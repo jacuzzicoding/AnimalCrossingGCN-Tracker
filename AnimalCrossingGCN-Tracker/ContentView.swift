@@ -21,22 +21,28 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            List {
-                // Fossils Section
-                Section(header: Text("Fossils")) {
-                    ForEach(museumItems["Fossils"] ?? [], id: \.id) { fossil in
-                        NavigationLink {
-                            Text("\(fossil.name) - \(fossil.part ?? "")")
-                        } label: {
-                            Text("\(fossil.name) - \(fossil.part ?? "")")
-                        }
+             List {
+    // Fossils Section
+    Section(header: Text("Fossils")) {
+        if let fossils = museumItems["Fossils"] {
+            ForEach(fossils.indices, id: \.self) { index in
+                let fossil = fossils[index]
+                Toggle(isOn: Binding(
+                    get: { fossil.isDonated },
+                    set: { newValue in
+                        museumItems["Fossils"]?[index].isDonated = newValue
                     }
-                    .onDelete { offsets in
-                        deleteItems(category: "Fossils", offsets: offsets)
-                    }
+                )) {
+                    Text("\(fossil.name) - \(fossil.part ?? "")")
                 }
-                // Other sections (Bugs, Fish, Art) can be added later
             }
+            .onDelete { offsets in
+                deleteItems(category: "Fossils", offsets: offsets)
+            }
+        }
+    }
+}
+            
 #if os(macOS)
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
 #endif
@@ -63,31 +69,31 @@ struct ContentView: View {
     // Function to load predefined fossils
     private func loadFossils() {
         let fossils = [
-            Fossil(name: "T. Rex", part: "Skull", isDonated: <#Bool#>),
-            Fossil(name: "T. Rex", part: "Torso" isDonated: <#Bool#>),
-            Fossil(name: "T. Rex", part: "Tail", isDonated: <#Bool#>),
-            Fossil(name: "Triceratops", part: "Skull", isDonated: <#Bool#>),
-            Fossil(name: "Triceratops", part: "Torso", isDonated: <#Bool#>),
-            Fossil(name: "Triceratops", part: "Tail", isDonated: <#Bool#>),
-            Fossil(name: "Stegosaurus", part: "Skull", isDonated: <#Bool#>),
-            Fossil(name: "Stegosaurus", part: "Torso", isDonated: <#Bool#>),
-            Fossil(name: "Stegosaurus", part: "Tail", isDonated: <#Bool#>),
-            Fossil(name: "Pteranodon", part: "Skull", isDonated: <#Bool#>),
-            Fossil(name: "Pteranodon", part: "Left Wing", isDonated: <#Bool#>),
-            Fossil(name: "Pteranodon", part: "Right Wing", isDonated: <#Bool#>),
-            Fossil(name: "Plesiosaurus", part: "Skull", isDonated: <#Bool#>),
-            Fossil(name: "Plesiosaurus", part: "Neck", isDonated: <#Bool#>),
-            Fossil(name: "Plesiosaurus", part: "Torso", isDonated: <#Bool#>),
-            Fossil(name: "Apatosaurus", part: "Skull", isDonated: <#Bool#>),
-            Fossil(name: "Apatosaurus", part: "Torso", isDonated: <#Bool#>),
-            Fossil(name: "Apatosaurus", part: "Tail", isDonated: <#Bool#>),
-            Fossil(name: "Mammoth", part: "Skull", isDonated: <#Bool#>),
-            Fossil(name: "Mammoth", part: "Torso", isDonated: <#Bool#>),
-            Fossil(name: "Amber", isDonated: <#Bool#>),
-            Fossil(name: "Ammonite", isDonated: <#Bool#>),
-            Fossil(name: "Dinosaur Egg", isDonated: <#Bool#>),
-            Fossil(name: "Dinosaur Track", isDonated: <#Bool#>),
-            Fossil(name: "Trilobite", isDonated: <#Bool#>)
+            Fossil(name: "T. Rex", part: "Skull", isDonated: false),
+            Fossil(name: "T. Rex", part: "Torso", isDonated: false),
+            Fossil(name: "T. Rex", part: "Tail", isDonated: false),
+            Fossil(name: "Triceratops", part: "Skull", isDonated: false),
+            Fossil(name: "Triceratops", part: "Torso", isDonated: false),
+            Fossil(name: "Triceratops", part: "Tail", isDonated: false),
+            Fossil(name: "Stegosaurus", part: "Skull", isDonated: false),
+            Fossil(name: "Stegosaurus", part: "Torso", isDonated: false),
+            Fossil(name: "Stegosaurus", part: "Tail", isDonated: false),
+            Fossil(name: "Pteranodon", part: "Skull", isDonated: false),
+            Fossil(name: "Pteranodon", part: "Left Wing", isDonated: false),
+            Fossil(name: "Pteranodon", part: "Right Wing", isDonated: false),
+            Fossil(name: "Plesiosaurus", part: "Skull", isDonated: false),
+            Fossil(name: "Plesiosaurus", part: "Neck", isDonated: false),
+            Fossil(name: "Plesiosaurus", part: "Torso", isDonated: false),
+            Fossil(name: "Apatosaurus", part: "Skull", isDonated: false),
+            Fossil(name: "Apatosaurus", part: "Torso", isDonated: false),
+            Fossil(name: "Apatosaurus", part: "Tail", isDonated: false),
+            Fossil(name: "Mammoth", part: "Skull", isDonated: false),
+            Fossil(name: "Mammoth", part: "Torso", isDonated: false),
+            Fossil(name: "Amber", isDonated: false),
+            Fossil(name: "Ammonite", isDonated: false),
+            Fossil(name: "Dinosaur Egg", isDonated: false),
+            Fossil(name: "Dinosaur Track", isDonated: false),
+            Fossil(name: "Trilobite", isDonated: false)
         ]
         
         museumItems["Fossils"] = fossils
