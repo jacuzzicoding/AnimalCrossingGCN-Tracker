@@ -12,8 +12,8 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     
     // Dictionary to hold arrays of items for each category
-    @State private var museumItems: [String: [Item]] = [
-        "Fossils": [],
+    @State private var museumItems: [String: [Fossil]] = [
+        "Fossils": [], // You'll populate this with the predefined fossils
         "Bugs": [],
         "Fish": [],
         "Art": []
@@ -24,11 +24,11 @@ struct ContentView: View {
             List {
                 // Fossils Section
                 Section(header: Text("Fossils")) {
-                    ForEach(museumItems["Fossils"] ?? [], id: \.self) { item in
+                    ForEach(museumItems["Fossils"] ?? [], id: \.id) { fossil in
                         NavigationLink {
-                            Text("Fossil found at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
+                            Text("\(fossil.name) - \(fossil.part ?? "")")
                         } label: {
-                            Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                            Text("\(fossil.name) - \(fossil.part ?? "")")
                         }
                     }
                     .onDelete { offsets in
