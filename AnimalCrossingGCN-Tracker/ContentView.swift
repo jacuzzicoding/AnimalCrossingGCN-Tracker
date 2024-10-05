@@ -35,48 +35,7 @@ struct ContentView: View {
                         deleteItems(category: "Fossils", offsets: offsets)
                     }
                 }
-                
-                // Bugs Section
-                Section(header: Text("Bugs")) {
-                    ForEach(museumItems["Bugs"] ?? [], id: \.self) { item in
-                        NavigationLink {
-                            Text("Bug caught at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                        } label: {
-                            Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                        }
-                    }
-                    .onDelete { offsets in
-                        deleteItems(category: "Bugs", offsets: offsets)
-                    }
-                }
-                
-                // Fish Section
-                Section(header: Text("Fish")) {
-                    ForEach(museumItems["Fish"] ?? [], id: \.self) { item in
-                        NavigationLink {
-                            Text("Fish caught at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                        } label: {
-                            Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                        }
-                    }
-                    .onDelete { offsets in
-                        deleteItems(category: "Fish", offsets: offsets)
-                    }
-                }
-                
-                // Art Section
-                Section(header: Text("Art")) {
-                    ForEach(museumItems["Art"] ?? [], id: \.self) { item in
-                        NavigationLink {
-                            Text("Artwork collected at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                        } label: {
-                            Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                        }
-                    }
-                    .onDelete { offsets in
-                        deleteItems(category: "Art", offsets: offsets)
-                    }
-                }
+                // Other sections (Bugs, Fish, Art) can be added later
             }
 #if os(macOS)
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
@@ -88,22 +47,57 @@ struct ContentView: View {
                 }
 #endif
                 ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    Button(action: addFossil) {
+                        Label("Add Fossil", systemImage: "plus")
                     }
                 }
             }
         } detail: {
             Text("Select an item")
         }
+        .onAppear {
+            loadFossils() // Load fossils when the view appears
+        }
     }
 
-    // Function to add an item to a specific category
-    private func addItem() {
+    // Function to load predefined fossils
+    private func loadFossils() {
+        let fossils = [
+            Fossil(name: "T. Rex", part: "Skull", isDonated: <#Bool#>),
+            Fossil(name: "T. Rex", part: "Torso" isDonated: <#Bool#>),
+            Fossil(name: "T. Rex", part: "Tail", isDonated: <#Bool#>),
+            Fossil(name: "Triceratops", part: "Skull", isDonated: <#Bool#>),
+            Fossil(name: "Triceratops", part: "Torso", isDonated: <#Bool#>),
+            Fossil(name: "Triceratops", part: "Tail", isDonated: <#Bool#>),
+            Fossil(name: "Stegosaurus", part: "Skull", isDonated: <#Bool#>),
+            Fossil(name: "Stegosaurus", part: "Torso", isDonated: <#Bool#>),
+            Fossil(name: "Stegosaurus", part: "Tail", isDonated: <#Bool#>),
+            Fossil(name: "Pteranodon", part: "Skull", isDonated: <#Bool#>),
+            Fossil(name: "Pteranodon", part: "Left Wing", isDonated: <#Bool#>),
+            Fossil(name: "Pteranodon", part: "Right Wing", isDonated: <#Bool#>),
+            Fossil(name: "Plesiosaurus", part: "Skull", isDonated: <#Bool#>),
+            Fossil(name: "Plesiosaurus", part: "Neck", isDonated: <#Bool#>),
+            Fossil(name: "Plesiosaurus", part: "Torso", isDonated: <#Bool#>),
+            Fossil(name: "Apatosaurus", part: "Skull", isDonated: <#Bool#>),
+            Fossil(name: "Apatosaurus", part: "Torso", isDonated: <#Bool#>),
+            Fossil(name: "Apatosaurus", part: "Tail", isDonated: <#Bool#>),
+            Fossil(name: "Mammoth", part: "Skull", isDonated: <#Bool#>),
+            Fossil(name: "Mammoth", part: "Torso", isDonated: <#Bool#>),
+            Fossil(name: "Amber", isDonated: <#Bool#>),
+            Fossil(name: "Ammonite", isDonated: <#Bool#>),
+            Fossil(name: "Dinosaur Egg", isDonated: <#Bool#>),
+            Fossil(name: "Dinosaur Track", isDonated: <#Bool#>),
+            Fossil(name: "Trilobite", isDonated: <#Bool#>)
+        ]
+        
+        museumItems["Fossils"] = fossils
+    }
+
+    // Function to add a fossil manually
+    private func addFossil() {
         withAnimation {
-            let newItem = Item(timestamp: Date()) // Later modify this to add specific data
-            museumItems["Fossils"]?.append(newItem) // Placeholder, allow user to choose category
-            modelContext.insert(newItem)
+            let newFossil = Fossil(name: "New Fossil", part: "Part", isDonated: false)
+            museumItems["Fossils"]?.append(newFossil)
         }
     }
 
@@ -117,5 +111,4 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
