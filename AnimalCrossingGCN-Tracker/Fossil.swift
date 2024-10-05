@@ -7,9 +7,9 @@
 import Foundation
 import SwiftData // or Core Data, depending on what you're using
 
-struct Fossil: Identifiable {
+struct Fossil: Identifiable, Hashable {
     var id = UUID() // Unique identifier
     var name: String // Name of the fossil
     var part: String? // Optional part for multi-part fossils
-    var isDonated: Bool = false // Tracks if the fossil is donated to the museum
+    var isDonated: Bool // Tracks if the fossil is donated to the museum
 }
