@@ -53,8 +53,9 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            loadFossils()  // Ensure fossils are loaded on all devices
-            loadBugs()      // Ensure bugs are loaded on all devices
+          //  clearAllBugs()  // Clear any old bugs for debugging, commenting out for now
+            loadBugs()      // Load the updated bugs
+            loadFossils()   // Load fossils
         }
     }
 
@@ -123,6 +124,7 @@ struct ContentView: View {
             for fossil in fossils {
                 modelContext.insert(fossil)  // Insert fossils into SwiftData context
             }
+            try? modelContext.save()  // Save the fossils
         }
     }
     
@@ -133,9 +135,18 @@ struct ContentView: View {
             for bug in bugs {
                 modelContext.insert(bug)  // Insert bugs into SwiftData context
             }
+            try? modelContext.save()  // Save the new bugs to the context
         }
     }
 
+    /* Temporary function to clear all bugs for debugging
+    private func clearAllBugs() {
+        for bug in bugsQuery {
+            modelContext.delete(bug)
+        }
+        try? modelContext.save()  // Save after deleting all bugs
+    }
+*/
     // Function to delete fossils
     private func deleteFossils(offsets: IndexSet) {
         withAnimation {
