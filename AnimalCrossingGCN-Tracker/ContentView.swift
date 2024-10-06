@@ -5,6 +5,7 @@
 //  Created by Brock Jenkinson on 10/5/24.
 //
 
+import Foundation
 import SwiftUI
 import SwiftData
 
