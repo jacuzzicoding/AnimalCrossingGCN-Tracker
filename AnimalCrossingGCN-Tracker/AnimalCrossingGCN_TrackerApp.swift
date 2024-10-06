@@ -12,7 +12,7 @@ import SwiftData
 struct AnimalCrossingGCN_TrackerApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Fossil.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
