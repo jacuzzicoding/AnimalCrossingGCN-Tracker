@@ -7,26 +7,29 @@
 
 import Foundation
 import SwiftUI
-import SwiftData
+import SwiftData //Using SwiftData to handle user data. Testing shows it works quite well with very simple implementation! Hoping it works for the final version as well.
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]  // Query to fetch fossils from SwiftData
-    @Query(sort: \Bug.name) private var bugsQuery: [Bug]  // Query to fetch bugs from SwiftData
+    @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]  // Queries to fetch fossils/bugs/fish/paintings from SwiftData
+    @Query(sort: \Bug.name) private var bugsQuery: [Bug]
+    @Query(sort: \Fish.name) private var fishQuery: [Fish]
 
     @Environment(\.horizontalSizeClass) var horizontalSizeClass  // Detect size class (compact = iPhone, regular = iPad/Mac)
     
     @State private var selectedFossil: Fossil?  // Bindable property for selected fossil
-    @State private var selectedBug: Bug?  // Bindable property for selected bug
+    @State private var selectedBug: Bug?
+    @State private var selectedFish: Fish?
 
     var body: some View {
         Group {
             if horizontalSizeClass == .compact {
-                // Use NavigationStack for iPhone (compact width)
+                // Use NavigationStack for iPhone (using the compact width specifier)
                 NavigationStack {
                     List {
                         fossilsSection
                         bugsSection
+                        fishSection
                     }
                     .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
                     .navigationTitle("Museum Tracker")
@@ -37,6 +40,7 @@ struct ContentView: View {
                     List {
                         fossilsSection
                         bugsSection
+                        fishSection
                     }
                     #if os(macOS)
                     .navigationSplitViewColumnWidth(min: 180, ideal: 200)
@@ -117,7 +121,33 @@ struct ContentView: View {
             }
         }
     }
-
+// Separate Fish section for reusability
+    private var FishSection: some View {
+        Section(header: Text("Fish")) {
+            ForEach(fishQuery, id: \.id) { fish in
+                Button(action: {
+                    selectedFish = fish  // Set the selected fish
+                }) {
+                    Toggle(isOn: Binding(
+                        get: { fish.isDonated },
+                        set: { newValue in
+                            fish.isDonated = newValue
+                        }
+                    )) {
+                        VStack(alignment: .leading) {
+                            Text(fish.name)
+                            Text("Season: \(fish.season)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+            .onDelete { offsets in
+                deleteFish(offsets: offsets)  // Handle deletion of bugs
+            }
+        }
+    }
     // Function to load predefined fossils into SwiftData if not already present
     private func loadFossils() {
         if fossilsQuery.isEmpty {
@@ -135,6 +165,16 @@ struct ContentView: View {
             let bugs = getDefaultBugs()  // Fetch default bugs from Bug.swift
             for bug in bugs {
                 modelContext.insert(bug)  // Insert bugs into SwiftData context
+            }
+            try? modelContext.save()  // Save the new bugs to the context
+        }
+    }
+    // Function to load predefined bugs into SwiftData if not already present
+    private func loadFish() {
+        if fishQuery.isEmpty {
+            let fish = getDefaultFish()  // Fetch default bugs from Bug.swift
+            for fish in fish {
+                modelContext.insert(fish)  // Insert bugs into SwiftData context
             }
             try? modelContext.save()  // Save the new bugs to the context
         }
@@ -159,6 +199,12 @@ struct ContentView: View {
     private func deleteBugs(offsets: IndexSet) {
         withAnimation {
             offsets.map { bugsQuery[$0] }.forEach(modelContext.delete)  // Remove selected bugs
+        }
+    }
+    // Function to delete fish
+    private func deleteFish(offsets: IndexSet) {
+        withAnimation {
+            offsets.map { fishQuery[$0] }.forEach(modelContext.delete)  // Remove selected fish
         }
     }
 }
