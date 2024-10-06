@@ -8,54 +8,15 @@ import Foundation
 import SwiftData
 import SwiftUI
 
-// This function returns the default array of bugs
-func getDefaultBugs() -> [Bug] {
+// This function returns the default array of Fish
+func getDefaultFish() -> [Fish] {
     return [
-        Bug(name: "Common Butterfly", season: "March - October", isDonated: false),
-        Bug(name: "Clouded Yellow Butterfly", season: "March - October", isDonated: false),
-        Bug(name: "Tiger Swallowtail Butterfly", season: "April - September", isDonated: false),
-        Bug(name: "Purple Butterfly", season: "June - July", isDonated: false),
-        Bug(name: "Brown Cicada", season: "July - August", isDonated: false),
-        Bug(name: "Robust Cicada", season: "July - August", isDonated: false),
-        Bug(name: "Walker Cicada", season: "July - August", isDonated: false),
-        Bug(name: "Evening Cicada", season: "July - August", isDonated: false),
-        Bug(name: "Red Dragonfly", season: "September - October", isDonated: false),
-        Bug(name: "Common Dragonfly", season: "May - July", isDonated: false),
-        Bug(name: "Darner Dragonfly", season: "June - August", isDonated: false),
-        Bug(name: "Banded Dragonfly", season: "July - August", isDonated: false),
-        Bug(name: "Cricket", season: "September - November", isDonated: false),
-        Bug(name: "Grasshopper", season: "July - September", isDonated: false),
-        Bug(name: "Pine Cricket", season: "September - October", isDonated: false),
-        Bug(name: "Bell Cricket", season: "September - October", isDonated: false),
-        Bug(name: "Ladybug", season: "March - June, October", isDonated: false),
-        Bug(name: "Seven-spotted Ladybug", season: "March - June, August - October", isDonated: false),
-        Bug(name: "Mantis", season: "August - October", isDonated: false),
-        Bug(name: "Long Locust", season: "August - October", isDonated: false),
-        Bug(name: "Migratory Locust", season: "September - November", isDonated: false),
-        Bug(name: "Cockroach", season: "January - December", isDonated: false),
-        Bug(name: "Bee", season: "January - December", isDonated: false),
-        Bug(name: "Firefly", season: "June", isDonated: false),
-        Bug(name: "Drone Beetle", season: "July - August", isDonated: false),
-        Bug(name: "Longhorn Beetle", season: "June - August", isDonated: false),
-        Bug(name: "Jewel Beetle", season: "July - August", isDonated: false),
-        Bug(name: "Dynastid Beetle", season: "July - August", isDonated: false),
-        Bug(name: "Flat Stag Beetle", season: "June - August", isDonated: false),
-        Bug(name: "Saw Stag Beetle", season: "July - August", isDonated: false),
-        Bug(name: "Mountain Stag Beetle", season: "July - August", isDonated: false),
-        Bug(name: "Giant Beetle", season: "July - August", isDonated: false),
-        Bug(name: "Pondskater", season: "June - September", isDonated: false),
-        Bug(name: "Ant", season: "January - December", isDonated: false),
-        Bug(name: "Pill Bug", season: "January - December", isDonated: false),
-        Bug(name: "Mosquito", season: "June - September", isDonated: false),
-        Bug(name: "Mole Cricket", season: "January - May, November - December", isDonated: false),
-        Bug(name: "Spider", season: "April - September", isDonated: false),
-        Bug(name: "Snail", season: "April - September", isDonated: false),
-        Bug(name: "Bagworm", season: "January - March, October - December", isDonated: false)
+        Fish(name: "Sea Bass", season: "All", isDonated: false)
     ]
 }
 
 @Model
-class Bug {
+class Fish {
     @Attribute(.unique) var id: UUID
     var name: String
     var season: String
@@ -69,22 +30,22 @@ class Bug {
     }
 }
 
-struct BugDetailView: View {
-    var bug: Bug
+struct FishDetailView: View {
+    var Fish: Fish
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(bug.name)
+            Text(Fish.name)
                 .font(.largeTitle)
                 .fontWeight(.bold)
             
-            Text("Season: \(bug.season)")
+            Text("Season: \(Fish.season)")
                 .font(.title2)
             
             Toggle("Donated", isOn: Binding(
-                get: { bug.isDonated },
+                get: { Fish.isDonated },
                 set: { newValue in
-                    bug.isDonated = newValue
+                    Fish.isDonated = newValue
                 }
             ))
             .padding(.top)
@@ -92,7 +53,7 @@ struct BugDetailView: View {
             Spacer()
         }
         .padding()
-        .navigationTitle(bug.name)
+        .navigationTitle(Fish.name)
     }
 }
 
