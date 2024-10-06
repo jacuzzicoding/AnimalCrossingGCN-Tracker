@@ -8,9 +8,25 @@
 import SwiftUI
 import SwiftData
 
+@Model
+class Fossil {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    var part: String?
+    var isDonated: Bool
+
+    init(name: String, part: String? = nil, isDonated: Bool = false) {
+        self.id = UUID()
+        self.name = name
+        self.part = part
+        self.isDonated = isDonated
+    }
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    
+    @Query(sort: \.name) private var fossilsQuery: [Fossil]  // Note: Renamed to avoid confusion
+
     // Dictionary to hold arrays of items for each category
     @State private var museumItems: [String: [Fossil]] = [
         "Fossils": [], // You'll populate this with the predefined fossils
@@ -21,37 +37,35 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-             List {
-    // Fossils Section
-    Section(header: Text("Fossils")) {
-        if let fossils = museumItems["Fossils"] {
-            ForEach(fossils.indices, id: \.self) { index in
-                let fossil = fossils[index]
-                Toggle(isOn: Binding(
-                    get: { fossil.isDonated },
-                    set: { newValue in
-                        museumItems["Fossils"]?[index].isDonated = newValue
+            List {
+                // Fossils Section
+                Section(header: Text("Fossils")) {
+                    if let fossils = museumItems["Fossils"] {
+                        ForEach(fossils, id: \.id) { fossil in
+                            Toggle(isOn: Binding(
+                                get: { fossil.isDonated },
+                                set: { newValue in
+                                    fossil.isDonated = newValue
+                                }
+                            )) {
+                                Text("\(fossil.name) - \(fossil.part ?? "")")
+                            }
+                        }
+                        .onDelete { offsets in
+                            deleteItems(category: "Fossils", offsets: offsets)
+                        }
                     }
-                )) {
-                    Text("\(fossil.name) - \(fossil.part ?? "")")
                 }
             }
-            .onDelete { offsets in
-                deleteItems(category: "Fossils", offsets: offsets)
-            }
-        }
-    }
-}
-            
-#if os(macOS)
+            #if os(macOS)
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
+            #endif
             .toolbar {
-#if os(iOS)
+                #if os(iOS)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }
-#endif
+                #endif
                 ToolbarItem {
                     Button(action: addFossil) {
                         Label("Add Fossil", systemImage: "plus")
@@ -61,6 +75,8 @@ struct ContentView: View {
         } detail: {
             Text("Select an item")
         }
+        // Moved navigationTitle and onAppear modifiers inside the body
+        .navigationTitle("Museum Tracker")
         .onAppear {
             loadFossils() // Load fossils when the view appears
         }
