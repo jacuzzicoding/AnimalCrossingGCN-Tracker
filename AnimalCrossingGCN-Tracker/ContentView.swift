@@ -122,7 +122,7 @@ struct ContentView: View {
         }
     }
 // Separate Fish section for reusability
-    private var FishSection: some View {
+    private var fishSection: some View {
         Section(header: Text("Fish")) {
             ForEach(fishQuery, id: \.id) { fish in
                 Button(action: {
@@ -144,7 +144,7 @@ struct ContentView: View {
                 }
             }
             .onDelete { offsets in
-                deleteFish(offsets: offsets)  // Handle deletion of bugs
+                deleteFish(offsets: offsets)  // Handle deletion of fish
             }
         }
     }
