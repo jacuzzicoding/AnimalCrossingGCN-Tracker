@@ -58,7 +58,7 @@ func getDefaultBugs() -> [Bug] {
 class Bug {
     @Attribute(.unique) var id: UUID
     var name: String
-    var season: String
+    var season: String?
     var isDonated: Bool
 
     init(name: String, season: String, isDonated: Bool = false) {
