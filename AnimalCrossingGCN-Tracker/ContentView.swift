@@ -8,125 +8,101 @@
 import SwiftUI
 import SwiftData
 
-@Model
-class Fossil {
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var part: String?
-    var isDonated: Bool
-
-    init(name: String, part: String? = nil, isDonated: Bool = false) {
-        self.id = UUID()
-        self.name = name
-        self.part = part
-        self.isDonated = isDonated
-    }
-}
-
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \.name) private var fossilsQuery: [Fossil]  // Note: Renamed to avoid confusion
+    @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]  // Query to fetch fossils from SwiftData
 
-    // Dictionary to hold arrays of items for each category
-    @State private var museumItems: [String: [Fossil]] = [
-        "Fossils": [], // You'll populate this with the predefined fossils
-        "Bugs": [],
-        "Fish": [],
-        "Art": []
-    ]
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass  // Detect size class (compact = iPhone, regular = iPad/Mac)
+    
+    @State private var selectedFossil: Fossil?  // Bindable property for selected fossil
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                // Fossils Section
-                Section(header: Text("Fossils")) {
-                    if let fossils = museumItems["Fossils"] {
-                        ForEach(fossils, id: \.id) { fossil in
-                            Toggle(isOn: Binding(
-                                get: { fossil.isDonated },
-                                set: { newValue in
-                                    fossil.isDonated = newValue
-                                }
-                            )) {
-                                Text("\(fossil.name) - \(fossil.part ?? "")")
-                            }
-                        }
-                        .onDelete { offsets in
-                            deleteItems(category: "Fossils", offsets: offsets)
-                        }
+        Group {
+            if horizontalSizeClass == .compact {
+                // Use NavigationStack for iPhone (compact width)
+                NavigationStack {
+                    List {
+                        fossilsSection
+                    }
+                    .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
+                    .navigationTitle("Museum Tracker")
+                }
+            } else {
+                // Using NavigationSplitView for macOS and iPadOS devices (regular width)
+                NavigationSplitView {
+                    List {
+                        fossilsSection
+                    }
+                    #if os(macOS)
+                    .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+                    #endif
+                } detail: {
+                    if let fossil = selectedFossil {
+                        FossilDetailView(fossil: fossil)
+                    } else {
+                        Text("Select an item")
                     }
                 }
+                .navigationTitle("Museum Tracker")
             }
-            #if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            #endif
-            .toolbar {
-                #if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                #endif
-                ToolbarItem {
-                    Button(action: addFossil) {
-                        Label("Add Fossil", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
         }
-        // Moved navigationTitle and onAppear modifiers inside the body
-        .navigationTitle("Museum Tracker")
         .onAppear {
-            loadFossils() // Load fossils when the view appears
+            loadFossils() // This ensures fossils are loaded on all devices
         }
     }
 
-    // Function to load predefined fossils
+    // Separate fossils section for reusability
+    private var fossilsSection: some View {
+        Section(header: Text("Fossils")) {
+            ForEach(fossilsQuery, id: \.id) { fossil in
+                Button(action: {
+                    selectedFossil = fossil // Set the selected fossil
+                }) {
+                    Toggle(isOn: Binding(
+                        get: { fossil.isDonated },
+                        set: { newValue in
+                            fossil.isDonated = newValue
+                        }
+                    )) {
+                        VStack(alignment: .leading) {
+                            Text(fossil.name)
+                            if let part = fossil.part {
+                                Text(part)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+            }
+            .onDelete { offsets in
+                deleteItems(offsets: offsets)  // Handle deletion of fossils
+            }
+        }
+    }
+
+    // Function to load predefined fossils into SwiftData if not already present
     private func loadFossils() {
-        let fossils = [
-            Fossil(name: "T. Rex", part: "Skull", isDonated: false),
-            Fossil(name: "T. Rex", part: "Torso", isDonated: false),
-            Fossil(name: "T. Rex", part: "Tail", isDonated: false),
-            Fossil(name: "Triceratops", part: "Skull", isDonated: false),
-            Fossil(name: "Triceratops", part: "Torso", isDonated: false),
-            Fossil(name: "Triceratops", part: "Tail", isDonated: false),
-            Fossil(name: "Stegosaurus", part: "Skull", isDonated: false),
-            Fossil(name: "Stegosaurus", part: "Torso", isDonated: false),
-            Fossil(name: "Stegosaurus", part: "Tail", isDonated: false),
-            Fossil(name: "Pteranodon", part: "Skull", isDonated: false),
-            Fossil(name: "Pteranodon", part: "Left Wing", isDonated: false),
-            Fossil(name: "Pteranodon", part: "Right Wing", isDonated: false),
-            Fossil(name: "Plesiosaurus", part: "Skull", isDonated: false),
-            Fossil(name: "Plesiosaurus", part: "Neck", isDonated: false),
-            Fossil(name: "Plesiosaurus", part: "Torso", isDonated: false),
-            Fossil(name: "Apatosaurus", part: "Skull", isDonated: false),
-            Fossil(name: "Apatosaurus", part: "Torso", isDonated: false),
-            Fossil(name: "Apatosaurus", part: "Tail", isDonated: false),
-            Fossil(name: "Mammoth", part: "Skull", isDonated: false),
-            Fossil(name: "Mammoth", part: "Torso", isDonated: false),
-            Fossil(name: "Amber", isDonated: false),
-            Fossil(name: "Ammonite", isDonated: false),
-            Fossil(name: "Dinosaur Egg", isDonated: false),
-            Fossil(name: "Dinosaur Track", isDonated: false),
-            Fossil(name: "Trilobite", isDonated: false)
-        ]
-        
-        museumItems["Fossils"] = fossils
+        if fossilsQuery.isEmpty {
+            let fossils = getDefaultFossils()  // Fetch default fossils from Fossils.swift
+            for fossil in fossils {
+                modelContext.insert(fossil) // Insert fossils into SwiftData context
+            }
+        }
     }
 
     // Function to add a fossil manually
     private func addFossil() {
         withAnimation {
             let newFossil = Fossil(name: "New Fossil", part: "Part", isDonated: false)
-            museumItems["Fossils"]?.append(newFossil)
+            modelContext.insert(newFossil) // Insert new fossil into SwiftData
         }
     }
 
-    // Function to delete items from a specific category
-    private func deleteItems(category: String, offsets: IndexSet) {
+    // Function to delete items from SwiftData
+    private func deleteItems(offsets: IndexSet) {
         withAnimation {
-            museumItems[category]?.remove(atOffsets: offsets)
+            offsets.map { fossilsQuery[$0] }.forEach(modelContext.delete)  // Remove selected items
         }
     }
 }
