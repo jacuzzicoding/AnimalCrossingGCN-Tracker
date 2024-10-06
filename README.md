@@ -1,47 +1,76 @@
-Animal Crossing App V1
+AnimalCrossingGCN-Tracker - Project Document
 
-AnimalCrossingGCN-Tracker Development Document
+Version: v1.10.05.24.a
+
+Release Date: October 5, 2024
 
 Project Overview:
 
-This is a little passion project for me. It’s a tracking app designed to function as a “second screen experience” for the original Animal Crossing GameCube game. The initial version will focus on tracking museum items, with future updates planned to expand functionality.
-
-The app is built using Swift (SwiftUI) and SwiftData.
+AnimalCrossingGCN-Tracker is a companion app designed for the original Animal Crossing on the GameCube. The app serves as a tool for players to track museum collectibles such as fossils, with plans to expand into bugs, fish, and art in future releases. It is built using Swift and SwiftUI for the user interface, and SwiftData for persistent storage.
 
 File Structure:
 
-The main file structure consists of several Swift files. ContentView.swift is the main view that displays a list of tracked items, such as fossils, bugs, fish, and art. It utilizes @Query to fetch items and implements NavigationSplitView for smooth navigation.
+ContentView.swift
+-Manages the primary view where fossils are displayed in a list.
+-Uses @Query to fetch fossil data from SwiftData and NavigationStack (iPhone) or NavigationSplitView (iPad/macOS) for smooth navigation.
+-Provides functionality for toggling donation status and viewing detailed information about each fossil.
 
-Item.swift is the model representing individual items. It stores information such as item type (fossil, bug, fish, art), timestamps, and other relevant metadata.
+Fossil.swift
+-Defines the Fossil data model, including the fossil name, part (optional), and donation status.
+-Contains a getDefaultFossils() function that returns a predefined list of fossils.
+-Also includes FossilDetailView, a view that displays detailed fossil information with a toggle for donation status.
 
-AnimalCrossingGCN_TrackerApp.swift serves as the entry point of the app and manages the app lifecycle.
+AnimalCrossingGCN_TrackerApp.swift
+-The entry point of the app, responsible for managing the app lifecycle and initializing the SwiftData model container.
+-Loads and displays the primary view (ContentView.swift).
 
-The project also contains test files, including AnimalCrossingGCN_TrackerTests.swift for unit tests and AnimalCrossingGCN_TrackerUITests.swift for UI tests.
+AnimalCrossingGCN_TrackerTests.swift & AnimalCrossingGCN_TrackerUITests.swift
+-Provide basic unit and UI tests to ensure the app’s functionality and interface work as expected.
 
-Features (Current and Planned):
+Current Features (v1.10.05.24.a):
 
-The initial version will focus on museum item tracking. The app will allow users to track four types of museum items: fossils, bugs, fish, and art. The items will be displayed in categorized lists with details such as collection dates and species.
+-Fossil Tracking:
+  -Users can mark fossils as donated or not donated.
+  -The fossil tracking system includes all 25 fossils that are present in Animal Crossing (GameCube version). These fossils are pre-populated during the app’s       
+   initial launch.
+  -Fossils can be viewed, and their details are displayed, including the fossil name, part, and donation status.
+  -Donation status is persisted using SwiftData, so changes are saved even after the app is closed.
 
-The app will use NavigationSplitView to navigate between different item categories, ensuring easy access to each type of museum item.
+-Dynamic User Interface
+  -Uses NavigationStack for iPhone devices and NavigationSplitView for iPads and macOS.
+  -Provides a responsive UI that adapts to the device being used, ensuring a clean and intuitive user experience.
+  -The interface includes a toggle for donation status and detailed views for each fossil.
 
-SwiftData will be used to persist data, ensuring the tracked items are saved and available even after the app is closed.
+-Persistent Data Storage
+  -Data is stored using SwiftData, ensuring that user progress (such as donation status) is saved and persists between app sessions.
 
-For future versions, the app will expand to include town customization, villager tracking, and progress tracking. These features will allow users to name their town, add villagers, and monitor progress like Nook store upgrades and holidays.
+Tasks Completed (v1.10.05.24.a):
 
-Tasks:
+  -Integration of SwiftData for persistent data storage.
+  -A fully functional fossil tracking system with 25 fossils pre-populated and the ability to toggle donation status.
+  -Implementation of NavigationStack (iPhone) and NavigationSplitView (iPad/macOS) for adaptive layouts.
+  -Basic unit tests and UI tests to ensure data integrity and proper functioning of the interface.
 
-The first step is to implement the functionality to create, edit, and delete museum items for the four categories: fossils, bugs, fish, and art. The item categories must be organized properly within ContentView.swift.
+Issues & Limitations (v1.10.05.24.a):
 
-Next, SwiftData will be set up to ensure data persistence for each museum item category, making sure the data is saved reliably.
-
-The user interface and experience will need enhancements to ensure smooth navigation and interaction. This will include adding detailed views for each item category, providing more information about the tracked items.
-
-Lastly, unit tests and UI tests will be written and implemented to ensure the app functions as expected and interactions are smooth.
+  -The app currently only supports fossil tracking. Future releases will include tracking for bugs, fish, and art.
+  -Some UI limitations may be experienced on smaller iPhone screens, but the app remains fully functional.
+  -The app must be run through Xcode and cannot be installed directly on a device via an app store.
 
 Next Steps:
 
-For October 5, 2024, the priority is to finalize the data structure for the four museum item categories. The development of the user interface to display and manage these items will follow. Writing and implementing unit tests, as well as testing data persistence using SwiftData, are key tasks to be completed.
+  -Tracking Expansion
+  -Implement tracking for bugs, fish, and art in future versions.
+  -Add features for search and filtering to make it easier to navigate the growing list of collectibles.
+
+UI Enhancements
+  -Provide richer detail views for each collectible category.
+  -Improve overall app performance and user experience, especially for larger collections.
+
+Additional Testing
+  -Expand unit and UI tests to cover the new features and ensure robustness as the app evolves.
 
 Notes:
 
-Future expansions will require reworking parts of the data model to accommodate the increased complexity of adding town customization, villager tracking, and other game-related features.
+Future updates will focus on expanding functionality, such as adding villager tracking, town customization, and Nook store upgrade monitoring.
+As the app grows, further optimization and testing will be necessary to handle the increased complexity of the features.
