@@ -129,7 +129,7 @@ struct ContentView: View {
     // Function to load predefined bugs into SwiftData if not already present
     private func loadBugs() {
         if bugsQuery.isEmpty {
-            let bugs = getDefaultBugs()  // Fetch default bugs from Bugs.swift
+            let bugs = getDefaultBugs()  // Fetch default bugs from Bug.swift
             for bug in bugs {
                 modelContext.insert(bug)  // Insert bugs into SwiftData context
             }
