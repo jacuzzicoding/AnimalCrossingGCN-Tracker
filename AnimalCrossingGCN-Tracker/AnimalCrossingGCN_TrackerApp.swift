@@ -8,13 +8,14 @@
 import SwiftUI
 import SwiftData
 
-@main
+@main //Main app loop here
+/*This is the structure for the app using the schemas I defined in the other files. Most of the core code is in ContentView.swift */
 struct AnimalCrossingGCN_TrackerApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Fossil.self,
-            Bug.self  // Include Bug model in the schema
-            Fish.self // fish model 
+            Bug.self,
+            Fish.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
