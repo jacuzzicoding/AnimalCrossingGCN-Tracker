@@ -5,7 +5,7 @@
 //  Created by Brock Jenkinson on 10/5/24.
 //
 import Foundation
-import SwiftData // or Core Data, depending on what you're using
+import SwiftData
 import SwiftUI
 
 // This function returns the default array of fossils
