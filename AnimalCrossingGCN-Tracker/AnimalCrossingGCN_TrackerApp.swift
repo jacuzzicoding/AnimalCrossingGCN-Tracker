@@ -14,6 +14,7 @@ struct AnimalCrossingGCN_TrackerApp: App {
         let schema = Schema([
             Fossil.self,
             Bug.self  // Include Bug model in the schema
+            Fish.self // fish model 
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
