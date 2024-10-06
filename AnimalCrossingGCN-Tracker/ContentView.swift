@@ -11,10 +11,12 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]  // Query to fetch fossils from SwiftData
+    @Query(sort: \Bug.name) private var bugsQuery: [Bug]  // Query to fetch bugs from SwiftData
 
     @Environment(\.horizontalSizeClass) var horizontalSizeClass  // Detect size class (compact = iPhone, regular = iPad/Mac)
     
     @State private var selectedFossil: Fossil?  // Bindable property for selected fossil
+    @State private var selectedBug: Bug?  // Bindable property for selected bug
 
     var body: some View {
         Group {
@@ -23,6 +25,7 @@ struct ContentView: View {
                 NavigationStack {
                     List {
                         fossilsSection
+                        bugsSection
                     }
                     .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
                     .navigationTitle("Museum Tracker")
@@ -32,6 +35,7 @@ struct ContentView: View {
                 NavigationSplitView {
                     List {
                         fossilsSection
+                        bugsSection
                     }
                     #if os(macOS)
                     .navigationSplitViewColumnWidth(min: 180, ideal: 200)
@@ -39,6 +43,8 @@ struct ContentView: View {
                 } detail: {
                     if let fossil = selectedFossil {
                         FossilDetailView(fossil: fossil)
+                    } else if let bug = selectedBug {
+                        BugDetailView(bug: bug)  // Show Bug details when a bug is selected
                     } else {
                         Text("Select an item")
                     }
@@ -47,7 +53,8 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            loadFossils() // This ensures fossils are loaded on all devices
+            loadFossils()  // Ensure fossils are loaded on all devices
+            loadBugs()      // Ensure bugs are loaded on all devices
         }
     }
 
@@ -56,7 +63,7 @@ struct ContentView: View {
         Section(header: Text("Fossils")) {
             ForEach(fossilsQuery, id: \.id) { fossil in
                 Button(action: {
-                    selectedFossil = fossil // Set the selected fossil
+                    selectedFossil = fossil  // Set the selected fossil
                 }) {
                     Toggle(isOn: Binding(
                         get: { fossil.isDonated },
@@ -76,7 +83,35 @@ struct ContentView: View {
                 }
             }
             .onDelete { offsets in
-                deleteItems(offsets: offsets)  // Handle deletion of fossils
+                deleteFossils(offsets: offsets)  // Handle deletion of fossils
+            }
+        }
+    }
+    
+    // Separate bugs section for reusability
+    private var bugsSection: some View {
+        Section(header: Text("Bugs")) {
+            ForEach(bugsQuery, id: \.id) { bug in
+                Button(action: {
+                    selectedBug = bug  // Set the selected bug
+                }) {
+                    Toggle(isOn: Binding(
+                        get: { bug.isDonated },
+                        set: { newValue in
+                            bug.isDonated = newValue
+                        }
+                    )) {
+                        VStack(alignment: .leading) {
+                            Text(bug.name)
+                            Text("Season: \(bug.season)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+            .onDelete { offsets in
+                deleteBugs(offsets: offsets)  // Handle deletion of bugs
             }
         }
     }
@@ -86,23 +121,32 @@ struct ContentView: View {
         if fossilsQuery.isEmpty {
             let fossils = getDefaultFossils()  // Fetch default fossils from Fossils.swift
             for fossil in fossils {
-                modelContext.insert(fossil) // Insert fossils into SwiftData context
+                modelContext.insert(fossil)  // Insert fossils into SwiftData context
+            }
+        }
+    }
+    
+    // Function to load predefined bugs into SwiftData if not already present
+    private func loadBugs() {
+        if bugsQuery.isEmpty {
+            let bugs = getDefaultBugs()  // Fetch default bugs from Bugs.swift
+            for bug in bugs {
+                modelContext.insert(bug)  // Insert bugs into SwiftData context
             }
         }
     }
 
-    // Function to add a fossil manually
-    private func addFossil() {
+    // Function to delete fossils
+    private func deleteFossils(offsets: IndexSet) {
         withAnimation {
-            let newFossil = Fossil(name: "New Fossil", part: "Part", isDonated: false)
-            modelContext.insert(newFossil) // Insert new fossil into SwiftData
+            offsets.map { fossilsQuery[$0] }.forEach(modelContext.delete)  // Remove selected fossils
         }
     }
 
-    // Function to delete items from SwiftData
-    private func deleteItems(offsets: IndexSet) {
+    // Function to delete bugs
+    private func deleteBugs(offsets: IndexSet) {
         withAnimation {
-            offsets.map { fossilsQuery[$0] }.forEach(modelContext.delete)  // Remove selected items
+            offsets.map { bugsQuery[$0] }.forEach(modelContext.delete)  // Remove selected bugs
         }
     }
 }
