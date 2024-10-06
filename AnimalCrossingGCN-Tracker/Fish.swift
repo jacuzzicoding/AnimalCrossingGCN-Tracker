@@ -84,7 +84,7 @@ struct FishDetailView: View {
                 .font(.title2)
             
             Text("Location: \(Fish.location)")
-                .font(title2)
+                
             
             Toggle("Donated", isOn: Binding(
                 get: { Fish.isDonated },

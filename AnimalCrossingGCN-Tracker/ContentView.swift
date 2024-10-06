@@ -61,6 +61,7 @@ struct ContentView: View {
           //  clearAllBugs()  // Clear any old bugs for debugging, commenting out for now
             loadBugs()      // Load the updated bugs
             loadFossils()   // Load fossils
+            loadFish() //Load the fish
         }
     }
 
@@ -124,21 +125,21 @@ struct ContentView: View {
 // Separate Fish section for reusability
     private var fishSection: some View {
         Section(header: Text("Fish")) {
-            ForEach(fishQuery, id: \.id) { fish in
+            ForEach(fishQuery, id: \.id) { fish in //for each fish in the fishQuery (using id as the unique identifier)
                 Button(action: {
                     selectedFish = fish  // Set the selected fish
                 }) {
-                    Toggle(isOn: Binding(
-                        get: { fish.isDonated },
-                        set: { newValue in
-                            fish.isDonated = newValue
+                    Toggle(isOn: Binding( //Toggle to shwo if the fish is donated or not
+                        get: { fish.isDonated }, //get the boolean value of isDonated
+                        set: { newValue in 
+                            fish.isDonated = newValue //set the boolean value of isDonated
                         }
                     )) {
-                        VStack(alignment: .leading) {
-                            Text(fish.name)
-                            Text("Season: \(fish.season)")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                        VStack(alignment: .leading) { //VStack to align the text to the left
+                            Text(fish.name) //Display the name of the fish
+                            Text("Season: \(fish.season)") //Display the season the fish is available in
+                                .font(.subheadline) //Set the font size to subheadline
+                                .foregroundColor(.secondary) //Set the color to secondary
                         }
                     }
                 }
