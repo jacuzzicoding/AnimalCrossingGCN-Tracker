@@ -78,7 +78,8 @@ struct BugDetailView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
             
-            Text("Season: \(bug.season)")
+            // Safely unwrap the optional season value
+            Text("Season: \(bug.season ?? "N/A")") 
                 .font(.title2)
             
             Toggle("Donated", isOn: Binding(
