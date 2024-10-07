@@ -159,6 +159,8 @@ struct ContentView: View {
             ForEach(filteredFish, id: \.id) { fish in //for each fish in the fishQuery (using id as the unique identifier)
                 Button(action: {
                     selectedFish = fish  // Set the selected fish
+                    selectedBug = nil  // Clear other selections
+                    selectedFossil = nil
                 }) {
                     Toggle(isOn: Binding( //Toggle to show if the fish is donated or not
                         get: { fish.isDonated }, //get the boolean value of isDonated
