@@ -35,9 +35,23 @@ struct ContentView: View {
                         fishSection
                     }
                     .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
-                    .navigationTitle("Museum Tracker")
+                    .navigationTitle("Brock's Museum Tracker")
+                    .background(
+                        Group {
+                            if let fossil = selectedFossil {
+                                FossilDetailView(fossil: fossil)
+                            } else if let bug = selectedBug {
+                                BugDetailView(bug: bug)
+                            } else if let fish = selectedFish {
+                                FishDetailView(Fish: fish)
+                            } else {
+                                Text("Select an item!")
+                            }
+                        }
+                    )
                 }
-            } else {
+            }
+            else {
                 // Using NavigationSplitView for macOS and iPadOS devices (regular width)
                 NavigationSplitView {
                     List {
