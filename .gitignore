@@ -2,3 +2,8 @@ AnimalCrossingGCN-Tracker.xcodeproj/xcuserdata/brockjenkinson.xcuserdatad/
 AnimalCrossingGCN-Tracker.xcodeproj/project.xcworkspace/xcuserdata/brockjenkinson.xcuserdatad/UserInterfaceState.xcuserstate
 AnimalCrossingGCN-Tracker.xcodeproj/project.xcworkspace/xcuserdata/brockjenkinson.xcuserdatad/UserInterfaceState.xcuserstate
 AnimalCrossingGCN-Tracker.xcodeproj/project.xcworkspace/xcuserdata/brockjenkinson.xcuserdatad/UserInterfaceState.xcuserstate
+AnimalCrossingGCN-Tracker.xcodeproj/project.xcworkspace/xcuserdata/brockjenkinson.xcuserdatad/UserInterfaceState.xcuserstate
+# Ignore Xcode user interface state
+*.xcuserstate
+*.xcworkspace/xcuserdata/*
+*.xcworkspace/xcuserdata/**/*
