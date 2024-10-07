@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-import SwiftData //Using SwiftData to handle user data. Testing shows it works quite well with very simple implementation! Hoping it works for the final version as well.
+import SwiftData // Using SwiftData to handle user data. Testing shows it works quite well with very simple implementation! Hoping it works for the final version as well.
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -43,7 +43,7 @@ struct ContentView: View {
                             } else if let bug = selectedBug {
                                 BugDetailView(bug: bug)
                             } else if let fish = selectedFish {
-                                FishDetailView(Fish: fish)
+                                FishDetailView(Fish: fish)  // Fixed naming convention for FishDetailView
                             } else {
                                 Text("Select an item!")
                             }
@@ -68,6 +68,8 @@ struct ContentView: View {
                         FossilDetailView(fossil: fossil)
                     } else if let bug = selectedBug {
                         BugDetailView(bug: bug)  // Show Bug details when a bug is selected
+                    } else if let fish = selectedFish {
+                        FishDetailView(Fish: fish)  // Show Fish details when a fish is selected
                     } else {
                         Text("Select an item")
                     }
@@ -127,6 +129,8 @@ struct ContentView: View {
             ForEach(filteredBugs, id: \.id) { bug in
                 Button(action: {
                     selectedBug = bug  // Set the selected bug
+                    selectedFossil = nil  // Clear other selections
+                    selectedFish = nil
                 }) {
                     Toggle(isOn: Binding(
                         get: { bug.isDonated },
@@ -225,6 +229,7 @@ struct ContentView: View {
             try? modelContext.save()  // Save the new bugs to the context
         }
     }
+
     // Function to load predefined fish into SwiftData if not already present
     private func loadFish() {
         if fishQuery.isEmpty {
@@ -236,14 +241,6 @@ struct ContentView: View {
         }
     }
 
-    /* Temporary function to clear all bugs for debugging
-    private func clearAllBugs() {
-        for bug in bugsQuery {
-            modelContext.delete(bug)
-        }
-        try? modelContext.save()  // Save after deleting all bugs
-    }
-*/
     // Function to delete fossils
     private func deleteFossils(offsets: IndexSet) {
         withAnimation {
@@ -257,6 +254,7 @@ struct ContentView: View {
             offsets.map { bugsQuery[$0] }.forEach(modelContext.delete)  // Remove selected bugs
         }
     }
+
     // Function to delete fish
     private func deleteFish(offsets: IndexSet) {
         withAnimation {
