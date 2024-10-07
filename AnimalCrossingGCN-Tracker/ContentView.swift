@@ -122,7 +122,7 @@ struct ContentView: View {
                     )) {
                         VStack(alignment: .leading) {
                             Text(bug.name)
-                            Text("Season: \(bug.season)")
+                            Text("Season: \(bug.season ?? "N/A")")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
