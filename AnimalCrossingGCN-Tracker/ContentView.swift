@@ -24,20 +24,32 @@ struct ContentView: View {
     @State private var selectedArt: Art?
     
     @State private var searchText = ""  // State property for search text
+    @State private var selectedCategories: Set<String> = ["Fossils", "Bugs", "Fish", "Art"] // State property for selected categories
     
     var body: some View {
         Group {
             if horizontalSizeClass == .compact {
                 // Use NavigationStack for iPhone (using the compact width specifier)
                 NavigationStack {
-                    List {
+                    VStack {
                         searchBar  // Add the search bar here
-                        fossilsSection
-                        bugsSection
-                        fishSection
-                        artSection
+                        categoryFilter  // Add the category filter here
+                        List {
+                            if selectedCategories.contains("Fossils") {
+                                fossilsSection
+                            }
+                            if selectedCategories.contains("Bugs") {
+                                bugsSection
+                            }
+                            if selectedCategories.contains("Fish") {
+                                fishSection
+                            }
+                            if selectedCategories.contains("Art") {
+                                artSection
+                            }
+                        }
+                        .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
                     }
-                    .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
                     .navigationTitle("Brock's Museum Tracker")
                     .background(
                         Group {
@@ -58,16 +70,27 @@ struct ContentView: View {
             } else {
                 // Using NavigationSplitView for macOS and iPadOS devices (regular width)
                 NavigationSplitView {
-                    List {
+                    VStack {
                         searchBar  // Add the search bar here
-                        fossilsSection
-                        bugsSection
-                        fishSection
-                        artSection
+                        categoryFilter  // Add the category filter here
+                        List {
+                            if selectedCategories.contains("Fossils") {
+                                fossilsSection
+                            }
+                            if selectedCategories.contains("Bugs") {
+                                bugsSection
+                            }
+                            if selectedCategories.contains("Fish") {
+                                fishSection
+                            }
+                            if selectedCategories.contains("Art") {
+                                artSection
+                            }
+                        }
                     }
-#if os(macOS)
+    #if os(macOS)
                     .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
+    #endif
                 } detail: {
                     if let fossil = selectedFossil {
                         FossilDetailView(fossil: fossil)
@@ -88,7 +111,7 @@ struct ContentView: View {
             loadBugs()      // Load the updated bugs
             loadFossils()   // Load fossils
             loadFish()      // Load the fish
-            loadArt()
+            loadArt()       // Load the art
         }
     }
     
@@ -101,12 +124,38 @@ struct ContentView: View {
         }
     }
     
+    // Category filter view
+    private var categoryFilter: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack {
+                ForEach(["Fossils", "Bugs", "Fish", "Art"], id: \.self) { category in
+                    Toggle(category, isOn: Binding(
+                        get: { selectedCategories.contains(category) },
+                        set: { isOn in
+                            if isOn {
+                                selectedCategories.insert(category)
+                            } else {
+                                selectedCategories.remove(category)
+                            }
+                        }
+                    ))
+                    .toggleStyle(ButtonToggleStyle())
+                    .padding(.horizontal, 8)
+                }
+            }
+            .padding()
+        }
+    }
+    
     // Separate fossils section for reusability with search filter
     private var fossilsSection: some View {
         Section(header: Text("Fossils")) {
             ForEach(filteredFossils, id: \.id) { fossil in
                 Button(action: {
                     selectedFossil = fossil  // Set the selected fossil
+                    selectedBug = nil        // Clear other selections
+                    selectedFish = nil
+                    selectedArt = nil
                 }) {
                     Toggle(isOn: Binding(
                         get: { fossil.isDonated },
@@ -156,13 +205,13 @@ struct ContentView: View {
         }
     }
     
-    // Separate Fish section for reusability with search filter
+    // Separate fish section for reusability with search filter
     private var fishSection: some View {
         Section(header: Text("Fish")) {
             ForEach(filteredFish, id: \.id) { fish in  // Keeping 'Fish' uppercase for now
                 Button(action: {
                     selectedFish = fish  // Set the selected fish
-                    selectedBug = nil  // Clear other selections
+                    selectedBug = nil    // Clear other selections
                     selectedFossil = nil
                     selectedArt = nil
                 }) {
@@ -211,7 +260,7 @@ struct ContentView: View {
         }
     }
     
-    // Filtered fossils based on search text
+    // Filtered fossils based on search text and selected categories
     private var filteredFossils: [Fossil] {
         if searchText.isEmpty {
             return fossilsQuery
@@ -220,7 +269,7 @@ struct ContentView: View {
         }
     }
     
-    // Filtered bugs based on search text
+    // Filtered bugs based on search text and selected categories
     private var filteredBugs: [Bug] {
         if searchText.isEmpty {
             return bugsQuery
@@ -229,7 +278,7 @@ struct ContentView: View {
         }
     }
     
-    // Filtered fish based on search text
+    // Filtered fish based on search text and selected categories
     private var filteredFish: [Fish] {
         if searchText.isEmpty {
             return fishQuery
@@ -238,7 +287,7 @@ struct ContentView: View {
         }
     }
     
-    // Filtered art based on search text
+    // Filtered art based on search text and selected categories
     private var filteredArt: [Art] {
         if searchText.isEmpty {
             return artQuery
@@ -268,24 +317,43 @@ struct ContentView: View {
             try? modelContext.save()  // Save the new bugs to the context
         }
     }
-    // Function to load predefined bugs into SwiftData if not already present
+    
+    // Function to load predefined fish into SwiftData if not already present
     private func loadFish() {
         if fishQuery.isEmpty {
-            let fish = getDefaultFish()  
+            let fish = getDefaultFish()  // Fetch default fish from Fish.swift
             for fish in fish {
-                modelContext.insert(fish)
+                modelContext.insert(fish)  // Insert fish into SwiftData context
             }
-            try? modelContext.save()
+            try? modelContext.save()  // Save the new fish to the context
         }
     }
-    // Function to load predefined bugs into SwiftData if not already present
+    
+    // Function to load predefined art into SwiftData if not already present
     private func loadArt() {
         if artQuery.isEmpty {
-            let art = getDefaultArt()  // Fetch default art from Bug.swift
+            let art = getDefaultArt()  // Fetch default art from Art.swift
             for art in art {
                 modelContext.insert(art)  // Insert art into SwiftData context
             }
             try? modelContext.save()  // Save the new art to the context
         }
+    }
+}
+
+// Custom toggle style for the category filter buttons
+struct ButtonToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button {
+            configuration.isOn.toggle()
+        } label: {
+            configuration.label
+                .padding(6)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(configuration.isOn ? Color.blue : Color.gray.opacity(0.2))
+                )
+        }
+        .foregroundColor(configuration.isOn ? .white : .primary)
     }
 }
