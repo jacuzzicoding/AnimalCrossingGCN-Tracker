@@ -55,8 +55,8 @@ func getDefaultBugs() -> [Bug] {
 }
 
 @Model
-class Bug { //define the Bug class
-    @Attribute(.unique) var id: UUID //define the id attribute, using UUID because it is unique!
+class Bug: ObservableObject, Identifiable { //define the Bug class
+    var id: UUID //define the id attribute, using UUID because it is unique!
     var name: String
     var season: String? //define the season attribute, using optional String because it may not be known (though it should be)
     var isDonated: Bool

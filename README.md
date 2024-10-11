@@ -1,76 +1,65 @@
 AnimalCrossingGCN-Tracker - Project Document
 
-Version: v1.10.05.24.a
+Version: v1.10.07.24.a
+Release Date: October 7, 2024
+Author: Brock Jenkinson
 
-Release Date: October 5, 2024
+Project Overview
 
-Project Overview:
+The AnimalCrossingGCN-Tracker is a companion app designed for players of the original Animal Crossing on the GameCube. The app assists players in tracking museum collectibles, including fossils, bugs, and fish. Built using Swift and SwiftUI, the app leverages SwiftData for persistent storage across all collectibles. It is designed to work seamlessly across iPhone, iPad, and macOS devices.
 
-AnimalCrossingGCN-Tracker is a companion app designed for the original Animal Crossing on the GameCube. The app serves as a tool for players to track museum collectibles such as fossils, with plans to expand into bugs, fish, and art in future releases. It is built using Swift and SwiftUI for the user interface, and SwiftData for persistent storage.
+The current version, v1.10.07.24.a, introduces a new search feature, allowing users to easily find items within their collections, and includes a fix for how the bug season information is displayed.
 
-File Structure:
+File Structure
 
-ContentView.swift
--Manages the primary view where fossils are displayed in a list.
--Uses @Query to fetch fossil data from SwiftData and NavigationStack (iPhone) or NavigationSplitView (iPad/macOS) for smooth navigation.
--Provides functionality for toggling donation status and viewing detailed information about each fossil.
+ContentView.swift manages the primary view where fossils, bugs, and fish are displayed. It includes the newly added search bar and adapts layouts for iPhones, iPads, and macOS devices using NavigationStack and NavigationSplitView. Users can toggle donation statuses, view detailed information, and search for specific collectibles.
 
-Fossil.swift
--Defines the Fossil data model, including the fossil name, part (optional), and donation status.
--Contains a getDefaultFossils() function that returns a predefined list of fossils.
--Also includes FossilDetailView, a view that displays detailed fossil information with a toggle for donation status.
+Fossil.swift defines the Fossil data model, containing the fossil’s name, optional part information, and donation status. It provides a method to pre-populate the app with all 25 fossils from Animal Crossing (GameCube).
 
-AnimalCrossingGCN_TrackerApp.swift
--The entry point of the app, responsible for managing the app lifecycle and initializing the SwiftData model container.
--Loads and displays the primary view (ContentView.swift).
+Bug.swift defines the Bug data model, including the bug’s name, season availability, and donation status. It also pre-populates the app with a list of 40 bugs. The recent update fixes how the season text is displayed.
 
-AnimalCrossingGCN_TrackerTests.swift & AnimalCrossingGCN_TrackerUITests.swift
--Provide basic unit and UI tests to ensure the app’s functionality and interface work as expected.
+Fish.swift defines the Fish data model, containing the fish’s name, season availability, location (river, sea, or pond), and donation status. It pre-populates the app with a list of 40 fish.
 
-Current Features (v1.10.05.24.a):
+AnimalCrossingGCN_TrackerApp.swift is the entry point of the app, responsible for managing the app’s lifecycle and initializing the SwiftData model container, which in turn loads and displays the primary ContentView.
 
--Fossil Tracking:
-  -Users can mark fossils as donated or not donated.
-  -The fossil tracking system includes all 25 fossils that are present in Animal Crossing (GameCube version). These fossils are pre-populated during the app’s       
-   initial launch.
-  -Fossils can be viewed, and their details are displayed, including the fossil name, part, and donation status.
-  -Donation status is persisted using SwiftData, so changes are saved even after the app is closed.
+AnimalCrossingGCN_TrackerTests.swift and AnimalCrossingGCN_TrackerUITests.swift provide basic unit and UI tests to ensure the app’s functionality and interface work as expected.
 
--Dynamic User Interface
-  -Uses NavigationStack for iPhone devices and NavigationSplitView for iPads and macOS.
-  -Provides a responsive UI that adapts to the device being used, ensuring a clean and intuitive user experience.
-  -The interface includes a toggle for donation status and detailed views for each fossil.
+Current Features (v1.10.07.24.a)
 
--Persistent Data Storage
-  -Data is stored using SwiftData, ensuring that user progress (such as donation status) is saved and persists between app sessions.
+-The app comes pre-populated with 25 fossils, 40 bugs, and 40 fish. Users can mark items as donated or not, with progress saved between sessions using SwiftData. The recently added search bar allows users to search through fossils, bugs, and fish by name, streamlining navigation.
 
-Tasks Completed (v1.10.05.24.a):
+-The app uses NavigationStack for iPhones and NavigationSplitView for iPads and macOS. This responsive user interface adapts to each device, ensuring a smooth experience for all users. A recent update also fixes how the bug season text is displayed, ensuring that information is shown cleanly and correctly.
 
-  -Integration of SwiftData for persistent data storage.
-  -A fully functional fossil tracking system with 25 fossils pre-populated and the ability to toggle donation status.
-  -Implementation of NavigationStack (iPhone) and NavigationSplitView (iPad/macOS) for adaptive layouts.
-  -Basic unit tests and UI tests to ensure data integrity and proper functioning of the interface.
+-Persistent data storage ensures that user data for fossils, bugs, and fish is preserved between app sessions.
 
-Issues & Limitations (v1.10.05.24.a):
+Tasks Completed in v1.10.07.24.a
 
-  -The app currently only supports fossil tracking. Future releases will include tracking for bugs, fish, and art.
-  -Some UI limitations may be experienced on smaller iPhone screens, but the app remains fully functional.
-  -The app must be run through Xcode and cannot be installed directly on a device via an app store.
+-A search functionality has been added to help users quickly find fossils, bugs, and fish. The bug season display has been fixed to eliminate the “Optional(…)” issue, ensuring cleaner presentation. 
 
-Next Steps:
+Issues & Limitations
 
-  -Tracking Expansion
-  -Implement tracking for bugs, fish, and art in future versions.
-  -Add features for search and filtering to make it easier to navigate the growing list of collectibles.
+-The delete function currently removes items permanently, with no option to restore them. A future update will either implement an add item function or remove the delete option altogether. 
 
-UI Enhancements
-  -Provide richer detail views for each collectible category.
-  -Improve overall app performance and user experience, especially for larger collections.
+-The DetailView feature is currently unavailable for iPhones, with plans to address this in future updates. 
 
-Additional Testing
-  -Expand unit and UI tests to cover the new features and ensure robustness as the app evolves.
+-Art tracking has not been implemented yet but is planned for future releases.
 
-Notes:
+Future Steps
 
-Future updates will focus on expanding functionality, such as adding villager tracking, town customization, and Nook store upgrade monitoring.
-As the app grows, further optimization and testing will be necessary to handle the increased complexity of the features.
+-Art tracking will be introduced in a future update, allowing users to track art pieces from the original Animal Crossing. 
+
+-Future features will also include filtering options for sorting collections by donation status, season availability, and collectible type (fossils, bugs, fish, and art).
+
+-The app will soon introduce data visualization features. Users will be able to track donation times, with graphs and visual representations of their progress over time. The ability to toggle between different collectibles on the graphs (such as fossils, bugs, fish, and art) will provide a more interactive experience. 
+
+-Future updates will also include summary statistics, such as total items donated and overall completion progress.
+
+-Plans are in place to add a feature for importing and exporting user data, allowing users to back up and transfer their collection progress across devices. Localization options will be explored to support multiple languages, expanding accessibility for non-English speakers.
+
+-Cross-Platform Support
+
+The app has been designed for compatibility with iPhones, iPads, and macOS devices. SwiftData ensures persistent data storage across all platforms, maintaining a seamless user experience regardless of device.
+
+Summary
+
+Version v1.10.07.24.a introduces a search bar and significant improvements to the display of bug season data. With this update, the app provides an even more streamlined experience for tracking fossils, bugs, and fish, while laying the foundation for future features such as art tracking and data visualization.
