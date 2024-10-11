@@ -20,7 +20,7 @@ struct ContentView: View {
     
     @State private var selectedFossil: Fossil?  // Bindable property for selected fossil
     @State private var selectedBug: Bug?
-    @State private var selectedFish: Fish?  // Keeping 'Fish' capitalization for now, as fixing it breaks the app
+    @State private var selectedFish: Fish?  // Keeping 'Fish' capitalization for now, as fixing it breaks it
     @State private var selectedArt: Art?
     
     @State private var searchText = ""  // State property for search text
@@ -46,7 +46,7 @@ struct ContentView: View {
                             } else if let bug = selectedBug {
                                 BugDetailView(bug: bug)
                             } else if let fish = selectedFish {
-                                FishDetailView(Fish: fish)  // Keeping 'Fish' uppercase for now
+                                FishDetailView(Fish: fish)
                             } else if let art = selectedArt {
                                 ArtDetailView(art: art)
                             } else {
@@ -271,21 +271,21 @@ struct ContentView: View {
     // Function to load predefined bugs into SwiftData if not already present
     private func loadFish() {
         if fishQuery.isEmpty {
-            let fish = getDefaultFish()  // Fetch default bugs from Bug.swift
+            let fish = getDefaultFish()  
             for fish in fish {
-                modelContext.insert(fish)  // Insert bugs into SwiftData context
+                modelContext.insert(fish)
             }
-            try? modelContext.save()  // Save the new bugs to the context
+            try? modelContext.save()
         }
     }
     // Function to load predefined bugs into SwiftData if not already present
     private func loadArt() {
         if artQuery.isEmpty {
-            let art = getDefaultArt()  // Fetch default bugs from Bug.swift
+            let art = getDefaultArt()  // Fetch default art from Bug.swift
             for art in art {
-                modelContext.insert(art)  // Insert bugs into SwiftData context
+                modelContext.insert(art)  // Insert art into SwiftData context
             }
-            try? modelContext.save()  // Save the new bugs to the context
+            try? modelContext.save()  // Save the new art to the context
         }
     }
 }
