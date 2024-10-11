@@ -55,17 +55,17 @@ func getDefaultBugs() -> [Bug] {
 }
 
 @Model
-class Bug {
-    @Attribute(.unique) var id: UUID
+class Bug: ObservableObject, Identifiable { //define the Bug class
+    var id: UUID //define the id attribute, using UUID because it is unique!
     var name: String
-    var season: String?
+    var season: String? //define the season attribute, using optional String because it may not be known (though it should be)
     var isDonated: Bool
 
-    init(name: String, season: String, isDonated: Bool = false) {
-        self.id = UUID()
-        self.name = name
-        self.season = season
-        self.isDonated = isDonated
+    init(name: String, season: String, isDonated: Bool = false) { //initialize the Bug class
+        self.id = UUID()//set the id to a new UUID
+        self.name = name //set the name to the name passed in
+        self.season = season //set the season to the season passed in
+        self.isDonated = isDonated //set the isDonated to the isDonated passed in
     }
 }
 
@@ -73,12 +73,13 @@ struct BugDetailView: View {
     var bug: Bug
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(bug.name)
-                .font(.largeTitle)
+        VStack(alignment: .leading) { //create a vertical stack with leading alignment
+            Text(bug.name) //display the bug name
+                .font(.largeTitle) //
                 .fontWeight(.bold)
             
-            Text("Season: \(bug.season)")
+            // Safely unwrap the optional season value
+            Text("Season: \(bug.season ?? "N/A")")  //display the season of the bug, "??" means if the season is nil, it will  display "N/A"
                 .font(.title2)
             
             Toggle("Donated", isOn: Binding(
