@@ -22,9 +22,9 @@ struct ContentView: View {
     @State private var selectedBug: Bug?
     @State private var selectedFish: Fish?
     @State private var selectedArt: Art?
-
+    
     @State private var searchText = ""  // State property for search text
-
+    
     var body: some View {
         Group {
             if horizontalSizeClass == .compact {
@@ -46,8 +46,11 @@ struct ContentView: View {
                             } else if let bug = selectedBug {
                                 BugDetailView(bug: bug)
                             } else if let fish = selectedFish {
-                                FishDetailView(Fish: fish)  // Fixed naming convention for FishDetailView
-                            } else {
+                                FishDetailView(Fish: fish)
+                            } else if let art = selectedArt {
+                                ArtDetailView(art: art) }
+                            }
+                             else {
                                 Text("Select an item!")
                             }
                         }
@@ -64,9 +67,9 @@ struct ContentView: View {
                         fishSection
                         artSection
                     }
-                    #if os(macOS)
+#if os(macOS)
                     .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-                    #endif
+#endif
                 } detail: {
                     if let fossil = selectedFossil {
                         FossilDetailView(fossil: fossil)
@@ -91,7 +94,7 @@ struct ContentView: View {
             loadArt()
         }
     }
-
+    
     // Search bar view
     private var searchBar: some View {
         HStack {
@@ -100,7 +103,7 @@ struct ContentView: View {
                 .padding()
         }
     }
-
+    
     // Separate fossils section for reusability with search filter
     private var fossilsSection: some View {
         Section(header: Text("Fossils")) {
@@ -125,9 +128,6 @@ struct ContentView: View {
                     }
                 }
             }
-            .onDelete { offsets in
-                deleteFossils(offsets: offsets)  // Handle deletion of fossils
-            }
         }
     }
     
@@ -139,6 +139,7 @@ struct ContentView: View {
                     selectedBug = bug  // Set the selected bug
                     selectedFossil = nil  // Clear other selections
                     selectedFish = nil
+                    selectedArt = nil
                 }) {
                     Toggle(isOn: Binding(
                         get: { bug.isDonated },
@@ -155,12 +156,9 @@ struct ContentView: View {
                     }
                 }
             }
-            .onDelete { offsets in
-                deleteBugs(offsets: offsets)  // Handle deletion of bugs
-            }
         }
     }
-
+    
     // Separate Fish section for reusability with search filter
     private var fishSection: some View {
         Section(header: Text("Fish")) {
@@ -169,28 +167,51 @@ struct ContentView: View {
                     selectedFish = fish  // Set the selected fish
                     selectedBug = nil  // Clear other selections
                     selectedFossil = nil
+                    selectedArt = nil
                 }) {
                     Toggle(isOn: Binding( //Toggle to show if the fish is donated or not
                         get: { fish.isDonated }, //get the boolean value of isDonated
                         set: { newValue in
                             fish.isDonated = newValue //set the boolean value of isDonated
                         }
-                    )) {
-                        VStack(alignment: .leading) { //VStack to align the text to the left
-                            Text(fish.name) //Display the name of the fish
-                            Text("Season: \(fish.season)") //Display the season the fish is available in
-                                .font(.subheadline) //Set the font size to subheadline
-                                .foregroundColor(.secondary) //Set the color to secondary
-                        }
-                    }
+                                        )) {
+                                            VStack(alignment: .leading) { //VStack to align the text to the left
+                                                Text(fish.name) //Display the name of the fish
+                                                Text("Season: \(fish.season)") //Display the season the fish is available in
+                                                    .font(.subheadline) //Set the font size to subheadline
+                                                    .foregroundColor(.secondary) //Set the color to secondary
+                                            }
+                                        }
                 }
-            }
-            .onDelete { offsets in
-                deleteFish(offsets: offsets)  // Handle deletion of fish
             }
         }
     }
-
+    private var artSection: some View {
+        Section(header: Text("Art")) {
+            ForEach(filteredArt, id: \.id) { art in
+                Button(action: {
+                    selectedArt = art  // Set the selected fish
+                    selectedBug = nil  // Clear other selections
+                    selectedFossil = nil
+                    selectedFish = nil
+                }) {
+                    Toggle(isOn: Binding( //Toggle to show if the fish is donated or not
+                        get: { art.isDonated }, //get the boolean value of isDonated
+                        set: { newValue in
+                            art.isDonated = newValue //set the boolean value of isDonated
+                        }
+                                        )) {
+                                            VStack(alignment: .leading) { //vertical stack to align the text to the left
+                                                Text(art.name) //Display the name of the painting
+                                                    .font(.subheadline) //Set the font size to subheadline
+                                                    .foregroundColor(.secondary) //Set the color to secondary
+                                            }
+                                        }
+                }
+            }
+        }
+    }
+    
     // Filtered fossils based on the search text
     private var filteredFossils: [Fossil] {
         if searchText.isEmpty {
@@ -199,7 +220,7 @@ struct ContentView: View {
             return fossilsQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
-
+    
     // Filtered bugs based on the search text
     private var filteredBugs: [Bug] {
         if searchText.isEmpty {
@@ -208,7 +229,7 @@ struct ContentView: View {
             return bugsQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
-
+    
     // Filtered fish based on the search text
     private var filteredFish: [Fish] {
         if searchText.isEmpty {
@@ -217,7 +238,14 @@ struct ContentView: View {
             return fishQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
-
+    
+    private var filteredArt: [Art] {
+        if searchArt.isEmpty {
+            return artQuery
+        } else {
+            return artQuery.filter {$0.name.lowercased().contains(searchText.lowercased()) }
+        }
+    
     // Function to load predefined fossils into SwiftData if not already present
     private func loadFossils() {
         if fossilsQuery.isEmpty {
@@ -239,7 +267,7 @@ struct ContentView: View {
             try? modelContext.save()  // Save the new bugs to the context
         }
     }
-
+    
     // Function to load predefined fish into SwiftData if not already present
     private func loadFish() {
         if fishQuery.isEmpty {
@@ -250,7 +278,18 @@ struct ContentView: View {
             try? modelContext.save()  // Save the new fish to the context
         }
     }
-
-#Preview {
-    ContentView()
+    
+    private func loadArt() {
+        if artQuery.isEmpty {
+            let art = getDefaultArt()
+            for art in art {
+                modelContext.insert(art)
+            }
+            try? modelContext.save()
+        }
+    }
+    
+    #Preview {
+        ContentView()
+    }
 }
