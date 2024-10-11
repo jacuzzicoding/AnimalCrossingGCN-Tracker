@@ -31,6 +31,7 @@ struct ContentView: View {
             if horizontalSizeClass == .compact {
                 // Use NavigationStack for iPhone (using the compact width specifier)
                 NavigationStack {
+
                     VStack {
                         searchBar  // Add the search bar here
                         categoryFilter  // Add the category filter here
@@ -70,6 +71,7 @@ struct ContentView: View {
             } else {
                 // Using NavigationSplitView for macOS and iPadOS devices (regular width)
                 NavigationSplitView {
+
                     VStack {
                         searchBar  // Add the search bar here
                         categoryFilter  // Add the category filter here
@@ -111,6 +113,7 @@ struct ContentView: View {
             loadBugs()      // Load the updated bugs
             loadFossils()   // Load fossils
             loadFish()      // Load the fish
+
             loadArt()       // Load the art
         }
     }
@@ -124,6 +127,7 @@ struct ContentView: View {
         }
     }
     
+
     // Category filter view
     private var categoryFilter: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -147,6 +151,7 @@ struct ContentView: View {
         }
     }
     
+
     // Separate fossils section for reusability with search filter
     private var fossilsSection: some View {
         Section(header: Text("Fossils")) {
@@ -268,7 +273,7 @@ struct ContentView: View {
             return fossilsQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
-    
+   
     // Filtered bugs based on search text and selected categories
     private var filteredBugs: [Bug] {
         if searchText.isEmpty {
@@ -278,7 +283,9 @@ struct ContentView: View {
         }
     }
     
+
     // Filtered fish based on search text and selected categories
+
     private var filteredFish: [Fish] {
         if searchText.isEmpty {
             return fishQuery
@@ -286,7 +293,7 @@ struct ContentView: View {
             return fishQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
-    
+
     // Filtered art based on search text and selected categories
     private var filteredArt: [Art] {
         if searchText.isEmpty {
@@ -355,5 +362,6 @@ struct ButtonToggleStyle: ToggleStyle {
                 )
         }
         .foregroundColor(configuration.isOn ? .white : .primary)
+
     }
 }
