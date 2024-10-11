@@ -14,12 +14,14 @@ struct ContentView: View {
     @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]  // Queries to fetch fossils/bugs/fish/paintings from SwiftData
     @Query(sort: \Bug.name) private var bugsQuery: [Bug]
     @Query(sort: \Fish.name) private var fishQuery: [Fish]
-
+    @Query(sort: \Art.name) private var artQuery: [Art]
+    
     @Environment(\.horizontalSizeClass) var horizontalSizeClass  // Detect size class (compact = iPhone, regular = iPad/Mac)
     
     @State private var selectedFossil: Fossil?  // Bindable property for selected fossil
     @State private var selectedBug: Bug?
     @State private var selectedFish: Fish?
+    @State private var selectedArt: Art?
 
     @State private var searchText = ""  // State property for search text
 
@@ -33,6 +35,7 @@ struct ContentView: View {
                         fossilsSection
                         bugsSection
                         fishSection
+                        artSection
                     }
                     .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
                     .navigationTitle("Brock's Museum Tracker")
@@ -59,6 +62,7 @@ struct ContentView: View {
                         fossilsSection
                         bugsSection
                         fishSection
+                        artSection
                     }
                     #if os(macOS)
                     .navigationSplitViewColumnWidth(min: 180, ideal: 200)
@@ -70,7 +74,10 @@ struct ContentView: View {
                         BugDetailView(bug: bug)  // Show Bug details when a bug is selected
                     } else if let fish = selectedFish {
                         FishDetailView(Fish: fish)  // Show Fish details when a fish is selected
-                    } else {
+                    } else if let art = selectedArt {
+                        ArtDetailView(art: art)
+                    }
+                    else {
                         Text("Select an item")
                     }
                 }
@@ -81,6 +88,7 @@ struct ContentView: View {
             loadBugs()      // Load the updated bugs
             loadFossils()   // Load fossils
             loadFish()      // Load the fish
+            loadArt()
         }
     }
 
@@ -242,28 +250,6 @@ struct ContentView: View {
             try? modelContext.save()  // Save the new fish to the context
         }
     }
-
-    // Function to delete fossils
-    private func deleteFossils(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { fossilsQuery[$0] }.forEach(modelContext.delete)  // Remove selected fossils
-        }
-    }
-
-    // Function to delete bugs
-    private func deleteBugs(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { bugsQuery[$0] }.forEach(modelContext.delete)  // Remove selected bugs
-        }
-    }
-
-    // Function to delete fish
-    private func deleteFish(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { fishQuery[$0] }.forEach(modelContext.delete)  // Remove selected fish
-        }
-    }
-}
 
 #Preview {
     ContentView()
