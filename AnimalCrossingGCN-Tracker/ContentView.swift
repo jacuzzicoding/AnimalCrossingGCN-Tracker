@@ -29,7 +29,7 @@ struct ContentView: View {
     var body: some View {
         Group {
             if horizontalSizeClass == .compact {
-                // Use NavigationStack for iPhone (using the compact width specifier)
+                // IPHONE SECTION, using navigationstack
                 NavigationStack {
                     VStack {
                         searchBar  // Add the search bar here
@@ -50,7 +50,7 @@ struct ContentView: View {
                         }
                         .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
                     }
-                    .navigationTitle("Brock's Museum Tracker")
+                    .navigationTitle("Museum Tracker")
                     .background(
                         Group {
                             if let fossil = selectedFossil {
