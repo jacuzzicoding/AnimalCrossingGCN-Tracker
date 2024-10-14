@@ -1,7 +1,10 @@
 AnimalCrossingGCN-Tracker - Project Document
-Version: v1.10.14.24.a
-Pre-Release Date: October 14, 2024
-Author: Brock Jenkinson
+
+-Version: v1.10.14.24.a
+
+-Pre-Release Date: October 14, 2024
+
+-Author: Brock Jenkinson
 
 Project Overview
 The AnimalCrossingGCN-Tracker is a companion app designed for players of the original Animal Crossing on the GameCube. The app helps users track museum collectibles, including fossils, bugs, fish, and art. It is built using Swift and SwiftUI, with SwiftData ensuring data persistence across iPhone, iPad, and macOS devices.
