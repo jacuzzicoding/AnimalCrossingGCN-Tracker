@@ -69,13 +69,13 @@ class Bug: ObservableObject, Identifiable { //define the Bug class
     }
 }
 
-struct BugDetailView: View {
+struct BugDetailView: View { //need to maybe make a seperate function for iphones.
     var bug: Bug
 
     var body: some View {
         VStack(alignment: .leading) { //create a vertical stack with leading alignment
             Text(bug.name) //display the bug name
-                .font(.largeTitle) //
+                .font(.title2) //
                 .fontWeight(.bold)
             
             // Safely unwrap the optional season value
