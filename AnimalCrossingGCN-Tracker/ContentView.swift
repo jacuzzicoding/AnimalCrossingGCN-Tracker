@@ -52,7 +52,7 @@ struct ContentView: View {
                         .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
                     }
                     .navigationTitle("Museum Tracker")
-                    .background(
+                  /*  .background(
                         Group {
                             if let fossil = selectedFossil {
                                 FossilDetailView(fossil: fossil)
@@ -66,7 +66,8 @@ struct ContentView: View {
                                 Text("Select an item!")
                             }
                         }
-                    )
+                    ) */ //commenting this background code out, will remove if testing goes well.
+                    //basically, the DetailView was being rendered in the background, at the bottom of the vstack...so i'm gonna try moving it 
                 }
             } else {
                 // Using NavigationSplitView for macOS and iPadOS devices (regular width)
