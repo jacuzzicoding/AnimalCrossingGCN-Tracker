@@ -238,7 +238,7 @@ struct ContentView: View {
                         VStack(alignment: .leading) {
                             Text(art.name)
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                               // .foregroundColor(.secondary)
                         }
                     }
                     Spacer()
