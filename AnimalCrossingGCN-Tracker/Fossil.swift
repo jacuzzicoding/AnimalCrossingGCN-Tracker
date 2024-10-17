@@ -59,10 +59,7 @@ struct FossilDetailView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(fossil.name)
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            
+        
             if let part = fossil.part {
                 Text("Part: \(part)")
                     .font(.title2)

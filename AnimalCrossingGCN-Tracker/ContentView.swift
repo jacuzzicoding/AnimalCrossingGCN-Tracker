@@ -3,6 +3,7 @@
 //  AnimalCrossingGCN-Tracker
 //
 //  Created by Brock Jenkinson on 10/5/24.
+//  Last updated 10/17/24
 //
 
 import Foundation
@@ -29,9 +30,9 @@ struct ContentView: View {
     var body: some View {
         Group {
             if horizontalSizeClass == .compact {
-                // IPHONE SECTION, using navigationstack
+                // IPHONE SECTION, using NavigationStack
                 NavigationStack {
-
+                    
                     VStack {
                         searchBar  // Add the search bar here
                         categoryFilter  // Add the category filter here
@@ -52,26 +53,12 @@ struct ContentView: View {
                         .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
                     }
                     .navigationTitle("Museum Tracker")
-                    .background(
-                        Group {
-                            if let fossil = selectedFossil {
-                                FossilDetailView(fossil: fossil)
-                            } else if let bug = selectedBug {
-                                BugDetailView(bug: bug)
-                            } else if let fish = selectedFish {
-                                FishDetailView(Fish: fish)
-                            } else if let art = selectedArt {
-                                ArtDetailView(art: art)
-                            } else {
-                                Text("Select an item!")
-                            }
-                        }
-                    )
+                    // Removed the .background modifier to fix the detail view appearing under the header
                 }
             } else {
                 // Using NavigationSplitView for macOS and iPadOS devices (regular width)
                 NavigationSplitView {
-
+                    
                     VStack {
                         searchBar  // Add the search bar here
                         categoryFilter  // Add the category filter here
@@ -113,7 +100,6 @@ struct ContentView: View {
             loadBugs()      // Load the updated bugs
             loadFossils()   // Load fossils
             loadFish()      // Load the fish
-
             loadArt()       // Load the art
         }
     }
@@ -127,7 +113,6 @@ struct ContentView: View {
         }
     }
     
-
     // Category filter view
     private var categoryFilter: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -151,23 +136,13 @@ struct ContentView: View {
         }
     }
     
-
     // Separate fossils section for reusability with search filter
     private var fossilsSection: some View {
         Section(header: Text("Fossils")) {
             ForEach(filteredFossils, id: \.id) { fossil in
-                Button(action: {
-                    selectedFossil = fossil  // Set the selected fossil
-                    selectedBug = nil        // Clear other selections
-                    selectedFish = nil
-                    selectedArt = nil
-                }) {
-                    Toggle(isOn: Binding(
-                        get: { fossil.isDonated },
-                        set: { newValue in
-                            fossil.isDonated = newValue
-                        }
-                    )) {
+                HStack {
+                    // NavigationLink to navigate to the detail view
+                    NavigationLink(destination: FossilDetailView(fossil: fossil)) {
                         VStack(alignment: .leading) {
                             Text(fossil.name)
                             if let part = fossil.part {
@@ -177,6 +152,17 @@ struct ContentView: View {
                             }
                         }
                     }
+                    Spacer()
+                    // Toggle to mark as donated, placed outside the NavigationLink
+                    Toggle(isOn: Binding(
+                        get: { fossil.isDonated },
+                        set: { newValue in
+                            fossil.isDonated = newValue
+                        }
+                    )) {
+                        Text("") // Empty label to avoid showing label
+                    }
+                    .labelsHidden()
                 }
             }
         }
@@ -186,18 +172,9 @@ struct ContentView: View {
     private var bugsSection: some View {
         Section(header: Text("Bugs")) {
             ForEach(filteredBugs, id: \.id) { bug in
-                Button(action: {
-                    selectedBug = bug  // Set the selected bug
-                    selectedFossil = nil  // Clear other selections
-                    selectedFish = nil
-                    selectedArt = nil
-                }) {
-                    Toggle(isOn: Binding(
-                        get: { bug.isDonated },
-                        set: { newValue in
-                            bug.isDonated = newValue
-                        }
-                    )) {
+                HStack {
+                    // NavigationLink to navigate to the detail view
+                    NavigationLink(destination: BugDetailView(bug: bug)) {
                         VStack(alignment: .leading) {
                             Text(bug.name)
                             Text("Season: \(bug.season ?? "N/A")")
@@ -205,6 +182,17 @@ struct ContentView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                    Spacer()
+                    // Toggle to mark as donated, placed outside the NavigationLink
+                    Toggle(isOn: Binding(
+                        get: { bug.isDonated },
+                        set: { newValue in
+                            bug.isDonated = newValue
+                        }
+                    )) {
+                        Text("")
+                    }
+                    .labelsHidden()
                 }
             }
         }
@@ -214,18 +202,9 @@ struct ContentView: View {
     private var fishSection: some View {
         Section(header: Text("Fish")) {
             ForEach(filteredFish, id: \.id) { fish in  // Keeping 'Fish' uppercase for now
-                Button(action: {
-                    selectedFish = fish  // Set the selected fish
-                    selectedBug = nil    // Clear other selections
-                    selectedFossil = nil
-                    selectedArt = nil
-                }) {
-                    Toggle(isOn: Binding(
-                        get: { fish.isDonated },
-                        set: { newValue in
-                            fish.isDonated = newValue
-                        }
-                    )) {
+                HStack {
+                    // NavigationLink to navigate to the detail view
+                    NavigationLink(destination: FishDetailView(Fish: fish)) {
                         VStack(alignment: .leading) {
                             Text(fish.name)
                             Text("Season: \(fish.season)")
@@ -233,6 +212,17 @@ struct ContentView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                    Spacer()
+                    // Toggle to mark as donated, placed outside the NavigationLink
+                    Toggle(isOn: Binding(
+                        get: { fish.isDonated },
+                        set: { newValue in
+                            fish.isDonated = newValue
+                        }
+                    )) {
+                        Text("")
+                    }
+                    .labelsHidden()
                 }
             }
         }
@@ -242,24 +232,26 @@ struct ContentView: View {
     private var artSection: some View {
         Section(header: Text("Art")) {
             ForEach(filteredArt, id: \.id) { art in
-                Button(action: {
-                    selectedArt = art  // Set the selected art
-                    selectedBug = nil  // Clear other selections
-                    selectedFossil = nil
-                    selectedFish = nil
-                }) {
+                HStack {
+                    // NavigationLink to navigate to the detail view
+                    NavigationLink(destination: ArtDetailView(art: art)) {
+                        VStack(alignment: .leading) {
+                            Text(art.name)
+                                .font(.subheadline)
+                               // .foregroundColor(.secondary)
+                        }
+                    }
+                    Spacer()
+                    // Toggle to mark as donated, placed outside the NavigationLink
                     Toggle(isOn: Binding(
                         get: { art.isDonated },
                         set: { newValue in
                             art.isDonated = newValue
                         }
                     )) {
-                        VStack(alignment: .leading) {
-                            Text(art.name)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
+                        Text("")
                     }
+                    .labelsHidden()
                 }
             }
         }
@@ -273,7 +265,7 @@ struct ContentView: View {
             return fossilsQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
-   
+    
     // Filtered bugs based on search text and selected categories
     private var filteredBugs: [Bug] {
         if searchText.isEmpty {
@@ -283,9 +275,7 @@ struct ContentView: View {
         }
     }
     
-
     // Filtered fish based on search text and selected categories
-
     private var filteredFish: [Fish] {
         if searchText.isEmpty {
             return fishQuery
@@ -293,7 +283,7 @@ struct ContentView: View {
             return fishQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
-
+    
     // Filtered art based on search text and selected categories
     private var filteredArt: [Art] {
         if searchText.isEmpty {
@@ -362,6 +352,5 @@ struct ButtonToggleStyle: ToggleStyle {
                 )
         }
         .foregroundColor(configuration.isOn ? .white : .primary)
-
     }
 }

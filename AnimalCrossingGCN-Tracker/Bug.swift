@@ -74,10 +74,6 @@ struct BugDetailView: View { //need to maybe make a seperate function for iphone
 
     var body: some View {
         VStack(alignment: .leading) { //create a vertical stack with leading alignment
-            Text(bug.name) //display the bug name
-                .font(.title2) //
-                .fontWeight(.bold)
-            
             // Safely unwrap the optional season value
             Text("Season: \(bug.season ?? "N/A")")  //display the season of the bug, "??" means if the season is nil, it will  display "N/A"
                 .font(.title2)
