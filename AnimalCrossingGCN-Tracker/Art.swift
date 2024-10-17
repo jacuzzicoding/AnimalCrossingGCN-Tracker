@@ -33,12 +33,14 @@ class Art: ObservableObject, Identifiable {
     var id: UUID
     var name: String
     var basedOn: String  // this field is for the real-world counterpart name and artist
+    //var imageName: String // this will store the name of the image file
     var isDonated: Bool
 
-    init(name: String, basedOn: String, isDonated: Bool = false) {
+    init(name: String, basedOn: String, isDonated: Bool = false) { //include imageName: String here once fixed
         self.id = UUID()
         self.name = name
         self.basedOn = basedOn
+      //  self.imageName = imageName
         self.isDonated = isDonated
     }
 }
@@ -55,6 +57,14 @@ struct ArtDetailView: View {
             Text("Based on: \(art.basedOn)")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+
+            // I will uncomment this once we have images in the assets folder, just putting in the framework for now
+            // Image(art.imageName)
+            //     .resizable()
+            //     .scaledToFit()
+            //     .frame(height: 200)
+            //     .cornerRadius(8)
+            //     .padding(.top)
 
             Toggle("Donated", isOn: Binding(
                 get: { art.isDonated },
