@@ -1,19 +1,19 @@
-AnimalCrossingGCN-Tracker - Project Document
+**AnimalCrossingGCN-Tracker - Project Document
 
 -Version: v1.10.14.24.a
 
 -Pre-Release Date: October 14, 2024
 
--Author: Brock Jenkinson
+-Author: Brock Jenkinson**
 
-Project Overview
+**Project Overview**
 The AnimalCrossingGCN-Tracker is a companion app designed for players of the original Animal Crossing on the GameCube. The app helps users track museum collectibles, including fossils, bugs, fish, and art. It is built using Swift and SwiftUI, with SwiftData ensuring data persistence across iPhone, iPad, and macOS devices.
 
 Version v1.10.11.24 introduced a major update with the addition of art tracking, completing the four main museum sections (fossils, bugs, fish, and art). The app now provides comprehensive tracking for all these categories. Upcoming updates will focus on polishing the user experience by adding sound effects, haptics, and a more visually appealing interface.
 
 The latest update, v1.10.14.24.a, is a beta release that primarily addresses bug fixes and optimizations based on feedback from version v1.10.11.24.
 
-File Structure
+**File Structure**
 ContentView.swift: Manages the main view, displaying fossils, bugs, fish, and art. It adapts layouts for different devices using NavigationStack (for iPhones) and NavigationSplitView (for iPads and macOS). A search bar allows users to easily find specific collectibles by name, and the section selector provides quick navigation between the different collectible types.
 
 Fossil.swift: Defines the Fossil data model, including the fossil’s name, optional part information, and donation status. Pre-populated with all 25 fossils from Animal Crossing for GameCube.
