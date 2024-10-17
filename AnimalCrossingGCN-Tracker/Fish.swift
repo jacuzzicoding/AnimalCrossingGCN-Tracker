@@ -76,9 +76,7 @@ struct FishDetailView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(Fish.name)
-                .font(.largeTitle)
-                .fontWeight(.bold)
+        
             
             Text("Season: \(Fish.season)")
                 .font(.title2)

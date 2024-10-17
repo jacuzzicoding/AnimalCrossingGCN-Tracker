@@ -50,13 +50,10 @@ struct ArtDetailView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(art.name)
-                .font(.largeTitle)
-                .fontWeight(.bold)
 
             Text("Based on: \(art.basedOn)")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.primary)
 
             // I will uncomment this once we have images in the assets folder, just putting in the framework for now
             // Image(art.imageName)
