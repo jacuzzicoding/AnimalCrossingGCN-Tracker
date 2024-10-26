@@ -6,7 +6,7 @@ Author: Brock Jenkinson
 
 Project Overview
 
-The AnimalCrossingGCN-Tracker is a companion app designed to help players of the original Animal Crossing on the GameCube track their museum collectibles, including fossils, bugs, fish, and art. Built with Swift and SwiftUI, the app leverages SwiftData to ensure data persistence across iPhone, iPad, and macOS devices. It aims to provide players with a seamless tool for managing their collections across platforms.
+The AnimalCrossingGCN-Tracker is a companion app I'm making as a passion project, and it helps players of the original Animal Crossing on the GameCube track their museum collectibles, including fossils, bugs, fish, and art. Built with Swift and SwiftUI, the app leverages SwiftData to ensure data persistence across iPhone, iPad, and macOS devices. It aims to provide players with a seamless tool for managing their collections across platforms.
 
 Version v0.4.2-alpha addresses UI issues on iPhones and lays the groundwork for future image display in the art tracking feature.
 
@@ -34,9 +34,7 @@ The app supports full tracking of fossils, bugs, fish, and art, with pre-populat
 	•	Use the search functionality to quickly find items by name.
 	•	Experience adaptive layouts for iPhones, iPads, and macOS devices.
 
-The addition of art tracking in v0.4.0-alpha completed the four major museum sections, including real-world counterparts for famous art pieces like the Mona Lisa and Sunflowers.
-
-v0.4.2-alpha Updates
+v0.4.2-alpha New Updates:
 
 This release resolves key navigation and UI issues, especially for iPhone users, and lays the foundation for future image display in the art section.
 
@@ -46,10 +44,9 @@ This release resolves key navigation and UI issues, especially for iPhone users,
 
 Issues & Limitations
 
-	•	Delete Functionality: Currently, the app does not support the deletion of items from collections. Future updates may address this by either adding a delete function or removing the option entirely.
 	•	Art Detail Images: While the groundwork for image display in the art section is in place, images are not yet available and remain commented out in the code.
 
-Future Steps
+Future Steps:
 
 With the completion of all major museum sections, the focus will now shift to refining the user experience and introducing new features:
 
