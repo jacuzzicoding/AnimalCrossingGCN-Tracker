@@ -2,7 +2,6 @@ AnimalCrossingGCN-Tracker - Project Document
 
 Version: v0.4.2-alpha
 Release Date: October 17, 2024
-Author: Brock Jenkinson
 
 Project Overview
 
