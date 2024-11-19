@@ -3,13 +3,135 @@
 //  AnimalCrossingGCN-Tracker
 //
 //  Created by Brock Jenkinson on 10/5/24.
-//  Last updated 10/17/24
 //
+//  Last updated 11/18/24
 
 import Foundation
 import SwiftUI
-import SwiftData // Using SwiftData to handle user data. Testing shows it works quite well with very simple implementation! Hoping it works for the final version as well.
+import SwiftData // Using SwiftData to handle user data. Testing shows it works quite well with very simple implementation!
 
+//Using a protocol to define the properties that all collectible items share. Kinda like a superclass in Java or C++
+protocol CollectibleItem: Identifiable {
+    var id: UUID { get }
+    var name: String { get }
+    var isDonated: Bool { get set }
+}
+
+//Need to use extensions so that the protocol can be used by our different item types
+extension Fossil: CollectibleItem {}
+extension Bug: CollectibleItem {}
+extension Fish: CollectibleItem {}
+extension Art: CollectibleItem {}
+
+//Now using an enum to handle the different categories of items, this should simplify the code a lot soon!!
+enum Category: String, CaseIterable {
+    case fossils = "Fossils"
+    case bugs = "Bugs"
+    case fish = "Fish"
+    case art = "Art"
+    
+    // Returns default data for each category type
+    func getDefaultData() -> [any CollectibleItem] {
+        switch self {
+        case .fossils:
+            return getDefaultFossils()
+        case .bugs:
+            return getDefaultBugs()
+        case .fish:
+            return getDefaultFish()
+        case .art:
+            return getDefaultArt()
+        }
+    }
+    
+    // Returns appropriate detail view for each category type using ViewBuilder
+    @ViewBuilder
+    func detailView<T: CollectibleItem>(for item: T) -> some View {
+        switch self {  //simple switch statement to return the correct view for each case
+        case .fossils:
+            if let fossil = item as? Fossil {
+                FossilDetailView(fossil: fossil)
+            }
+        case .bugs:
+            if let bug = item as? Bug {
+                BugDetailView(bug: bug)
+            }
+        case .fish:
+            if let fish = item as? Fish {
+                FishDetailView(Fish: fish)  // Keeping 'Fish' capitalization for now, as fixing it breaks it
+            }
+        case .art:
+            if let art = item as? Art {
+                ArtDetailView(art: art)
+            }
+        }
+    }
+}
+
+//New reusable section view for each category! Going to refractor the other functions like this soon
+struct CategorySection<T: CollectibleItem>: View {
+    let category: Category
+    let items: [T]
+    @Binding var searchText: String
+    
+    // Filtered items based on search text
+    var filteredItems: [T] {
+        if searchText.isEmpty {
+            return items
+        } else {
+            return items.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        }
+    }
+    
+    var body: some View {
+        Section(header: Text(category.rawValue)) {
+            ForEach(filteredItems) { item in
+                HStack {
+                    // NavigationLink to navigate to the appropriate detail view
+                    NavigationLink {
+                        category.detailView(for: item)
+                    } label: {
+                        VStack(alignment: .leading) {
+                            Text(item.name)
+                            // Category-specific detail information
+                            if let fossil = item as? Fossil, let part = fossil.part {
+                                Text(part)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            if let bug = item as? Bug, let season = bug.season {
+                                Text("Season: \(season)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            if let fish = item as? Fish {
+                                Text("Season: \(fish.season)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    Spacer()
+                    // Toggle to mark as donated, placed outside NavigationLink
+                    Toggle(isOn: Binding(
+                        get: { item.isDonated },
+                        set: { newValue in
+                            if var mutableItem = item as? any CollectibleItem {
+                                mutableItem.isDonated = newValue
+                            }
+                        }
+                    )) {
+                        Text("")
+                    }
+                    .labelsHidden()
+                }
+            }
+        }
+    }
+}
+
+/* ContentView struct is the main view of the app, containing the search bar, category filter, and main list view.
+   It also loads all predefined data into SwiftData when the view appears. */
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]  // Queries to fetch fossils/bugs/fish/paintings from SwiftData
@@ -19,72 +141,42 @@ struct ContentView: View {
     
     @Environment(\.horizontalSizeClass) var horizontalSizeClass  // Detect size class (compact = iPhone, regular = iPad/Mac)
     
-    @State private var selectedFossil: Fossil?  // Bindable property for selected fossil
+    @State private var selectedFossil: Fossil?  // Bindable properties for selected items
     @State private var selectedBug: Bug?
-    @State private var selectedFish: Fish?  // Keeping 'Fish' capitalization for now, as fixing it breaks it
+    @State private var selectedFish: Fish?
     @State private var selectedArt: Art?
     
     @State private var searchText = ""  // State property for search text
-    @State private var selectedCategories: Set<String> = ["Fossils", "Bugs", "Fish", "Art"] // State property for selected categories
+    @State private var selectedCategories: Set<String> = Set(Category.allCases.map { $0.rawValue })  // State property for selected categories
     
     var body: some View {
         Group {
             if horizontalSizeClass == .compact {
                 // IPHONE SECTION, using NavigationStack
                 NavigationStack {
-                    
                     VStack {
-                        searchBar  // Add the search bar here
-                        categoryFilter  // Add the category filter here
-                        List {
-                            if selectedCategories.contains("Fossils") {
-                                fossilsSection
-                            }
-                            if selectedCategories.contains("Bugs") {
-                                bugsSection
-                            }
-                            if selectedCategories.contains("Fish") {
-                                fishSection
-                            }
-                            if selectedCategories.contains("Art") {
-                                artSection
-                            }
-                        }
-                        .frame(maxHeight: .infinity)  // Ensure the List takes up all available space
+                        searchBar
+                        categoryFilter
+                        mainList
                     }
                     .navigationTitle("Museum Tracker")
-                    // Removed the .background modifier to fix the detail view appearing under the header
                 }
             } else {
                 // Using NavigationSplitView for macOS and iPadOS devices (regular width)
                 NavigationSplitView {
-                    
                     VStack {
-                        searchBar  // Add the search bar here
-                        categoryFilter  // Add the category filter here
-                        List {
-                            if selectedCategories.contains("Fossils") {
-                                fossilsSection
-                            }
-                            if selectedCategories.contains("Bugs") {
-                                bugsSection
-                            }
-                            if selectedCategories.contains("Fish") {
-                                fishSection
-                            }
-                            if selectedCategories.contains("Art") {
-                                artSection
-                            }
-                        }
+                        searchBar
+                        categoryFilter
+                        mainList
                     }
-    #if os(macOS)
+                    #if os(macOS)
                     .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-    #endif
+                    #endif
                 } detail: {
                     if let fossil = selectedFossil {
                         FossilDetailView(fossil: fossil)
                     } else if let bug = selectedBug {
-                        BugDetailView(bug: bug)  // Show Bug details when a bug is selected
+                        BugDetailView(bug: bug)
                     } else if let fish = selectedFish {
                         FishDetailView(Fish: fish)  // Keeping 'Fish' uppercase for now
                     } else if let art = selectedArt {
@@ -97,12 +189,11 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            loadBugs()      // Load the updated bugs
-            loadFossils()   // Load fossils
-            loadFish()      // Load the fish
-            loadArt()       // Load the art
+            loadData()  // Load all data when view appears
         }
     }
+    
+    // MARK: - Views
     
     // Search bar view
     private var searchBar: some View {
@@ -113,18 +204,18 @@ struct ContentView: View {
         }
     }
     
-    // Category filter view
+    // Category filter view with horizontal scrolling buttons
     private var categoryFilter: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
-                ForEach(["Fossils", "Bugs", "Fish", "Art"], id: \.self) { category in
-                    Toggle(category, isOn: Binding(
-                        get: { selectedCategories.contains(category) },
+                ForEach(Category.allCases, id: \.self) { category in
+                    Toggle(category.rawValue, isOn: Binding(
+                        get: { selectedCategories.contains(category.rawValue) },
                         set: { isOn in
                             if isOn {
-                                selectedCategories.insert(category)
+                                selectedCategories.insert(category.rawValue)
                             } else {
-                                selectedCategories.remove(category)
+                                selectedCategories.remove(category.rawValue)
                             }
                         }
                     ))
@@ -136,205 +227,52 @@ struct ContentView: View {
         }
     }
     
-    // Separate fossils section for reusability with search filter
-    private var fossilsSection: some View {
-        Section(header: Text("Fossils")) {
-            ForEach(filteredFossils, id: \.id) { fossil in
-                HStack {
-                    // NavigationLink to navigate to the detail view
-                    NavigationLink(destination: FossilDetailView(fossil: fossil)) {
-                        VStack(alignment: .leading) {
-                            Text(fossil.name)
-                            if let part = fossil.part {
-                                Text(part)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
+    // Main list view containing all category sections
+    private var mainList: some View {
+        List {
+            ForEach(Category.allCases, id: \.self) { category in
+                if selectedCategories.contains(category.rawValue) {
+                    switch category {
+                    case .fossils:
+                        CategorySection(category: category, items: fossilsQuery, searchText: $searchText)
+                    case .bugs:
+                        CategorySection(category: category, items: bugsQuery, searchText: $searchText)
+                    case .fish:
+                        CategorySection(category: category, items: fishQuery, searchText: $searchText)
+                    case .art:
+                        CategorySection(category: category, items: artQuery, searchText: $searchText)
                     }
-                    Spacer()
-                    // Toggle to mark as donated, placed outside the NavigationLink
-                    Toggle(isOn: Binding(
-                        get: { fossil.isDonated },
-                        set: { newValue in
-                            fossil.isDonated = newValue
-                        }
-                    )) {
-                        Text("") // Empty label to avoid showing label
-                    }
-                    .labelsHidden()
                 }
             }
         }
     }
     
-    // Separate bugs section for reusability with search filter
-    private var bugsSection: some View {
-        Section(header: Text("Bugs")) {
-            ForEach(filteredBugs, id: \.id) { bug in
-                HStack {
-                    // NavigationLink to navigate to the detail view
-                    NavigationLink(destination: BugDetailView(bug: bug)) {
-                        VStack(alignment: .leading) {
-                            Text(bug.name)
-                            Text("Season: \(bug.season ?? "N/A")")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    Spacer()
-                    // Toggle to mark as donated, placed outside the NavigationLink
-                    Toggle(isOn: Binding(
-                        get: { bug.isDonated },
-                        set: { newValue in
-                            bug.isDonated = newValue
-                        }
-                    )) {
-                        Text("")
-                    }
-                    .labelsHidden()
+    // MARK: - Data Loading
+    
+    // Function to load all predefined data into SwiftData if not already present
+    private func loadData() {
+        for category in Category.allCases {
+            let data = category.getDefaultData()
+            switch category {
+            case .fossils:
+                if fossilsQuery.isEmpty {
+                    data.compactMap { $0 as? Fossil }.forEach { modelContext.insert($0) }
+                }
+            case .bugs:
+                if bugsQuery.isEmpty {
+                    data.compactMap { $0 as? Bug }.forEach { modelContext.insert($0) }
+                }
+            case .fish:
+                if fishQuery.isEmpty {
+                    data.compactMap { $0 as? Fish }.forEach { modelContext.insert($0) }
+                }
+            case .art:
+                if artQuery.isEmpty {
+                    data.compactMap { $0 as? Art }.forEach { modelContext.insert($0) }
                 }
             }
         }
-    }
-    
-    // Separate fish section for reusability with search filter
-    private var fishSection: some View {
-        Section(header: Text("Fish")) {
-            ForEach(filteredFish, id: \.id) { fish in  // Keeping 'Fish' uppercase for now
-                HStack {
-                    // NavigationLink to navigate to the detail view
-                    NavigationLink(destination: FishDetailView(Fish: fish)) {
-                        VStack(alignment: .leading) {
-                            Text(fish.name)
-                            Text("Season: \(fish.season)")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    Spacer()
-                    // Toggle to mark as donated, placed outside the NavigationLink
-                    Toggle(isOn: Binding(
-                        get: { fish.isDonated },
-                        set: { newValue in
-                            fish.isDonated = newValue
-                        }
-                    )) {
-                        Text("")
-                    }
-                    .labelsHidden()
-                }
-            }
-        }
-    }
-    
-    // Separate art section for reusability with search filter
-    private var artSection: some View {
-        Section(header: Text("Art")) {
-            ForEach(filteredArt, id: \.id) { art in
-                HStack {
-                    // NavigationLink to navigate to the detail view
-                    NavigationLink(destination: ArtDetailView(art: art)) {
-                        VStack(alignment: .leading) {
-                            Text(art.name)
-                                .font(.subheadline)
-                               // .foregroundColor(.secondary)
-                        }
-                    }
-                    Spacer()
-                    // Toggle to mark as donated, placed outside the NavigationLink
-                    Toggle(isOn: Binding(
-                        get: { art.isDonated },
-                        set: { newValue in
-                            art.isDonated = newValue
-                        }
-                    )) {
-                        Text("")
-                    }
-                    .labelsHidden()
-                }
-            }
-        }
-    }
-    
-    // Filtered fossils based on search text and selected categories
-    private var filteredFossils: [Fossil] {
-        if searchText.isEmpty {
-            return fossilsQuery
-        } else {
-            return fossilsQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-        }
-    }
-    
-    // Filtered bugs based on search text and selected categories
-    private var filteredBugs: [Bug] {
-        if searchText.isEmpty {
-            return bugsQuery
-        } else {
-            return bugsQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-        }
-    }
-    
-    // Filtered fish based on search text and selected categories
-    private var filteredFish: [Fish] {
-        if searchText.isEmpty {
-            return fishQuery
-        } else {
-            return fishQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-        }
-    }
-    
-    // Filtered art based on search text and selected categories
-    private var filteredArt: [Art] {
-        if searchText.isEmpty {
-            return artQuery
-        } else {
-            return artQuery.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-        }
-    }
-    
-    // Function to load predefined fossils into SwiftData if not already present
-    private func loadFossils() {
-        if fossilsQuery.isEmpty {
-            let fossils = getDefaultFossils()  // Fetch default fossils from Fossils.swift
-            for fossil in fossils {
-                modelContext.insert(fossil)  // Insert fossils into SwiftData context
-            }
-            try? modelContext.save()  // Save the fossils
-        }
-    }
-    
-    // Function to load predefined bugs into SwiftData if not already present
-    private func loadBugs() {
-        if bugsQuery.isEmpty {
-            let bugs = getDefaultBugs()  // Fetch default bugs from Bug.swift
-            for bug in bugs {
-                modelContext.insert(bug)  // Insert bugs into SwiftData context
-            }
-            try? modelContext.save()  // Save the new bugs to the context
-        }
-    }
-    
-    // Function to load predefined fish into SwiftData if not already present
-    private func loadFish() {
-        if fishQuery.isEmpty {
-            let fish = getDefaultFish()  // Fetch default fish from Fish.swift
-            for fish in fish {
-                modelContext.insert(fish)  // Insert fish into SwiftData context
-            }
-            try? modelContext.save()  // Save the new fish to the context
-        }
-    }
-    
-    // Function to load predefined art into SwiftData if not already present
-    private func loadArt() {
-        if artQuery.isEmpty {
-            let art = getDefaultArt()  // Fetch default art from Art.swift
-            for art in art {
-                modelContext.insert(art)  // Insert art into SwiftData context
-            }
-            try? modelContext.save()  // Save the new art to the context
-        }
+        try? modelContext.save()  // Save all new items to the context
     }
 }
 
