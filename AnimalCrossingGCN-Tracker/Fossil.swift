@@ -1,43 +1,9 @@
 //
 //  Fossil.swift
-//  AnimalCrossingGCN-Tracker
-//
-//  Created by Brock Jenkinson on 10/5/24.
 //
 import Foundation
 import SwiftData
 import SwiftUI
-
-// This function returns the default array of fossils
-func getDefaultFossils() -> [Fossil] {
-    return [
-        Fossil(name: "T. Rex", part: "Skull", isDonated: false),
-        Fossil(name: "T. Rex", part: "Torso", isDonated: false),
-        Fossil(name: "T. Rex", part: "Tail", isDonated: false),
-        Fossil(name: "Triceratops", part: "Skull", isDonated: false),
-        Fossil(name: "Triceratops", part: "Torso", isDonated: false),
-        Fossil(name: "Triceratops", part: "Tail", isDonated: false),
-        Fossil(name: "Stegosaurus", part: "Skull", isDonated: false),
-        Fossil(name: "Stegosaurus", part: "Torso", isDonated: false),
-        Fossil(name: "Stegosaurus", part: "Tail", isDonated: false),
-        Fossil(name: "Pteranodon", part: "Skull", isDonated: false),
-        Fossil(name: "Pteranodon", part: "Left Wing", isDonated: false),
-        Fossil(name: "Pteranodon", part: "Right Wing", isDonated: false),
-        Fossil(name: "Plesiosaurus", part: "Skull", isDonated: false),
-        Fossil(name: "Plesiosaurus", part: "Neck", isDonated: false),
-        Fossil(name: "Plesiosaurus", part: "Torso", isDonated: false),
-        Fossil(name: "Apatosaurus", part: "Skull", isDonated: false),
-        Fossil(name: "Apatosaurus", part: "Torso", isDonated: false),
-        Fossil(name: "Apatosaurus", part: "Tail", isDonated: false),
-        Fossil(name: "Mammoth", part: "Skull", isDonated: false),
-        Fossil(name: "Mammoth", part: "Torso", isDonated: false),
-        Fossil(name: "Amber", isDonated: false),
-        Fossil(name: "Ammonite", isDonated: false),
-        Fossil(name: "Dinosaur Egg", isDonated: false),
-        Fossil(name: "Dinosaur Track", isDonated: false),
-        Fossil(name: "Trilobite", isDonated: false)
-    ]
-}
 
 @Model
 class Fossil {
@@ -78,4 +44,33 @@ struct FossilDetailView: View {
         .padding()
         .navigationTitle(fossil.name)
     }
+}
+func getDefaultFossils() -> [Fossil] {
+    return [
+        Fossil(name: "T. Rex", part: "Skull", isDonated: false),
+        Fossil(name: "T. Rex", part: "Torso", isDonated: false),
+        Fossil(name: "T. Rex", part: "Tail", isDonated: false),
+        Fossil(name: "Triceratops", part: "Skull", isDonated: false),
+        Fossil(name: "Triceratops", part: "Torso", isDonated: false),
+        Fossil(name: "Triceratops", part: "Tail", isDonated: false),
+        Fossil(name: "Stegosaurus", part: "Skull", isDonated: false),
+        Fossil(name: "Stegosaurus", part: "Torso", isDonated: false),
+        Fossil(name: "Stegosaurus", part: "Tail", isDonated: false),
+        Fossil(name: "Pteranodon", part: "Skull", isDonated: false),
+        Fossil(name: "Pteranodon", part: "Left Wing", isDonated: false),
+        Fossil(name: "Pteranodon", part: "Right Wing", isDonated: false),
+        Fossil(name: "Plesiosaurus", part: "Skull", isDonated: false),
+        Fossil(name: "Plesiosaurus", part: "Neck", isDonated: false),
+        Fossil(name: "Plesiosaurus", part: "Torso", isDonated: false),
+        Fossil(name: "Apatosaurus", part: "Skull", isDonated: false),
+        Fossil(name: "Apatosaurus", part: "Torso", isDonated: false),
+        Fossil(name: "Apatosaurus", part: "Tail", isDonated: false),
+        Fossil(name: "Mammoth", part: "Skull", isDonated: false),
+        Fossil(name: "Mammoth", part: "Torso", isDonated: false),
+        Fossil(name: "Amber", isDonated: false),
+        Fossil(name: "Ammonite", isDonated: false),
+        Fossil(name: "Dinosaur Egg", isDonated: false),
+        Fossil(name: "Dinosaur Track", isDonated: false),
+        Fossil(name: "Trilobite", isDonated: false)
+    ]
 }

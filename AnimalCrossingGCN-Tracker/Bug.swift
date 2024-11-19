@@ -9,6 +9,46 @@ import SwiftData
 import SwiftUI
 
 // This function returns the default array of bugs
+
+@Model
+class Bug: ObservableObject, Identifiable { //define the Bug class
+    var id: UUID //define the id attribute, using UUID because it is unique!
+    var name: String
+    var season: String? //define the season attribute, using optional String because it may not be known (though it should be)
+    var isDonated: Bool
+
+    init(name: String, season: String, isDonated: Bool = false) { //initialize the Bug class
+        self.id = UUID()//set the id to a new UUID
+        self.name = name //set the name to the name passed in
+        self.season = season //set the season to the season passed in
+        self.isDonated = isDonated //set the isDonated to the isDonated passed in
+    }
+}
+
+struct BugDetailView: View { //need to maybe make a seperate function for iphones.
+    var bug: Bug
+
+    var body: some View {
+        VStack(alignment: .leading) { //create a vertical stack with leading alignment
+            // Safely unwrap the optional season value
+            Text("Season: \(bug.season ?? "N/A")")  //display the season of the bug, "??" means if the season is nil, it will  display "N/A"
+                .font(.title2)
+            
+            Toggle("Donated", isOn: Binding(
+                get: { bug.isDonated },
+                set: { newValue in
+                    bug.isDonated = newValue
+                }
+            ))
+            .padding(.top)
+
+            Spacer()
+        }
+        .padding()
+        .navigationTitle(bug.name)
+    }
+}
+
 func getDefaultBugs() -> [Bug] {
     return [
         Bug(name: "Common Butterfly", season: "March - October", isDonated: false),
@@ -52,43 +92,4 @@ func getDefaultBugs() -> [Bug] {
         Bug(name: "Snail", season: "April - September", isDonated: false),
         Bug(name: "Bagworm", season: "January - March, October - December", isDonated: false)
     ]
-}
-
-@Model
-class Bug: ObservableObject, Identifiable { //define the Bug class
-    var id: UUID //define the id attribute, using UUID because it is unique!
-    var name: String
-    var season: String? //define the season attribute, using optional String because it may not be known (though it should be)
-    var isDonated: Bool
-
-    init(name: String, season: String, isDonated: Bool = false) { //initialize the Bug class
-        self.id = UUID()//set the id to a new UUID
-        self.name = name //set the name to the name passed in
-        self.season = season //set the season to the season passed in
-        self.isDonated = isDonated //set the isDonated to the isDonated passed in
-    }
-}
-
-struct BugDetailView: View { //need to maybe make a seperate function for iphones.
-    var bug: Bug
-
-    var body: some View {
-        VStack(alignment: .leading) { //create a vertical stack with leading alignment
-            // Safely unwrap the optional season value
-            Text("Season: \(bug.season ?? "N/A")")  //display the season of the bug, "??" means if the season is nil, it will  display "N/A"
-                .font(.title2)
-            
-            Toggle("Donated", isOn: Binding(
-                get: { bug.isDonated },
-                set: { newValue in
-                    bug.isDonated = newValue
-                }
-            ))
-            .padding(.top)
-
-            Spacer()
-        }
-        .padding()
-        .navigationTitle(bug.name)
-    }
 }
