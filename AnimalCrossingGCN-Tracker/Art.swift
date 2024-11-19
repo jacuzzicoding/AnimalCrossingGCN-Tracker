@@ -1,32 +1,10 @@
 //
 //  Art.swift
-//  AnimalCrossingGCN-Tracker
-//
-//  Created by Brock Jenkinson on 10/11/24.
 //
 
 import Foundation
 import SwiftData
 import SwiftUI
-
-// This function returns the array of art pieces
-func getDefaultArt() -> [Art] {
-    return [
-        Art(name: "Academic Painting", basedOn: "Vitruvian Man by Leonardo da Vinci", isDonated: false),
-        Art(name: "Amazing Painting", basedOn: "The Night Watch by Rembrandt", isDonated: false),
-        Art(name: "Basic Painting", basedOn: "The Blue Boy by Thomas Gainsborough", isDonated: false),
-        Art(name: "Calm Painting", basedOn: "A Sunday Afternoon on the Island of La Grande Jatte by Georges Seurat", isDonated: false),
-        Art(name: "Classic Painting", basedOn: "Washington Crossing the Delaware by Emanuel Leutze", isDonated: false),
-        Art(name: "Common Painting", basedOn: "The Gleaners by Jean-François Millet", isDonated: false),
-        Art(name: "Dainty Painting", basedOn: "The Star (Dancer on Stage) by Edgar Degas", isDonated: false),
-        Art(name: "Famous Painting", basedOn: "Mona Lisa by Leonardo da Vinci", isDonated: false),
-        Art(name: "Flowery Painting", basedOn: "Sunflowers by Vincent van Gogh", isDonated: false),
-        Art(name: "Moving Painting", basedOn: "The Birth of Venus by Sandro Botticelli", isDonated: false),
-        Art(name: "Quaint Painting", basedOn: "The Milkmaid by Johannes Vermeer", isDonated: false),
-        Art(name: "Scary Painting", basedOn: "Otani Oniji II by Toshusai Sharaku", isDonated: false),
-        Art(name: "Worthy Painting", basedOn: "Liberty Leading the People by Eugène Delacroix", isDonated: false)
-    ]
-}
 
 @Model
 class Art: ObservableObject, Identifiable {
@@ -76,4 +54,23 @@ struct ArtDetailView: View {
         .padding()
         .navigationTitle(art.name)
     }
+}
+
+// This function returns the array of art pieces
+func getDefaultArt() -> [Art] {
+    return [
+        Art(name: "Academic Painting", basedOn: "Vitruvian Man by Leonardo da Vinci", isDonated: false),
+        Art(name: "Amazing Painting", basedOn: "The Night Watch by Rembrandt", isDonated: false),
+        Art(name: "Basic Painting", basedOn: "The Blue Boy by Thomas Gainsborough", isDonated: false),
+        Art(name: "Calm Painting", basedOn: "A Sunday Afternoon on the Island of La Grande Jatte by Georges Seurat", isDonated: false),
+        Art(name: "Classic Painting", basedOn: "Washington Crossing the Delaware by Emanuel Leutze", isDonated: false),
+        Art(name: "Common Painting", basedOn: "The Gleaners by Jean-François Millet", isDonated: false),
+        Art(name: "Dainty Painting", basedOn: "The Star (Dancer on Stage) by Edgar Degas", isDonated: false),
+        Art(name: "Famous Painting", basedOn: "Mona Lisa by Leonardo da Vinci", isDonated: false),
+        Art(name: "Flowery Painting", basedOn: "Sunflowers by Vincent van Gogh", isDonated: false),
+        Art(name: "Moving Painting", basedOn: "The Birth of Venus by Sandro Botticelli", isDonated: false),
+        Art(name: "Quaint Painting", basedOn: "The Milkmaid by Johannes Vermeer", isDonated: false),
+        Art(name: "Scary Painting", basedOn: "Otani Oniji II by Toshusai Sharaku", isDonated: false),
+        Art(name: "Worthy Painting", basedOn: "Liberty Leading the People by Eugène Delacroix", isDonated: false)
+    ]
 }
