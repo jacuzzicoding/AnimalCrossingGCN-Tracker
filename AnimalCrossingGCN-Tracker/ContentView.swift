@@ -29,17 +29,17 @@ enum Category: String, CaseIterable {
     case fish = "Fish"
     case art = "Art"
     
+    // New variable to get the symbol name for each category
     var symbolName: String {
         switch self {
-        case .fossils: return "leaf.arrow.circlepath" //
+        case .fossils: return "leaf.arrow.circlepath"  //might find a better symbol
         case .bugs: return "ant.fill"
         case .fish: return "fish.fill"
         case .art: return "paintpalette.fill"
         }
     }
     
-    // Keeping existing functions
-    func getDefaultData() -> [any CollectibleItem] {
+    func getDefaultData() -> [any CollectibleItem] { //function to get the default data for each category using the new CollectibleItem protocol
         switch self {
         case .fossils: return getDefaultFossils()
         case .bugs: return getDefaultBugs()
@@ -48,7 +48,7 @@ enum Category: String, CaseIterable {
         }
     }
     
-    @ViewBuilder
+    @ViewBuilder //new view builder to return the correct detail view based on the category selected
     func detailView<T: CollectibleItem>(for item: T) -> some View {
         switch self {
         case .fossils:
@@ -78,50 +78,50 @@ struct SearchBar: View {
     var body: some View {
         HStack {
             HStack {
-                Image(systemName: "magnifyingglass")
+                Image(systemName: "magnifyingglass") //new magnifying glass icon
                     .foregroundColor(.gray)
                 TextField("Search...", text: $text)
                     .foregroundColor(.primary)
-                    .disableAutocorrection(true)
-                if !text.isEmpty {
-                    Button(action: {
+                    .disableAutocorrection(false) //now allows autocorrection
+                if !text.isEmpty { 
+                    Button(action: { //new button to clear the text
                         text = ""
                     }) {
-                        Image(systemName: "xmark.circle.fill")
+                        Image(systemName: "xmark.circle.fill") //if text is not empty, show the xmark to clear the text
                             .foregroundColor(.gray)
                     }
                 }
             }
             .padding(8)
-            .background(Color(.systemGray5))
+            .background(Color.gray.opacity(0.1))
             .cornerRadius(10)
             .padding(.horizontal)
         }
     }
 }
 
-// Custom floating category switcher
-struct FloatingCategorySwitcher: View {
-    @Binding var selectedCategory: Category
+// Custom floating category switcher for improved UI
+struct FloatingCategorySwitcher: View { //new struct for the floating category switcher
+    @Binding var selectedCategory: Category //binding to the selected category so it updates when the user selects a new category
     
-    var body: some View {
-        HStack(spacing: 16) {
-            ForEach(Category.allCases, id: \.self) { category in
-                Button(action: {
-                    withAnimation {
+    var body: some View { //new body section for the floating category switcher
+        HStack(spacing: 16) { //new horizontal stack with spacing of 16 pixels between each category (can be adjusted)
+            ForEach(Category.allCases, id: \.self) { category in //for each category in the Category enum
+                Button(action: { //new button to select the category
+                    withAnimation { //new animation to smoothly transition between categories
                         selectedCategory = category
                     }
                 }) {
-                    VStack {
-                        Image(systemName: category.symbolName)
+                    VStack { //new vertical stack for the category
+                        Image(systemName: category.symbolName) 
                             .font(.headline)
                         Text(category.rawValue)
                             .font(.caption)
                     }
-                    .padding()
-                    .background(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2))
-                    .foregroundColor(selectedCategory == category ? .white : .primary)
-                    .cornerRadius(10)
+                    .padding() //pad
+                    .background(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2)) //if the category is selected, the background will be blue, otherwise it will be gray.
+                    .foregroundColor(selectedCategory == category ? .white : .primary) //if the category is selected, the text will be white, otherwise it will be the primary color
+                    .cornerRadius(10) //rounding the corners of the category
                 }
             }
         }
@@ -134,7 +134,7 @@ struct FloatingCategorySwitcher: View {
 
 // Enhanced CollectibleRow for better visual presentation
 struct CollectibleRow<T: CollectibleItem>: View {
-    let item: T
+    let item: T //new item variable
     let category: Category
     
     var body: some View {
@@ -152,8 +152,8 @@ struct CollectibleRow<T: CollectibleItem>: View {
                 Text(item.name)
                     .font(.headline)
                 // Category-specific details (keeping existing logic)
-                if let fossil = item as? Fossil, let part = fossil.part {
-                    Text(part)
+                if let fossil = item as? Fossil, let part = fossil.part { //so, if the item is a fossil and the part is not nil
+                    Text(part) //then display the part
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 } else if let bug = item as? Bug, let season = bug.season {
@@ -183,23 +183,23 @@ struct CollectibleRow<T: CollectibleItem>: View {
 }
 
 // Updated CategorySection with enhanced row presentation
-struct CategorySection<T: CollectibleItem>: View {
-    let category: Category
-    let items: [T]
-    @Binding var searchText: String
+struct CategorySection<T: CollectibleItem>: View { //this is the new CategorySection struct
+    let category: Category //new category variable
+    let items: [T] //an array of items
+    @Binding var searchText: String //binding to the search text
     
-    var filteredItems: [T] {
+    var filteredItems: [T] { //new filteredItems variable
         if searchText.isEmpty {
             return items
         } else {
-            return items.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return items.filter { $0.name.lowercased().contains(searchText.lowercased()) } //filter the items based on the search text, ignoring case
         }
     }
     
     var body: some View {
-        ForEach(filteredItems) { item in
-            NavigationLink {
-                category.detailView(for: item)
+        ForEach(filteredItems) { item in //for each item in the filtered items
+            NavigationLink { //new navigation link to the detail view
+                category.detailView(for: item) //passing the item to the detail view
             } label: {
                 CollectibleRow(item: item, category: category)
             }
@@ -207,7 +207,7 @@ struct CategorySection<T: CollectibleItem>: View {
     }
 }
 
-struct ContentView: View {
+struct ContentView: View { //here is the new ContentView struct
     // Keeping existing environment and query properties
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]
@@ -278,7 +278,11 @@ struct ContentView: View {
                 CategorySection(category: .art, items: artQuery, searchText: $searchText)
             }
         }
-        .listStyle(InsetGroupedListStyle())
+            #if os(iOS)
+            .listStyle(InsetGroupedListStyle())
+            #else
+            .listStyle(SidebarListStyle()) // This is more appropriate for macOS
+            #endif
     }
     
     // MARK: - Data Loading
