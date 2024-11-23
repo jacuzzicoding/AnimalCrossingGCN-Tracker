@@ -1,10 +1,6 @@
 //
 //  ContentView.swift
-//  AnimalCrossingGCN-Tracker
-//
-//  Created by Brock Jenkinson on 10/5/24.
-//
-//  Last updated 11/23/24
+// 
 
 import Foundation
 import SwiftUI
