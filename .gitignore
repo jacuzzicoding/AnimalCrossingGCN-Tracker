@@ -7,3 +7,4 @@ AnimalCrossingGCN-Tracker.xcodeproj/project.xcworkspace/xcuserdata/brockjenkinso
 *.xcuserstate
 *.xcworkspace/xcuserdata/*
 *.xcworkspace/xcuserdata/**/*
+.DS_Store
