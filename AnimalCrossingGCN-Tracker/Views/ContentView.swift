@@ -6,13 +6,6 @@ import Foundation
 import SwiftUI
 import SwiftData
 
-// Keeping existing protocol and extensions
-protocol CollectibleItem: Identifiable, Hashable {
-    var id: UUID { get }
-    var name: String { get }
-    var isDonated: Bool { get set }
-}
-
 extension Fossil: CollectibleItem {}
 extension Bug: CollectibleItem {}
 extension Fish: CollectibleItem {}
