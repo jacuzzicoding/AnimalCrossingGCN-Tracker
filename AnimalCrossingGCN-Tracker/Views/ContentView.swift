@@ -6,17 +6,22 @@ import Foundation
 import SwiftUI
 import SwiftData
 
-// Keeping existing protocol and extensions
-protocol CollectibleItem: Identifiable, Hashable {
-    var id: UUID { get }
-    var name: String { get }
-    var isDonated: Bool { get set }
-}
-
 extension Fossil: CollectibleItem {}
 extension Bug: CollectibleItem {}
 extension Fish: CollectibleItem {}
 extension Art: CollectibleItem {}
+
+class CategoryManager: ObservableObject {
+    @Published var selectedCategory: Category = .fossils
+    @Published var selectedItem: (any CollectibleItem)? = nil
+    
+    func switchCategory(_ newCategory: Category) {
+        if selectedCategory != newCategory {
+            selectedItem = nil  // Clear selection when switching categories
+            selectedCategory = newCategory
+        }
+    }
+}
 
 // Enhanced Category enum with symbols built into swift
 enum Category: String, CaseIterable {
@@ -96,38 +101,6 @@ struct SearchBar: View {
     }
 }
 
-// Custom floating category switcher for improved UI
-struct FloatingCategorySwitcher: View { //new struct for the floating category switcher
-    @Binding var selectedCategory: Category //binding to the selected category so it updates when the user selects a new category
-    
-    var body: some View { //new body section for the floating category switcher
-        HStack(spacing: 16) { //new horizontal stack with spacing of 16 pixels between each category (can be adjusted)
-            ForEach(Category.allCases, id: \.self) { category in //for each category in the Category enum
-                Button(action: { //new button to select the category
-                    withAnimation { //new animation to smoothly transition between categories
-                        selectedCategory = category
-                    }
-                }) {
-                    VStack { //new vertical stack for the category
-                        Image(systemName: category.symbolName) 
-                            .font(.headline)
-                        Text(category.rawValue)
-                            .font(.caption)
-                    }
-                    .padding() //pad
-                    .background(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2)) //if the category is selected, the background will be blue, otherwise it will be gray.
-                    .foregroundColor(selectedCategory == category ? .white : .primary) //if the category is selected, the text will be white, otherwise it will be the primary color
-                    .cornerRadius(10) //rounding the corners of the category
-                }
-            }
-        }
-        .padding()
-        .background(.regularMaterial)
-        .cornerRadius(15)
-        .shadow(radius: 5)
-    }
-}
-
 // Enhanced CollectibleRow for better visual presentation
 struct CollectibleRow<T: CollectibleItem>: View {
     let item: T //new item variable
@@ -180,6 +153,7 @@ struct CollectibleRow<T: CollectibleItem>: View {
 
 // Updated CategorySection with enhanced row presentation
 struct CategorySection<T: CollectibleItem>: View { //this is the new CategorySection struct
+    @EnvironmentObject var categoryManager: CategoryManager
     let category: Category //new category variable
     let items: [T] //an array of items
     @Binding var searchText: String //binding to the search text
@@ -193,13 +167,30 @@ struct CategorySection<T: CollectibleItem>: View { //this is the new CategorySec
     }
     
     var body: some View {
-        ForEach(filteredItems) { item in //for each item in the filtered items
-            NavigationLink { //new navigation link to the detail view
-                category.detailView(for: item) //passing the item to the detail view
-            } label: {
+        ForEach(filteredItems) { item in
+            NavigationLink(value: item) {
                 CollectibleRow(item: item, category: category)
             }
+            #if os(macOS)
+            .buttonStyle(PlainButtonStyle())
+            #endif
         }
+        .onAppear {
+            debugPrint("\(category) section showing \(filteredItems.count) items")
+        }
+    }
+}
+
+// Add this helper struct
+struct LazyView<Content: View>: View {
+    let build: () -> Content
+    
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    
+    var body: Content {
+        build()
     }
 }
 
@@ -212,76 +203,28 @@ struct ContentView: View { //here is the new ContentView struct
     @Query(sort: \Art.name) private var artQuery: [Art]
     
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    
-    // Updated state properties
-    @State private var selectedCategory: Category = .fossils
+    @StateObject private var categoryManager = CategoryManager()
     @State private var searchText = ""
     
-    var body: some View {
-        Group {
-            if horizontalSizeClass == .compact {
-                // IPHONE SECTION
-                NavigationStack {
-                    mainContent
-                        .navigationTitle("Museum Tracker")
-                }
-            } else {
-                // MAC/IPAD SECTION
-                NavigationSplitView {
-                    mainContent
-                        #if os(macOS)
-                        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-                        #endif
-                } detail: {
-                    Text("Select an item")
-                }
-                .navigationTitle("Museum Tracker")
-            }
-        }
-        .onAppear {
-            loadData()
-        }
-    }
-    
-    // MARK: - Views
-    
     private var mainContent: some View {
-        ZStack {
+        ZStack(alignment: .bottom) { //align the floating category switcher to the bottom
             VStack(spacing: 0) {
                 SearchBar(text: $searchText)
-                mainList
+                MainListView(
+                    searchText: $searchText,
+                    fossilsQuery: fossilsQuery,
+                    bugsQuery: bugsQuery,
+                    fishQuery: fishQuery,
+                    artQuery: artQuery
+                )
             }
             
             // Floating category switcher overlay
-            VStack {
-                Spacer()
-                FloatingCategorySwitcher(selectedCategory: $selectedCategory)
-                    .padding(.bottom, 20)
-            }
+            FloatingCategorySwitcher()
+                .padding(.bottom, 20)
         }
     }
-    
-    private var mainList: some View {
-        List {
-            switch selectedCategory {
-            case .fossils:
-                CategorySection(category: .fossils, items: fossilsQuery, searchText: $searchText)
-            case .bugs:
-                CategorySection(category: .bugs, items: bugsQuery, searchText: $searchText)
-            case .fish:
-                CategorySection(category: .fish, items: fishQuery, searchText: $searchText)
-            case .art:
-                CategorySection(category: .art, items: artQuery, searchText: $searchText)
-            }
-        }
-            #if os(iOS)
-            .listStyle(InsetGroupedListStyle())
-            #else
-            .listStyle(SidebarListStyle()) // This is more appropriate for macOS
-            #endif
-    }
-    
-    // MARK: - Data Loading
+    /* DATA LOADING SECTION */
     
     // Keeping existing loadData function
     private func loadData() {
@@ -307,5 +250,56 @@ struct ContentView: View { //here is the new ContentView struct
             }
         }
         try? modelContext.save()
+    }
+//helper function for the navigationDestination modifiers we need in the body..
+
+    @ViewBuilder
+    func addNavigationDestinations<Content: View>(_ content: Content) -> some View {
+        content
+            .navigationDestination(for: Fossil.self) { fossil in
+                FossilDetailView(fossil: fossil)
+            }
+            .navigationDestination(for: Bug.self) { bug in
+                BugDetailView(bug: bug)
+            }
+            .navigationDestination(for: Fish.self) { fish in
+                FishDetailView(Fish: fish)
+            }
+            .navigationDestination(for: Art.self) { art in
+                ArtDetailView(art: art)
+            }
+    }
+//here!
+    var body: some View {
+
+        Group {
+            if horizontalSizeClass == .compact {
+                // IPHONE SECTION
+                NavigationStack {
+                    addNavigationDestinations(mainContent)
+                        .navigationTitle("Museum Tracker")
+                }
+            } else {
+                // MAC/IPAD SECTION
+                NavigationSplitView {
+                    addNavigationDestinations(mainContent)
+#if os(macOS)
+                        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+#endif
+                } detail: {
+#if os(macOS)
+                    Text("Select an item")
+                        .frame(minWidth: 300)
+#else
+                    Text("Select an item")
+#endif
+                }
+                .navigationTitle("Museum Tracker")
+            }
+        }
+        .environmentObject(categoryManager)
+        .onAppear {
+            loadData()
+        }
     }
 }

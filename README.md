@@ -1,76 +1,101 @@
-AnimalCrossingGCN-Tracker
-v0.5.0-alpha (November 23, 2024)
-Made by Brock (@jacuzzicoding)
+# AnimalCrossingGCN-Tracker
 
-What is this?
-A little app I'm making to track museum donations in Animal Crossing GameCube. Built with Swift/SwiftUI because I wanted to learn them better. Works on iPhone, iPad, and Mac (mostly).
-v0.5.0-alpha adds some floating category buttons and makes everything look nicer. Built on top of the code cleanup I did in v0.4.3-alpha.
-Files
-The code is currently in these main files:
+Version: v0.5.1-alpha (Development)  
+Last Updated: November 26, 2024  
+Author: Brock Jenkinson (@jacuzzicoding)
 
-ContentView.swift: Main app view - shows lists of fossils, bugs, fish, and art
-CollectibleItem.swift: Base stuff that all collectible items share
-Fossil.swift: Fossil tracking (25 fossils)
-Bug.swift: Bug tracking (40 bugs)
-Fish.swift: Fish tracking (40 fish)
-Art.swift: Art tracking (13 pieces)
+## Project Overview
 
-Planning to split this into:
+The AnimalCrossingGCN-Tracker is a comprehensive companion app for Animal Crossing GameCube players to track their museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
 
-DataManager.swift: For handling data/saving
-Models.swift: All the data models
-CustomViews.swift: Reusable UI parts
-ContentView.swift: Just the main view
+Version v0.5.1-alpha introduces a major file structure reorganization while maintaining all functionality from v0.5.0, including the floating category system and enhanced UI components.
 
-What's Working
+## File Structure
 
-Museum donation tracking for all items
-Search by name
-New floating category selector with icons
-Better looking item display
-Works great on iPhone/iPad
-Some Mac support (needs fixes)
+The project follows a modular organization pattern:
 
-v0.5.0-alpha Changes
+```
+AnimalCrossingGCN-Tracker/
+├── App/
+│   └── AnimalCrossingGCN_TrackerApp.swift
+├── Models/
+│   ├── CollectibleItem.swift
+│   ├── Fossil.swift
+│   ├── Bug.swift
+│   ├── Fish.swift
+│   └── Art.swift
+├── Views/
+│   ├── Main/
+│   │   ├── ContentView.swift
+│   │   └── CategoryView.swift
+│   ├── Components/
+│   │   ├── FloatingCategorySwitcher.swift
+│   │   ├── CollectibleRow.swift
+│   │   └── CategorySection.swift
+│   └── Detail/
+│       ├── FossilDetailView.swift
+│       ├── BugDetailView.swift
+│       ├── FishDetailView.swift
+│       └── ArtDetailView.swift
+└── Managers/
+    └── DataManager.swift
+```
 
-Added floating category buttons with icons
-Made items look better with icons and spacing
-Kept SwiftData working the same
-iOS version working great
-Mac version needs work
+## Features
 
-Known Issues
+### Core Functionality
+- Complete museum donation tracking
+- Support for all collectible categories:
+  - Fossils (25 items)
+  - Bugs (40 items)
+  - Fish (40 items)
+  - Art (13 pieces)
+- Modern floating category navigation
+- Enhanced search functionality
+- Cross-platform compatibility
+- SwiftData integration for persistence
 
-Mac breaks when switching categories (#17)
-Search only looks in current category
-Mac needs more testing
-Can't delete items (by design)
-Art images not added yet
+### UI Components
+- Floating category selector with custom icons
+- Improved item display and spacing
+- Streamlined navigation system
+- Refined search functionality
+- Platform-specific optimizations
 
-What's Next
-Need to:
+## Platform Support
 
-Fix Mac category switching
-Make search work across all items
-Add code file organization:
+### iOS/iPadOS
+- Full feature support
+- Optimized floating UI elements
+- Native platform interactions
+- Responsive layouts for all screen sizes
 
-Split into DataManager/Models/Views
-Cleaner separation of code
-Easier to add features
+### macOS
+- Basic functionality implemented
+- Known limitations:
+  - Category switching issues (#17)
+  - Additional testing required
+  - UI refinements pending
 
+## Known Issues
+- macOS breaks when switching categories (#17)
+- Search limited to current category
+- Requires additional macOS testing
 
-Add item stats and graphs
-Add sorting and filtering
-Add backup/restore
-Add other languages
-Track donation dates
+## Technical Requirements
+- Xcode 15+
+- iOS 17.0+
+- macOS 14.0+
+- SwiftUI and SwiftData knowledge for contributions
 
-Platform Support
+## Development Status
+- Currently in development (v0.5.1-alpha)
+- Focused on code structure reorganization
+- Maintaining existing functionality from v0.5.0
+- Working toward platform stability improvements
 
-iPhone/iPad: Working great with new UI
-Mac: Basic support but has bugs
-Uses SwiftData to save progress
-Different layouts for iPhone vs iPad/Mac
+## Contributing
+This project welcomes community contributions. Please report any issues or submit pull requests through the project's GitHub repository.
 
-Summary
-v0.5.0-alpha adds a much better looking UI, especially on iOS. Some Mac bugs to fix to say the least, planning on using an enum to easily seperate the phone & desktop versions. Code cleanup coming next to make future updates easier.
+## License
+[License information pending]

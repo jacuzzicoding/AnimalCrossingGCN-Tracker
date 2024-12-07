@@ -6,7 +6,15 @@
 //
 
 import Foundation
+import SwiftUI
 import SwiftData
+
+/*protocol for collectible item, previously in contentview.swift*/
+protocol CollectibleItem: Identifiable, Hashable {
+    var id: UUID { get }
+    var name: String { get }
+    var isDonated: Bool { get set }
+}
 
 @Model
 final class Item {
