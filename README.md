@@ -99,7 +99,3 @@ This project welcomes community contributions. Please report any issues or submi
 
 ## License
 [License information pending]
-
----
-
-*Created by Brock Jenkinson (@jacuzzicoding)*
