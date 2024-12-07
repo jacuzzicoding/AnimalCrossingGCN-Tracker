@@ -327,4 +327,4 @@ struct ContentView: View { //here is the new ContentView struct
         }
         try? modelContext.save()
     }
-}
+
