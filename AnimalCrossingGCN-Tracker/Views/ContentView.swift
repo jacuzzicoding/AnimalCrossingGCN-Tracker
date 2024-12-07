@@ -179,7 +179,7 @@ struct CollectibleRow<T: CollectibleItem>: View {
 }
 
 // Updated CategorySection with enhanced row presentation
-struct CategorySection<T: CollectibleItem>: View { //this is the new CategorySection struct
+struct CategorySection<T: CollectibleItem>: View {
     let category: Category //new category variable
     let items: [T] //an array of items
     @Binding var searchText: String //binding to the search text
@@ -203,7 +203,8 @@ struct CategorySection<T: CollectibleItem>: View { //this is the new CategorySec
     }
 }
 
-struct ContentView: View { //here is the new ContentView struct
+//ContentView Struct Block
+struct ContentView: View {
     // Keeping existing environment and query properties
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]
@@ -283,10 +284,11 @@ struct ContentView: View { //here is the new ContentView struct
             .listStyle(InsetGroupedListStyle())
             #else
             .listStyle(SidebarListStyle()) // This is more appropriate for macOS
+            .frame(minWidth: 200) //
             #endif
     }
     
-    // MARK: - Data Loading
+/* DATA LOADING SECTION */
     
     // Keeping existing loadData function
     private func loadData() {
