@@ -178,10 +178,31 @@ struct ContentView: View { //here is the new ContentView struct
     
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @StateObject private var categoryManager = CategoryManager()
-    
-    // Updated state properties
     @State private var searchText = ""
     
+    private var mainContent: some View {
+        ZStack(alignment: .bottom) { //align the floating category switcher to the bottom
+            VStack(spacing: 0) {
+                SearchBar(text: $searchText)
+                MainListView(
+                    searchText: $searchText,
+                    fossilsQuery: fossilsQuery,
+                    bugsQuery: bugsQuery,
+                    fishQuery: fishQuery,
+                    artQuery: artQuery
+                )
+            }
+            
+            // Floating category switcher overlay
+            FloatingCategorySwitcher()
+                .padding(.bottom, 20)
+                #if os(macOS)
+                .frame(maxWidth: 400)
+                .allowsHitTesting(true) //will let you click on the buttons in the floating category switcher again
+                #endif
+            }
+        }
+    }
     var body: some View {
         Group {
             if horizontalSizeClass == .compact {
@@ -216,23 +237,7 @@ struct ContentView: View { //here is the new ContentView struct
     
 /* VIEWS SECTION */
     
-    private var mainContent: some View {
-        ZStack(alignment: .bottom) { //align the floating category switcher to the bottom
-            VStack(spacing: 0) {
-                SearchBar(text: $searchText)
-                mainList
-            }
-            
-            // Floating category switcher overlay
-            FloatingCategorySwitcher()
-                .padding(.bottom, 20)
-                #if os(macOS)
-                .frame(maxWidth: 400)
-                .allowsHitTesting(true) //will let you click on the buttons in the floating category switcher again
-                #endif
-            }
-        }
-    }
+
     
     /* DATA LOADING SECTION */  
     
