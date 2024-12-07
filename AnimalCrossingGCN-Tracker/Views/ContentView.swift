@@ -88,19 +88,25 @@ struct SearchBar: View {
         }
     }
 }
+//testing if making the category manager an observable object will fix the issue
+class CategoryManager: ObservableObject {
+    @Published var selectedCategory: Category = .fossils
+}
 
-// Custom floating category switcher
+// FloatingCategorySwitcher 
 struct FloatingCategorySwitcher: View { 
-    @Binding var selectedCategory: Category
+    @EnvironmentalObject var CategoryManager: CategoryManager //environemental object instead of binding, to fix the issue
     
     var body: some View {
         HStack(spacing: 16) {
             ForEach(Category.allCases, id: \.self) { category in
                 Button(action: { //button to switch the category
-                    withAnimation(.easeInOut(duration: 0.3)) { //.easeInOut animation for smooth transition. Duration is 0.3 seconds
-                        selectedCategory = category //update the selected category
+                    DispatchQueue.main.async { //forces a UI update on the main thread
+                        withAnimation(.easeInOut(duration: 0.3)) { //.easeInOut animation for smooth transition. Duration is 0.3 seconds
+                            CategoryManager.selectedCategory = category //update the selected category
+                         }
                     }
-                }) {
+                 }) {
                     VStack {
                         Image(systemName: category.symbolName)
                             .font(.headline)
@@ -205,15 +211,14 @@ struct CategorySection<T: CollectibleItem>: View {
 
 //ContentView Struct Block
 struct ContentView: View {
-    // Keeping existing environment and query properties
-    @Environment(\.modelContext) private var modelContext
+    @StateObject private var categoryManager = CategoryManager() //new state object for the category manager
     @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]
     @Query(sort: \Bug.name) private var bugsQuery: [Bug]
     @Query(sort: \Fish.name) private var fishQuery: [Fish]
     @Query(sort: \Art.name) private var artQuery: [Art]
-    
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    
+    @Environment(\.modelContext) private var modelContext
+
     // Updated state properties
     @State private var selectedCategory: Category = .fossils
     @State private var searchText = ""
