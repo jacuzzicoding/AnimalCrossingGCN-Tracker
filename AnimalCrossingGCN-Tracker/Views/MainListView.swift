@@ -17,23 +17,29 @@ struct MainListView: View { //MainListView is now a struct instead of a class, a
     
     var body: some View {
         List {
-            switch categoryManager.selectedCategory {
-            case .fossils:
-                CategorySection(category: .fossils, items: fossilsQuery, searchText: $searchText)
-            case .bugs:
-                CategorySection(category: .bugs, items: bugsQuery, searchText: $searchText)
-            case .fish:
-                CategorySection(category: .fish, items: fishQuery, searchText: $searchText)
-            case .art:
-                CategorySection(category: .art, items: artQuery, searchText: $searchText)
+            // Force list to recreate when category changes
+            let _ = debugPrint("List rebuilding for category: \(categoryManager.selectedCategory)")
+            
+            Group {
+                switch categoryManager.selectedCategory {
+                case .fossils:
+                    CategorySection(category: .fossils, items: fossilsQuery, searchText: $searchText)
+                case .bugs:
+                    CategorySection(category: .bugs, items: bugsQuery, searchText: $searchText)
+                case .fish:
+                    CategorySection(category: .fish, items: fishQuery, searchText: $searchText)
+                case .art:
+                    CategorySection(category: .art, items: artQuery, searchText: $searchText)
+                }
             }
+#if os(iOS)
+            .listStyle(InsetGroupedListStyle())
+#else
+            .listStyle(SidebarListStyle())
+            .frame(minWidth: 200)
+            .allowsHitTesting(true)
+            .zIndex(1) //Puts list above other layers.
+#endif
         }
-        #if os(iOS) //same styling as before for now
-        .listStyle(InsetGroupedListStyle())
-        #else
-        .listStyle(SidebarListStyle())
-        .frame(minWidth: 200)
-        .allowsHitTesting(true)
-        #endif
     }
 }

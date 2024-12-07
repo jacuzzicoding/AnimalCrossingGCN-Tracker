@@ -23,9 +23,11 @@ struct FloatingCategorySwitcher: View { //new file for the floating category swi
             HStack(spacing: 16) {
                 ForEach(Category.allCases, id: \.self) { category in
                     Button {
+                        debugPrint("Button pressed for category: \(category)")
                         withAnimation(.easeInOut(duration: 0.3)) {
                             categoryManager.selectedCategory = category
                         }
+                    debugPrint("Button action completed for category: \(category)")
                     } label: {
                         VStack {
                             Image(systemName: category.symbolName)
