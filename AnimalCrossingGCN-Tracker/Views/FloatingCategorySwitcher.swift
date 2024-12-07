@@ -15,9 +15,10 @@ struct FloatingCategorySwitcher: View { //new file for the floating category swi
                 .fill(Material.regular.opacity(0.8))
                 .frame(width: 300, height: 100)
                 .allowsHitTesting(false)
-#else
+#else //ios
             RoundedRectangle(cornerRadius: 16)
                 .fill(.regularMaterial)
+                .frame(width: 310, height: 105)
 #endif
             //buttons layer
             HStack(spacing: 16) {
@@ -40,10 +41,10 @@ struct FloatingCategorySwitcher: View { //new file for the floating category swi
                         .foregroundColor(categoryManager.selectedCategory == category ? .white : .primary)
                         .cornerRadius(10)
                     }
-#if os(macOS)
+//#if os(macOS)
                     .buttonStyle(PlainButtonStyle())
                     .focusable(false)
-#endif
+//#endif
                 }
             }
             .padding()
