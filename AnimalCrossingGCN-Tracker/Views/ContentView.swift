@@ -11,6 +11,10 @@ extension Bug: CollectibleItem {}
 extension Fish: CollectibleItem {}
 extension Art: CollectibleItem {}
 
+class CategoryManager: ObservableObject {
+    @Published var selectedCategory: Category = .fossils
+}
+
 // Enhanced Category enum with symbols built into swift
 enum Category: String, CaseIterable {
     case fossils = "Fossils"
@@ -88,52 +92,49 @@ struct SearchBar: View {
         }
     }
 }
-//testing if making the category manager an observable object will fix the issue
-class CategoryManager: ObservableObject {
-    @Published var selectedCategory: Category = .fossils
-}
 
-// FloatingCategorySwitcher 
-struct FloatingCategorySwitcher: View { 
-    @EnvironmentObject var CategoryManager: CategoryManager //environemental object instead of binding, to fix the issue
+// Custom floating category switcher for improved UI
+struct FloatingCategorySwitcher: View { //new struct for the floating category switcher
+    @EnvironmentObject var categoryManager: CategoryManager
     
-    var body: some View {
-        HStack(spacing: 16) {
-            ForEach(Category.allCases, id: \.self) { category in
-                Button(action: { //button to switch the category
-                    DispatchQueue.main.async { //forces a UI update on the main thread
-                        withAnimation(.easeInOut(duration: 0.3)) { //.easeInOut animation for smooth transition. Duration is 0.3 seconds
-                            CategoryManager.selectedCategory = category //update the selected category
-                         }
+    var body: some View { //new body section for the floating category switcher
+        HStack(spacing: 16) { //new horizontal stack with spacing of 16 pixels between each category (can be adjusted)
+            ForEach(Category.allCases, id: \.self) { category in //for each category in the Category enum
+                Button(action: { //new button to select the category
+                    DispatchQueue.main.async {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            categoryManager.selectedCategory = category
+                        }
                     }
-                 }) {
-                    VStack {
-                        Image(systemName: category.symbolName)
+                }) {
+                    VStack { //new vertical stack for the category
+                        Image(systemName: category.symbolName) 
                             .font(.headline)
                         Text(category.rawValue)
                             .font(.caption)
                     }
-                    .padding()
-                    .background(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2))
-                    .foregroundColor(selectedCategory == category ? .white : .primary)
-                    .cornerRadius(10)
+                    .padding() //pad
+                    .background(categoryManager.selectedCategory == category ? Color.blue : Color.gray.opacity(0.2)) //if the category is selected, the background will be blue, otherwise it will be gray.
+                    .foregroundColor(categoryManager.selectedCategory == category ? .white : .primary) //if the category is selected, the text will be white, otherwise it will be the primary color
+                    .cornerRadius(10) //rounding the corners of the category
                 }
-                #if os(macOS) //v0.5.1 now includes more specific code for macos, should fix the UI issues
+                #if os(macOS)
                 .buttonStyle(PlainButtonStyle())
-                .focusable(false)  // This can help with macOS focus issues
+                .focusable(false)
                 #endif
             }
         }
         .padding()
         #if os(macOS)
-        .background(Material.regular.opacity(0.8)) //0.8 opacity for better background visibility on macOS
+        .background(Material.regular.opacity(0.8))//0.8 opacity for better background visibility on macOS
         #else
-        .background(.regularMaterial) //default background for iOS
+        .background(.regularMaterial)//default background for iOS
         #endif
         .cornerRadius(15)
         .shadow(radius: 5)
     }
 }
+
 // Enhanced CollectibleRow for better visual presentation
 struct CollectibleRow<T: CollectibleItem>: View {
     let item: T //new item variable
@@ -185,7 +186,7 @@ struct CollectibleRow<T: CollectibleItem>: View {
 }
 
 // Updated CategorySection with enhanced row presentation
-struct CategorySection<T: CollectibleItem>: View {
+struct CategorySection<T: CollectibleItem>: View { //this is the new CategorySection struct
     let category: Category //new category variable
     let items: [T] //an array of items
     @Binding var searchText: String //binding to the search text
@@ -209,16 +210,18 @@ struct CategorySection<T: CollectibleItem>: View {
     }
 }
 
-//ContentView Struct Block
-struct ContentView: View {
-    @StateObject private var categoryManager = CategoryManager() //new state object for the category manager
+struct ContentView: View { //here is the new ContentView struct
+    // Keeping existing environment and query properties
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]
     @Query(sort: \Bug.name) private var bugsQuery: [Bug]
     @Query(sort: \Fish.name) private var fishQuery: [Fish]
     @Query(sort: \Art.name) private var artQuery: [Art]
+    
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @Environment(\.modelContext) private var modelContext
-    @State private var selectedCategory: Category = .fossils
+    @StateObject private var categoryManager = CategoryManager()
+    
+    // Updated state properties
     @State private var searchText = ""
     
     var body: some View {
@@ -236,17 +239,18 @@ struct ContentView: View {
                         #if os(macOS)
                         .navigationSplitViewColumnWidth(min: 180, ideal: 200)
                         #endif
-                } detail: {
-                        #if os(macOS)
+                } detail: {                      
+                     #if os(macOS)
                         Text("Select an item")
                             .frame(minWidth: 300) //special formatting for macOS
                         #else
                         Text("Select an item") //iOS default formatting
-                        #endif
+                        #endif               
                     }
                 .navigationTitle("Museum Tracker")
             }
         }
+        .environmentObject(categoryManager)
         .onAppear {
             loadData()
         }
@@ -264,7 +268,7 @@ struct ContentView: View {
             // Floating category switcher overlay
             VStack {
                 Spacer()
-                FloatingCategorySwitcher(selectedCategory: $selectedCategory)
+                FloatingCategorySwitcher()
                     .padding(.bottom, 20)
             }
         }
@@ -272,7 +276,7 @@ struct ContentView: View {
     
     private var mainList: some View {
         List {
-            switch selectedCategory {
+            switch categoryManager.selectedCategory {
             case .fossils:
                 CategorySection(category: .fossils, items: fossilsQuery, searchText: $searchText)
             case .bugs:
@@ -283,15 +287,15 @@ struct ContentView: View {
                 CategorySection(category: .art, items: artQuery, searchText: $searchText)
             }
         }
-            #if os(iOS)
-            .listStyle(InsetGroupedListStyle())
-            #else
-            .listStyle(SidebarListStyle()) // This is more appropriate for macOS
-            .frame(minWidth: 200) //
-            #endif
+        #if os(iOS)
+        .listStyle(InsetGroupedListStyle())
+        #else
+        .listStyle(SidebarListStyle())
+        .frame(minWidth: 200)
+        #endif
     }
     
-/* DATA LOADING SECTION */
+    /* DATA LOADING SECTION */  
     
     // Keeping existing loadData function
     private func loadData() {
