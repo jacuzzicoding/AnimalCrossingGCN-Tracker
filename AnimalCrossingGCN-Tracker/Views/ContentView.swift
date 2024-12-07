@@ -13,6 +13,14 @@ extension Art: CollectibleItem {}
 
 class CategoryManager: ObservableObject {
     @Published var selectedCategory: Category = .fossils
+    @Published var selectedItem: (any CollectibleItem)? = nil
+    
+    func switchCategory(_ newCategory: Category) {
+        if selectedCategory != newCategory {
+            selectedItem = nil  // Clear selection when switching categories
+            selectedCategory = newCategory
+        }
+    }
 }
 
 // Enhanced Category enum with symbols built into swift
@@ -145,6 +153,7 @@ struct CollectibleRow<T: CollectibleItem>: View {
 
 // Updated CategorySection with enhanced row presentation
 struct CategorySection<T: CollectibleItem>: View { //this is the new CategorySection struct
+    @EnvironmentObject var categoryManager: CategoryManager
     let category: Category //new category variable
     let items: [T] //an array of items
     @Binding var searchText: String //binding to the search text
@@ -158,13 +167,30 @@ struct CategorySection<T: CollectibleItem>: View { //this is the new CategorySec
     }
     
     var body: some View {
-        ForEach(filteredItems) { item in //for each item in the filtered items
-            NavigationLink { //new navigation link to the detail view
-                category.detailView(for: item) //passing the item to the detail view
-            } label: {
+        ForEach(filteredItems) { item in
+            NavigationLink(value: item) {
                 CollectibleRow(item: item, category: category)
             }
+            #if os(macOS)
+            .buttonStyle(PlainButtonStyle())
+            #endif
         }
+        .onAppear {
+            debugPrint("\(category) section showing \(filteredItems.count) items")
+        }
+    }
+}
+
+// Add this helper struct
+struct LazyView<Content: View>: View {
+    let build: () -> Content
+    
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    
+    var body: Content {
+        build()
     }
 }
 
@@ -238,16 +264,24 @@ struct ContentView: View { //here is the new ContentView struct
                 // MAC/IPAD SECTION
                 NavigationSplitView {
                     mainContent
-#if os(macOS)
+                        .navigationDestination(for: Fossil.self) { fossil in
+                            FossilDetailView(fossil: fossil)
+                        }
+                        .navigationDestination(for: Bug.self) { bug in
+                            BugDetailView(bug: bug)
+                        }
+                        .navigationDestination(for: Fish.self) { fish in
+                            FishDetailView(Fish: fish)
+                        }
+                        .navigationDestination(for: Art.self) { art in
+                            ArtDetailView(art: art)
+                        }
+                #if os(macOS)
                         .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
+                #endif
                 } detail: {
-#if os(macOS)
                     Text("Select an item")
-                        .frame(minWidth: 300) //special formatting for macOS
-#else
-                    Text("Select an item") //iOS default formatting
-#endif
+                        .frame(minWidth: 300)
                 }
                 .navigationTitle("Museum Tracker")
             }
