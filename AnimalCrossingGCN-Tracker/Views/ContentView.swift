@@ -258,20 +258,22 @@ struct ContentView: View { //here is the new ContentView struct
         }
     }
     
-    // MARK: - Views
+/* VIEWS SECTION */
     
     private var mainContent: some View {
-        ZStack {
+        ZStack(alignment: .bottom) { //align the floating category switcher to the bottom
             VStack(spacing: 0) {
                 SearchBar(text: $searchText)
                 mainList
             }
             
             // Floating category switcher overlay
-            VStack {
-                Spacer()
-                FloatingCategorySwitcher()
-                    .padding(.bottom, 20)
+            FloatingCategorySwitcher()
+                .padding(.bottom, 20)
+                #if os(macOS)
+                .frame(maxWidth: 400)
+                .allowsHitTesting(true) //will let you click on the buttons in the floating category switcher again
+                #endif
             }
         }
     }
@@ -294,6 +296,7 @@ struct ContentView: View { //here is the new ContentView struct
         #else
         .listStyle(SidebarListStyle())
         .frame(minWidth: 200)
+        .allowsHitTesting(true) //will let you click on the list items again. fixes macOs long-standing bug
         #endif
     }
     
