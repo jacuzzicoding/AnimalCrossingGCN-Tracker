@@ -1,8 +1,11 @@
 //
 // FloatingCategorySwitcher.swift
 //
+import Foundation
+import SwiftUI
+import SwiftData
 
-struct FloatingCategorySwitcher: View { //new file for the floating category switcher 
+struct FloatingCategorySwitcher: View { //new file for the floating category switcher
     @EnvironmentObject var categoryManager: CategoryManager
     
     var body: some View { //new body section for the floating category switcher
