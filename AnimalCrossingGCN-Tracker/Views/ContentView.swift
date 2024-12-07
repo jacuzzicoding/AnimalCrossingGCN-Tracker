@@ -234,28 +234,6 @@ struct ContentView: View { //here is the new ContentView struct
         }
     }
     
-    private var mainList: some View {
-        List {
-            switch categoryManager.selectedCategory {
-            case .fossils:
-                CategorySection(category: .fossils, items: fossilsQuery, searchText: $searchText)
-            case .bugs:
-                CategorySection(category: .bugs, items: bugsQuery, searchText: $searchText)
-            case .fish:
-                CategorySection(category: .fish, items: fishQuery, searchText: $searchText)
-            case .art:
-                CategorySection(category: .art, items: artQuery, searchText: $searchText)
-            }
-        }
-        #if os(iOS)
-        .listStyle(InsetGroupedListStyle())
-        #else
-        .listStyle(SidebarListStyle())
-        .frame(minWidth: 200)
-        .allowsHitTesting(true) //will let you click on the list items again. fixes macOs long-standing bug
-        #endif
-    }
-    
     /* DATA LOADING SECTION */  
     
     // Keeping existing loadData function
