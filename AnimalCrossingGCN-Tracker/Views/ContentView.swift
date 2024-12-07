@@ -251,37 +251,48 @@ struct ContentView: View { //here is the new ContentView struct
         }
         try? modelContext.save()
     }
-    
+//helper function for the navigationDestination modifiers we need in the body..
+
+    @ViewBuilder
+    func addNavigationDestinations<Content: View>(_ content: Content) -> some View {
+        content
+            .navigationDestination(for: Fossil.self) { fossil in
+                FossilDetailView(fossil: fossil)
+            }
+            .navigationDestination(for: Bug.self) { bug in
+                BugDetailView(bug: bug)
+            }
+            .navigationDestination(for: Fish.self) { fish in
+                FishDetailView(Fish: fish)
+            }
+            .navigationDestination(for: Art.self) { art in
+                ArtDetailView(art: art)
+            }
+    }
+//here!
     var body: some View {
+
         Group {
             if horizontalSizeClass == .compact {
                 // IPHONE SECTION
                 NavigationStack {
-                    mainContent
+                    addNavigationDestinations(mainContent)
                         .navigationTitle("Museum Tracker")
                 }
             } else {
                 // MAC/IPAD SECTION
                 NavigationSplitView {
-                    mainContent
-                        .navigationDestination(for: Fossil.self) { fossil in
-                            FossilDetailView(fossil: fossil)
-                        }
-                        .navigationDestination(for: Bug.self) { bug in
-                            BugDetailView(bug: bug)
-                        }
-                        .navigationDestination(for: Fish.self) { fish in
-                            FishDetailView(Fish: fish)
-                        }
-                        .navigationDestination(for: Art.self) { art in
-                            ArtDetailView(art: art)
-                        }
-                #if os(macOS)
+                    addNavigationDestinations(mainContent)
+#if os(macOS)
                         .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-                #endif
+#endif
                 } detail: {
+#if os(macOS)
                     Text("Select an item")
                         .frame(minWidth: 300)
+#else
+                    Text("Select an item")
+#endif
                 }
                 .navigationTitle("Museum Tracker")
             }
