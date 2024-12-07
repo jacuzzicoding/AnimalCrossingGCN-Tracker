@@ -13,6 +13,7 @@ struct FloatingCategorySwitcher: View { //new file for the floating category swi
 #if os(macOS)
             RoundedRectangle(cornerRadius: 16)
                 .fill(Material.regular.opacity(0.8))
+                .frame(width: 300, height: 100)
                 .allowsHitTesting(false)
 #else
             RoundedRectangle(cornerRadius: 16)

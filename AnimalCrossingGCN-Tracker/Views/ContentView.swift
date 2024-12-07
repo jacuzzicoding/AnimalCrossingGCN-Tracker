@@ -196,10 +196,6 @@ struct ContentView: View { //here is the new ContentView struct
             // Floating category switcher overlay
             FloatingCategorySwitcher()
                 .padding(.bottom, 20)
-#if os(macOS)
-                .frame(maxWidth: 400)
-                .allowsHitTesting(true) //will let you click on the buttons in the floating category switcher again
-#endif
         }
     }
     /* DATA LOADING SECTION */
