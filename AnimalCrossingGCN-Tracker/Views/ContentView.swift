@@ -118,7 +118,11 @@ struct FloatingCategorySwitcher: View { //new struct for the floating category s
                     .foregroundColor(categoryManager.selectedCategory == category ? .white : .primary) //if the category is selected, the text will be white, otherwise it will be the primary color
                     .cornerRadius(10) //rounding the corners of the category
                 }
-                #if os(macOS)
+                .allowsHitTesting(true) // Explicitly enable hit testing for buttons, should fix the layer issue
+        }
+    }
+         .padding()
+         #if os(macOS)
                 .buttonStyle(PlainButtonStyle())
                 .focusable(false)
                 #endif
@@ -129,8 +133,8 @@ struct FloatingCategorySwitcher: View { //new struct for the floating category s
         .background(Material.regular.opacity(0.8))//0.8 opacity for better background visibility on macOS
         #else
         .background(.regularMaterial)//default background for iOS
-        #endif
         .cornerRadius(15)
+        #endif
         .shadow(radius: 5)
     }
 }
