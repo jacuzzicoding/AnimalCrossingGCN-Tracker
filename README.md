@@ -1,6 +1,7 @@
 AnimalCrossingGCN-Tracker
 v0.5.0-alpha (November 23, 2024)
 Made by Brock (@jacuzzicoding)
+
 What is this?
 A little app I'm making to track museum donations in Animal Crossing GameCube. Built with Swift/SwiftUI because I wanted to learn them better. Works on iPhone, iPad, and Mac (mostly).
 v0.5.0-alpha adds some floating category buttons and makes everything look nicer. Built on top of the code cleanup I did in v0.4.3-alpha.
