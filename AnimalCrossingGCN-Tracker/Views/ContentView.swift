@@ -196,50 +196,13 @@ struct ContentView: View { //here is the new ContentView struct
             // Floating category switcher overlay
             FloatingCategorySwitcher()
                 .padding(.bottom, 20)
-                #if os(macOS)
+#if os(macOS)
                 .frame(maxWidth: 400)
                 .allowsHitTesting(true) //will let you click on the buttons in the floating category switcher again
-                #endif
-            }
+#endif
         }
     }
-    var body: some View {
-        Group {
-            if horizontalSizeClass == .compact {
-                // IPHONE SECTION
-                NavigationStack {
-                    mainContent
-                        .navigationTitle("Museum Tracker")
-                }
-            } else {
-                // MAC/IPAD SECTION
-                NavigationSplitView {
-                    mainContent
-                        #if os(macOS)
-                        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-                        #endif
-                } detail: {                      
-                     #if os(macOS)
-                        Text("Select an item")
-                            .frame(minWidth: 300) //special formatting for macOS
-                        #else
-                        Text("Select an item") //iOS default formatting
-                        #endif               
-                    }
-                .navigationTitle("Museum Tracker")
-            }
-        }
-        .environmentObject(categoryManager)
-        .onAppear {
-            loadData()
-        }
-    }
-    
-/* VIEWS SECTION */
-    
-
-    
-    /* DATA LOADING SECTION */  
+    /* DATA LOADING SECTION */
     
     // Keeping existing loadData function
     private func loadData() {
@@ -266,4 +229,36 @@ struct ContentView: View { //here is the new ContentView struct
         }
         try? modelContext.save()
     }
-
+    
+    var body: some View {
+        Group {
+            if horizontalSizeClass == .compact {
+                // IPHONE SECTION
+                NavigationStack {
+                    mainContent
+                        .navigationTitle("Museum Tracker")
+                }
+            } else {
+                // MAC/IPAD SECTION
+                NavigationSplitView {
+                    mainContent
+#if os(macOS)
+                        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+#endif
+                } detail: {
+#if os(macOS)
+                    Text("Select an item")
+                        .frame(minWidth: 300) //special formatting for macOS
+#else
+                    Text("Select an item") //iOS default formatting
+#endif
+                }
+                .navigationTitle("Museum Tracker")
+            }
+        }
+        .environmentObject(categoryManager)
+        .onAppear {
+            loadData()
+        }
+    }
+}
