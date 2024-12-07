@@ -113,26 +113,24 @@ struct FloatingCategorySwitcher: View { //new struct for the floating category s
                         Text(category.rawValue)
                             .font(.caption)
                     }
-                    .padding() //pad
-                    .background(categoryManager.selectedCategory == category ? Color.blue : Color.gray.opacity(0.2)) //if the category is selected, the background will be blue, otherwise it will be gray.
+                    .padding()
+                    .background(categoryManager.selectedCategory == category ? Color.blue : Color.gray.opacity(0.2)) //if the category is selected, the button will be blue, otherwise it will be gray
                     .foregroundColor(categoryManager.selectedCategory == category ? .white : .primary) //if the category is selected, the text will be white, otherwise it will be the primary color
                     .cornerRadius(10) //rounding the corners of the category
                 }
-                .allowsHitTesting(true) // Explicitly enable hit testing for buttons, should fix the layer issue
+                .allowsHitTesting(true) //enable hit testing for buttons, should fix the layer issue
         }
     }
-         .padding()
-         #if os(macOS)
-                .buttonStyle(PlainButtonStyle())
-                .focusable(false)
-                #endif
-            }
-        }
         .padding()
         #if os(macOS)
-        .background(Material.regular.opacity(0.8))//0.8 opacity for better background visibility on macOS
+        .background {
+            RoundedRectangle(cornerRadius: 15)
+                .fill(Material.regular.opacity(0.8))
+                .frame(maxWidth: 400) // Limit the width of the background
+        }
+        .allowsHitTesting(false) // Disable hit testing for the background
         #else
-        .background(.regularMaterial)//default background for iOS
+        .background(.regularMaterial)
         .cornerRadius(15)
         #endif
         .shadow(radius: 5)
