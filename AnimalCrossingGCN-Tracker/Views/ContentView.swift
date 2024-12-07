@@ -226,8 +226,13 @@ struct ContentView: View { //here is the new ContentView struct
                         .navigationSplitViewColumnWidth(min: 180, ideal: 200)
                         #endif
                 } detail: {
-                    Text("Select an item")
-                }
+                        #if os(macOS)
+                        Text("Select an item")
+                            .frame(minWidth: 300) //special formatting for macOS
+                        #else
+                        Text("Select an item") //iOS default formatting
+                        #endif
+                    }
                 .navigationTitle("Museum Tracker")
             }
         }
