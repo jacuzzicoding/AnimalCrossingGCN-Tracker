@@ -1,7 +1,7 @@
 # AnimalCrossingGCN-Tracker
 
 Version: v0.5.1-alpha (Development)  
-Last Updated: November 26, 2024  
+Last Updated: December 7th, 2024  
 Author: Brock Jenkinson (@jacuzzicoding)
 
 ## Project Overview
