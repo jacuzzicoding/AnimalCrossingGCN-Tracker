@@ -95,7 +95,7 @@ class CategoryManager: ObservableObject {
 
 // FloatingCategorySwitcher 
 struct FloatingCategorySwitcher: View { 
-    @EnvironmentalObject var CategoryManager: CategoryManager //environemental object instead of binding, to fix the issue
+    @EnvironmentObject var CategoryManager: CategoryManager //environemental object instead of binding, to fix the issue
     
     var body: some View {
         HStack(spacing: 16) {
@@ -218,8 +218,6 @@ struct ContentView: View {
     @Query(sort: \Art.name) private var artQuery: [Art]
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.modelContext) private var modelContext
-
-    // Updated state properties
     @State private var selectedCategory: Category = .fossils
     @State private var searchText = ""
     
