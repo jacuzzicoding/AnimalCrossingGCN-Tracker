@@ -28,8 +28,11 @@ class Fish {
 }
 // Helper enum for type safety when adding games
 enum ACGame: String {
-    case gameCube = "ACGCN"
-    case newHorizons = "ACNH"
+    case gameCube = "ACGCN" //Animal Crossing on the GameCube (Population Growing)
+    case wildWorld = "ACWW" //Animal Crossing Wild World
+    case cityFolk = "ACCF" //Animal Crossing City Folk
+    case newLeaf = "ACNL" //Animal Crossing New Leaf
+    case newHorizons = "ACNH" //Animal Crossing New Horizons
 }
 
 struct FishDetailView: View {
