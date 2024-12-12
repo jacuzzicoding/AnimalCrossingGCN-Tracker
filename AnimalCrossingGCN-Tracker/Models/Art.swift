@@ -10,13 +10,13 @@ import SwiftData
 import SwiftUI
 
 @Model
-class Art: ObservableObject, Identifiable {
+class Art {
     @Attribute(.unique) var id: UUID
     var name: String
     var basedOn: String
     //var imageName: String // this will store the name of the image file
     var isDonated: Bool
-    var games: [ACGame] // New attribute for multi-game support
+    var games: [ACGame] // match Fish.swift implementation exactly
 
     init(name: String, basedOn: String, isDonated: Bool = false, games: [ACGame]) {
         self.id = UUID()
@@ -27,7 +27,6 @@ class Art: ObservableObject, Identifiable {
         self.games = games
     }
 }
-
 struct ArtDetailView: View {
     var art: Art
 
