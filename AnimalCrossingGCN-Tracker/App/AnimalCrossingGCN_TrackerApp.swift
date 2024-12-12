@@ -10,8 +10,7 @@
 import SwiftUI
 import SwiftData
 
-@main //Main app loop here
-/*Most of the core code is in ContentView.swift */
+@main
 struct AnimalCrossingGCN_TrackerApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -19,13 +18,18 @@ struct AnimalCrossingGCN_TrackerApp: App {
             Bug.self,
             Fish.self,
             Art.self
-        ], version: Schema.Version(2, 0, 0))
+        ])
         
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let modelConfiguration = ModelConfiguration(isStoredInMemoryOnly: true)
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let container = try ModelContainer(
+                for: schema,
+                configurations: [modelConfiguration]
+            )
+            return container
         } catch {
+            print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.path ?? "")
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
