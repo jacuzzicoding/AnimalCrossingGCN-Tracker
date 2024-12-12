@@ -9,16 +9,24 @@ import SwiftUI
 class Fossil {
     @Attribute(.unique) var id: UUID
     var name: String
-    var part: String?
     var isDonated: Bool
-    var games: [ACGame]
+    var gameRawValues: [String]  // New storage property
+    
+    // Computed property for games
+    var games: [ACGame] {
+        get {
+            gameRawValues.compactMap { ACGame(rawValue: $0) }
+        }
+        set {
+            gameRawValues = newValue.map { $0.rawValue }
+        }
+    }
 
-    init(name: String, part: String? = nil, isDonated: Bool = false, games: [ACGame]) {
+    init(name: String, isDonated: Bool = false, games: [ACGame]) {
         self.id = UUID()
         self.name = name
-        self.part = part
         self.isDonated = isDonated
-        self.games = games
+        self.gameRawValues = games.map { $0.rawValue }
     }
 }
 
