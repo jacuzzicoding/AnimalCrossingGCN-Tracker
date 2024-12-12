@@ -9,6 +9,7 @@ import SwiftUI
 class Fossil {
     @Attribute(.unique) var id: UUID
     var name: String
+    var part: String?
     var isDonated: Bool
     var gameRawValues: [String]  // New storage property
     
@@ -22,14 +23,14 @@ class Fossil {
         }
     }
 
-    init(name: String, isDonated: Bool = false, games: [ACGame]) {
+    init(name: String, part: String? = nil, isDonated: Bool = false, games: [ACGame]) {
         self.id = UUID()
         self.name = name
+        self.part = part
         self.isDonated = isDonated
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
-
 struct FossilDetailView: View {
     var fossil: Fossil
 
