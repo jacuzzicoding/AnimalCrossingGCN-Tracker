@@ -17,7 +17,7 @@ class Fish {
     var isDonated: Bool
     var games: [ACGame] //new attribute to the model, this will be used to store the games that the fish is in
 
-init(name: String, season: String, location: String, isDonated: Bool = false, games: [String]) { //init for the model, this is used when creating a new instance of the model
+init(name: String, season: String, location: String, isDonated: Bool = false, games: [ACGame]) { //init for the model, this is used when creating a new instance of the model
         self.id = UUID()
         self.name = name
         self.season = season
