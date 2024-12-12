@@ -16,7 +16,17 @@ class Art {
     var basedOn: String
     //var imageName: String // this will store the name of the image file
     var isDonated: Bool
-    var games: [ACGame]
+    var gameRawValues: [String]
+    
+    // Computed property to access ACGame enums
+    var games: [ACGame] {
+        get {
+            gameRawValues.compactMap { ACGame(rawValue: $0) }
+        }
+        set {
+            gameRawValues = newValue.map { $0.rawValue }
+        }
+    }
 
     init(name: String, basedOn: String, isDonated: Bool = false, games: [ACGame]) {
         self.id = UUID()
@@ -24,7 +34,7 @@ class Art {
         self.basedOn = basedOn
         //self.imageName = imageName
         self.isDonated = isDonated
-        self.games = games
+        self.gameRawValues = games.map { $0.rawValue }
     }
 }
 

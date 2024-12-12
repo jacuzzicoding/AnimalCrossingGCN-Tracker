@@ -15,15 +15,25 @@ class Fish {
     var season: String
     var location: String
     var isDonated: Bool
-    var games: [ACGame] //new attribute to the model, this will be used to store the games that the fish is in
+    var gameRawValues: [String]
+    
+    // Computed property to access ACGame enums
+    var games: [ACGame] {
+        get {
+            gameRawValues.compactMap { ACGame(rawValue: $0) }
+        }
+        set {
+            gameRawValues = newValue.map { $0.rawValue }
+        }
+    }
 
-init(name: String, season: String, location: String, isDonated: Bool = false, games: [ACGame]) { //init for the model, this is used when creating a new instance of the model
+    init(name: String, season: String, location: String, isDonated: Bool = false, games: [ACGame]) {
         self.id = UUID()
         self.name = name
         self.season = season
         self.location = location
         self.isDonated = isDonated
-        self.games = games 
+        self.gameRawValues = games.map { $0.rawValue }
     }
 }
 
@@ -32,14 +42,11 @@ struct FishDetailView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-        
-            
             Text("Season: \(Fish.season)")
                 .font(.title2)
             
             Text("Location: \(Fish.location)")
                 
-            
             Toggle("Donated", isOn: Binding(
                 get: { Fish.isDonated },
                 set: { newValue in

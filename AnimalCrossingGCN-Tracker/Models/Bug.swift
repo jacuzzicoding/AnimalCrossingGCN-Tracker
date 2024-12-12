@@ -14,14 +14,24 @@ class Bug {
     var name: String
     var season: String?
     var isDonated: Bool
-    var games: [ACGame]
+    var gameRawValues: [String]
+    
+    // Computed property to access ACGame enums
+    var games: [ACGame] {
+        get {
+            gameRawValues.compactMap { ACGame(rawValue: $0) }
+        }
+        set {
+            gameRawValues = newValue.map { $0.rawValue }
+        }
+    }
 
     init(name: String, season: String, isDonated: Bool = false, games: [ACGame]) {
         self.id = UUID()
         self.name = name
         self.season = season
         self.isDonated = isDonated
-        self.games = games
+        self.gameRawValues = games.map { $0.rawValue }
     }
 }
 
