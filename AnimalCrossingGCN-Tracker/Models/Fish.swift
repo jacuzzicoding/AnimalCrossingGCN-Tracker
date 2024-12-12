@@ -15,14 +15,21 @@ class Fish {
     var season: String
     var location: String
     var isDonated: Bool
+    var games: [String] //new attribute to the model, this will be used to store the games that the fish is in
 
-    init(name: String, season: String, location: String, isDonated: Bool = false) {
+    init(name: String, season: String, location: String, isDonated: Bool = false) { //init for the model, this is used when creating a new instance of the model
         self.id = UUID()
         self.name = name
         self.season = season
         self.location = location
         self.isDonated = isDonated
+        self.games = games 
     }
+}
+// Helper enum for type safety when adding games
+enum ACGame: String {
+    case gameCube = "ACGCN"
+    case newHorizons = "ACNH"
 }
 
 struct FishDetailView: View {
