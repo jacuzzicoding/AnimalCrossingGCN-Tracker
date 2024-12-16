@@ -194,25 +194,49 @@ struct LazyView<Content: View>: View {
     }
 }
 
-struct ContentView: View { //here is the new ContentView struct
-    // Keeping existing environment and query properties
+struct ContentView: View { // Updated ContentView
+    // Existing environment and query properties
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Fossil.name) private var fossilsQuery: [Fossil]
     @Query(sort: \Bug.name) private var bugsQuery: [Bug]
     @Query(sort: \Fish.name) private var fishQuery: [Fish]
     @Query(sort: \Art.name) private var artQuery: [Art]
-    //town managing
+
+    // Town managing
     @EnvironmentObject var dataManager: DataManager
     @State private var isEditingTown = false
     @State private var newTownName: String = ""
-    //category manager
+
+    // Category manager
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @StateObject private var categoryManager = CategoryManager()
     @State private var searchText = ""
-    
+
     private var mainContent: some View {
         ZStack(alignment: .bottom) { //align the floating category switcher to the bottom
             VStack(spacing: 0) {
+                // Town Section
+                HStack {
+                    Text("Town Name:")
+                        .font(.headline)
+                    Spacer()
+                    Text(dataManager.currentTown?.name ?? "Loading...")
+                        .font(.title2)
+                    Button(action: {
+                        // Initialize with current town name or empty if not set
+                        newTownName = dataManager.currentTown?.name ?? ""
+                        isEditingTown = true
+                    }) {
+                        Image(systemName: "pencil")
+                            .foregroundColor(.blue)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                }
+                .padding()
+
+                Divider()
+
+                // Existing search and main list content
                 SearchBar(text: $searchText)
                 MainListView(
                     searchText: $searchText,
@@ -222,15 +246,14 @@ struct ContentView: View { //here is the new ContentView struct
                     artQuery: artQuery
                 )
             }
-            
+
             // Floating category switcher overlay
             FloatingCategorySwitcher()
                 .padding(.bottom, 20)
         }
     }
-    /* DATA LOADING SECTION */
-    
-    // Keeping existing loadData function
+    /*Data Loading Section*/ //moving to DataManager.swift soon
+    // Keeping the existing loadData function unchanged
     private func loadData() {
         for category in Category.allCases {
             let data = category.getDefaultData()
@@ -255,7 +278,6 @@ struct ContentView: View { //here is the new ContentView struct
         }
         try? modelContext.save()
     }
-//helper function for the navigationDestination modifiers we need in the body
 
     @ViewBuilder
     func addNavigationDestinations<Content: View>(_ content: Content) -> some View {
@@ -273,18 +295,17 @@ struct ContentView: View { //here is the new ContentView struct
                 ArtDetailView(art: art)
             }
     }
-//here!
-    var body: some View {
 
+    var body: some View {
         Group {
             if horizontalSizeClass == .compact {
-                // IPHONE SECTION
+                // iPhone section
                 NavigationStack {
                     addNavigationDestinations(mainContent)
                         .navigationTitle("Museum Tracker")
                 }
             } else {
-                // MAC/IPAD SECTION
+                // iPad/Mac section
                 NavigationSplitView {
                     addNavigationDestinations(mainContent)
 #if os(macOS)
@@ -304,6 +325,10 @@ struct ContentView: View { //here is the new ContentView struct
         .environmentObject(categoryManager)
         .onAppear {
             loadData()
+        }
+        .sheet(isPresented: $isEditingTown) {
+            EditTownView(isPresented: $isEditingTown, townName: $newTownName)
+                .environmentObject(dataManager)
         }
     }
 }
