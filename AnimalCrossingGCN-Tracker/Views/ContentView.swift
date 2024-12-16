@@ -326,9 +326,9 @@ struct ContentView: View { // Updated ContentView
         .onAppear {
             loadData()
         }
-        /*.sheet(isPresented: $isEditingTown) {
+        .sheet(isPresented: $isEditingTown) {
             EditTownView(isPresented: $isEditingTown, townName: $newTownName)
                 .environmentObject(dataManager)
-        }*/
+        }
     }
 }
