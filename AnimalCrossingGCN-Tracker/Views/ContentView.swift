@@ -201,7 +201,11 @@ struct ContentView: View { //here is the new ContentView struct
     @Query(sort: \Bug.name) private var bugsQuery: [Bug]
     @Query(sort: \Fish.name) private var fishQuery: [Fish]
     @Query(sort: \Art.name) private var artQuery: [Art]
-    
+    //town managing
+    @EnvironmentObject var dataManager: DataManager
+    @State private var isEditingTown = false
+    @State private var newTownName: String = ""
+    //category manager
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @StateObject private var categoryManager = CategoryManager()
     @State private var searchText = ""
