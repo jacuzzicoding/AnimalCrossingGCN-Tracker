@@ -1,5 +1,8 @@
 //
 //  Art.swift
+//  AnimalCrossingGCN-Tracker
+//
+//  Created by Brock Jenkinson on 10/5/24.
 //
 
 import Foundation
@@ -7,19 +10,31 @@ import SwiftData
 import SwiftUI
 
 @Model
-class Art: ObservableObject, Identifiable {
-    var id: UUID
+class Art {
+    @Attribute(.unique) var id: UUID
     var name: String
-    var basedOn: String  // this field is for the real-world counterpart name and artist
+    var basedOn: String
     //var imageName: String // this will store the name of the image file
     var isDonated: Bool
+    var gameRawValues: [String]
+    
+    // Computed property to access ACGame enums
+    var games: [ACGame] {
+        get {
+            gameRawValues.compactMap { ACGame(rawValue: $0) }
+        }
+        set {
+            gameRawValues = newValue.map { $0.rawValue }
+        }
+    }
 
-    init(name: String, basedOn: String, isDonated: Bool = false) { //include imageName: String here once fixed
+    init(name: String, basedOn: String, isDonated: Bool = false, games: [ACGame]) {
         self.id = UUID()
         self.name = name
         self.basedOn = basedOn
-      //  self.imageName = imageName
+        //self.imageName = imageName
         self.isDonated = isDonated
+        self.gameRawValues = games.map { $0.rawValue }
     }
 }
 
@@ -28,12 +43,11 @@ struct ArtDetailView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-
             Text("Based on: \(art.basedOn)")
                 .font(.subheadline)
                 .foregroundColor(.primary)
 
-            // I will uncomment this once we have images in the assets folder, just putting in the framework for now
+            // I will uncomment this once we have images in the assets folder
             // Image(art.imageName)
             //     .resizable()
             //     .scaledToFit()
@@ -56,21 +70,85 @@ struct ArtDetailView: View {
     }
 }
 
-// This function returns the array of art pieces
 func getDefaultArt() -> [Art] {
     return [
-        Art(name: "Academic Painting", basedOn: "Vitruvian Man by Leonardo da Vinci", isDonated: false),
-        Art(name: "Amazing Painting", basedOn: "The Night Watch by Rembrandt", isDonated: false),
-        Art(name: "Basic Painting", basedOn: "The Blue Boy by Thomas Gainsborough", isDonated: false),
-        Art(name: "Calm Painting", basedOn: "A Sunday Afternoon on the Island of La Grande Jatte by Georges Seurat", isDonated: false),
-        Art(name: "Classic Painting", basedOn: "Washington Crossing the Delaware by Emanuel Leutze", isDonated: false),
-        Art(name: "Common Painting", basedOn: "The Gleaners by Jean-François Millet", isDonated: false),
-        Art(name: "Dainty Painting", basedOn: "The Star (Dancer on Stage) by Edgar Degas", isDonated: false),
-        Art(name: "Famous Painting", basedOn: "Mona Lisa by Leonardo da Vinci", isDonated: false),
-        Art(name: "Flowery Painting", basedOn: "Sunflowers by Vincent van Gogh", isDonated: false),
-        Art(name: "Moving Painting", basedOn: "The Birth of Venus by Sandro Botticelli", isDonated: false),
-        Art(name: "Quaint Painting", basedOn: "The Milkmaid by Johannes Vermeer", isDonated: false),
-        Art(name: "Scary Painting", basedOn: "Otani Oniji II by Toshusai Sharaku", isDonated: false),
-        Art(name: "Worthy Painting", basedOn: "Liberty Leading the People by Eugène Delacroix", isDonated: false)
+        Art(
+            name: "Academic Painting",
+            basedOn: "Vitruvian Man by Leonardo da Vinci",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Amazing Painting",
+            basedOn: "The Night Watch by Rembrandt",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Basic Painting",
+            basedOn: "The Blue Boy by Thomas Gainsborough",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Calm Painting",
+            basedOn: "A Sunday Afternoon on the Island of La Grande Jatte by Georges Seurat",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Classic Painting",
+            basedOn: "Washington Crossing the Delaware by Emanuel Leutze",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Common Painting",
+            basedOn: "The Gleaners by Jean-François Millet",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Dainty Painting",
+            basedOn: "The Star (Dancer on Stage) by Edgar Degas",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Famous Painting",
+            basedOn: "Mona Lisa by Leonardo da Vinci",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Flowery Painting",
+            basedOn: "Sunflowers by Vincent van Gogh",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Moving Painting",
+            basedOn: "The Birth of Venus by Sandro Botticelli",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Quaint Painting",
+            basedOn: "The Milkmaid by Johannes Vermeer",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Scary Painting",
+            basedOn: "Otani Oniji II by Toshusai Sharaku",
+            isDonated: false,
+            games: [.ACGCN]
+        ),
+        Art(
+            name: "Worthy Painting",
+            basedOn: "Liberty Leading the People by Eugène Delacroix",
+            isDonated: false,
+            games: [.ACGCN]
+        )
     ]
 }
