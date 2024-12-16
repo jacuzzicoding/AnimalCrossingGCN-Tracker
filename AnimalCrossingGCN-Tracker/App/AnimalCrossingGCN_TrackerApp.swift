@@ -4,7 +4,7 @@
 //
 //  Created by Brock Jenkinson on 10/5/24.
 //
-//  Last updated 11/18/24
+//  Last updated 12/15/24
 //
 
 import SwiftUI
@@ -17,7 +17,8 @@ struct AnimalCrossingGCN_TrackerApp: App {
             Fossil.self,
             Bug.self,
             Fish.self,
-            Art.self
+            Art.self,
+            Town.self
         ])
         
         let modelConfiguration = ModelConfiguration(isStoredInMemoryOnly: false)
@@ -33,10 +34,19 @@ struct AnimalCrossingGCN_TrackerApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
+    // Initialize DataManager with the shared ModelContainer's context
+    @StateObject private var dataManager: DataManager
+
+    init() {
+        let context = sharedModelContainer.mainContext
+        _dataManager = StateObject(wrappedValue: DataManager(modelContext: context))
+    }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(dataManager) // Inject DataManager into the environment
         }
         .modelContainer(sharedModelContainer)
     }
