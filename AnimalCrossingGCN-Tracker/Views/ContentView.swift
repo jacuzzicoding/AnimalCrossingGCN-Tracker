@@ -181,7 +181,7 @@ struct CategorySection<T: CollectibleItem>: View { //this is the new CategorySec
     }
 }
 
-// Add this helper struct
+//helper struct
 struct LazyView<Content: View>: View {
     let build: () -> Content
     
@@ -251,7 +251,7 @@ struct ContentView: View { //here is the new ContentView struct
         }
         try? modelContext.save()
     }
-//helper function for the navigationDestination modifiers we need in the body..
+//helper function for the navigationDestination modifiers we need in the body
 
     @ViewBuilder
     func addNavigationDestinations<Content: View>(_ content: Content) -> some View {

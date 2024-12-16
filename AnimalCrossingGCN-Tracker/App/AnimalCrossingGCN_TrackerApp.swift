@@ -46,6 +46,7 @@ struct AnimalCrossingGCN_TrackerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(dataManager) // Inject DataManager into the environment
         }
         .modelContainer(sharedModelContainer)
     }
