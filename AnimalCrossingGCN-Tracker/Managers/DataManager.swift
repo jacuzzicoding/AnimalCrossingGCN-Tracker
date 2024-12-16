@@ -20,10 +20,11 @@ class DataManager: ObservableObject {
     /// Fetches the current town from the persistent store.
     /// If no town exists, it creates a default one.
     func fetchCurrentTown() {
-        let query = Query<Town>() // Create a query for Town entities
+        // Create a basic fetch descriptor for Town
+        let descriptor = FetchDescriptor<Town>()
 
         do {
-            let towns = try modelContext.fetch(query)
+            let towns = try modelContext.fetch(descriptor)
             if let town = towns.first {
                 DispatchQueue.main.async {
                     self.currentTown = town
