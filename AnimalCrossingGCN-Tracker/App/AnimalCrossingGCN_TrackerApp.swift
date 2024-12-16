@@ -20,7 +20,7 @@ struct AnimalCrossingGCN_TrackerApp: App {
             Art.self
         ])
         
-        let modelConfiguration = ModelConfiguration(isStoredInMemoryOnly: true)
+        let modelConfiguration = ModelConfiguration(isStoredInMemoryOnly: false)
 
         do {
             let container = try ModelContainer(
