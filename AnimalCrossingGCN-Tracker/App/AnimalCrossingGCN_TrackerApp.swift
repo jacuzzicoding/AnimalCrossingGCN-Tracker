@@ -17,7 +17,8 @@ struct AnimalCrossingGCN_TrackerApp: App {
             Fossil.self,
             Bug.self,
             Fish.self,
-            Art.self
+            Art.self,
+            Town.self
         ])
         
         let modelConfiguration = ModelConfiguration(isStoredInMemoryOnly: false)
