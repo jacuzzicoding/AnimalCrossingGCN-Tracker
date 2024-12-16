@@ -73,14 +73,11 @@ AnimalCrossingGCN-Tracker/
 ### macOS
 - Basic functionality implemented
 - Known limitations:
-  - Category switching issues (#17)
   - Additional testing required
   - UI refinements pending
 
 ## Known Issues
-- macOS breaks when switching categories (#17)
 - Search limited to current category
-- Requires additional macOS testing
 
 ## Technical Requirements
 - Xcode 15+
@@ -98,4 +95,4 @@ AnimalCrossingGCN-Tracker/
 This project welcomes community contributions. Please report any issues or submit pull requests through the project's GitHub repository.
 
 ## License
-[License information pending]
+MIT License.
