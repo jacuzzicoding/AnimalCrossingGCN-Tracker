@@ -34,6 +34,14 @@ struct AnimalCrossingGCN_TrackerApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
+    // Initialize DataManager with the shared ModelContainer's context
+    @StateObject private var dataManager: DataManager
+
+    init() {
+        let context = sharedModelContainer.mainContext
+        _dataManager = StateObject(wrappedValue: DataManager(modelContext: context))
+    }
 
     var body: some Scene {
         WindowGroup {
