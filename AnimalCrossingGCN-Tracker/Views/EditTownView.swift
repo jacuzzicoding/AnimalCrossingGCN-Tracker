@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct EditTownView: View {
     @Binding var isPresented: Bool
@@ -6,22 +7,48 @@ struct EditTownView: View {
     @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Town Details")) {
-                    TextField("Town Name", text: $townName)
+        #if os(macOS)
+        editTownContent
+            .frame(width: 300, height: 150)
+        #else
+        NavigationStack {
+            editTownContent
+                .navigationTitle("Edit Town")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            isPresented = false
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            dataManager.updateTownName(townName)
+                            isPresented = false
+                        }
+                    }
                 }
+        }
+        #endif
+    }
+    
+    private var editTownContent: some View {
+        Form {
+            Section(header: Text("Town Details")) {
+                TextField("Town Name", text: $townName)
             }
-            .navigationTitle("Edit Town")
-            .navigationBarItems(
-                leading: Button("Cancel") {
+            #if os(macOS)
+            HStack {
+                Button("Cancel") {
                     isPresented = false
-                },
-                trailing: Button("Save") {
+                }
+                Spacer()
+                Button("Save") {
                     dataManager.updateTownName(townName)
                     isPresented = false
                 }
-            )
+            }
+            .padding()
+            #endif
         }
     }
 }
