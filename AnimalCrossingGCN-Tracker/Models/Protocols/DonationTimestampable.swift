@@ -19,6 +19,7 @@ extension DonationTimestampable {
 	mutating func markDonated() {
 		isDonated = true
 		donationDate = Date()
+		print("Donation date set to: \(donationDate?.description ?? "nil")")
 	}
 	
 	mutating func unmarkDonated() {
