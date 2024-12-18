@@ -62,6 +62,8 @@ struct BugDetailView: View {
             ))
             .padding(.top)
 
+            DetailMoreInfoView(item: bug)
+
             Spacer()
         }
         .padding()
