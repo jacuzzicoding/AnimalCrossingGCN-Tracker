@@ -13,14 +13,16 @@ protocol CollectibleItem: Identifiable, Hashable {
     var id: UUID { get }
     var name: String { get }
     var isDonated: Bool { get set }
+    var donationDate: Date? { get set } 
     var games: [ACGame] { get set }
 }
 
-@Model
-final class Item {
-    var timestamp: Date
-    
-    init(timestamp: Date) {
-        self.timestamp = timestamp
+//CollectibleItem automatically conforms to DonationTimestampable
+extension CollectibleItem {
+    // This means any type that conforms to CollectibleItem
+    // automatically gets DonationTimestampable for free
+    var donationDate: Date? {
+        get { self.donationDate }
+        set { self.donationDate = newValue }
     }
 }
