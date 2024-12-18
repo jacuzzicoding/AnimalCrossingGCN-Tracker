@@ -73,6 +73,8 @@ struct ArtDetailView: View {
             ))
             .padding(.top)
 
+			DetailMoreInfoView(item: art)
+			
             Spacer()
         }
         .padding()
