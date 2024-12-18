@@ -58,7 +58,7 @@ struct FishDetailView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
-            
+
             Toggle("Donated", isOn: Binding(
                 get: { Fish.isDonated },
                 set: { newValue in
@@ -66,6 +66,8 @@ struct FishDetailView: View {
                 }
             ))
             .padding(.top)
+
+            DetailMoreInfoView(item: Fish) 
 
             Spacer()
         }
