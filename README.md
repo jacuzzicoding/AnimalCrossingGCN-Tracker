@@ -1,24 +1,47 @@
 # AnimalCrossingGCN-Tracker
-
-Version: v0.5.1-alpha (Development)  
-Last Updated: December 7th, 2024  
+Version: v0.6.0-alpha (Development)
+Last Updated: December 16th, 2024
 Author: Brock Jenkinson (@jacuzzicoding)
 
 ## Project Overview
+The AnimalCrossingGCN-Tracker is a comprehensive companion app for tracking Animal Crossing GameCube museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
 
-The AnimalCrossingGCN-Tracker is a comprehensive companion app for Animal Crossing GameCube players to track their museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
+Version v0.6.0-alpha introduces town tracking functionality and lays the groundwork for future multi-game support while maintaining the streamlined interface introduced in v0.5.0.
 
-Version v0.5.1-alpha introduces a major file structure reorganization while maintaining all functionality from v0.5.0, including the floating category system and enhanced UI components.
+## Features
+
+### Core Functionality
+* Complete museum donation tracking:
+  * Fossils (25 items)
+  * Bugs (40 items)
+  * Fish (40 items)
+  * Art (13 pieces)
+* Town-based collection tracking (NEW)
+* Modern floating category navigation
+* Enhanced search functionality
+* SwiftData integration for persistence
+
+### Technical Improvements
+* Backend preparation for future multi-game support:
+  * ACGame enum system implementation
+  * Version-specific data structures
+  * Cross-game item availability framework
+* Enhanced data models with town tracking
+* Improved item organization by town
+
+### UI Components
+* Floating category switcher with custom icons
+* Streamlined navigation system
+* Refined search functionality
+* Platform-specific optimizations
 
 ## File Structure
-
-The project follows a modular organization pattern:
-
 ```
 AnimalCrossingGCN-Tracker/
 ├── App/
 │   └── AnimalCrossingGCN_TrackerApp.swift
 ├── Models/
+│   ├── ACGame.swift
 │   ├── CollectibleItem.swift
 │   ├── Fossil.swift
 │   ├── Bug.swift
@@ -41,58 +64,39 @@ AnimalCrossingGCN-Tracker/
     └── DataManager.swift
 ```
 
-## Features
-
-### Core Functionality
-- Complete museum donation tracking
-- Support for all collectible categories:
-  - Fossils (25 items)
-  - Bugs (40 items)
-  - Fish (40 items)
-  - Art (13 pieces)
-- Modern floating category navigation
-- Enhanced search functionality
-- Cross-platform compatibility
-- SwiftData integration for persistence
-
-### UI Components
-- Floating category selector with custom icons
-- Improved item display and spacing
-- Streamlined navigation system
-- Refined search functionality
-- Platform-specific optimizations
-
 ## Platform Support
 
 ### iOS/iPadOS
-- Full feature support
-- Optimized floating UI elements
-- Native platform interactions
-- Responsive layouts for all screen sizes
+* Full feature support
+* Optimized floating UI elements
+* Native platform interactions
+* Responsive layouts for all screen sizes
 
 ### macOS
-- Basic functionality implemented
-- Known limitations:
-  - Additional testing required
-  - UI refinements pending
+* Complete feature parity with iOS
+* Enhanced keyboard navigation
+* Native menu bar integration
+* Platform-specific UI refinements
 
 ## Known Issues
-- Search limited to current category
+* Search limited to current category
+* No transition animations for category switches
+* Additional macOS performance testing needed
 
 ## Technical Requirements
-- Xcode 15+
-- iOS 17.0+
-- macOS 14.0+
-- SwiftUI and SwiftData knowledge for contributions
+* Xcode 15+
+* iOS 17.0+
+* macOS 14.0+
+* SwiftUI and SwiftData knowledge for contributions
 
 ## Development Status
-- Currently in development (v0.5.1-alpha)
-- Focused on code structure reorganization
-- Maintaining existing functionality from v0.5.0
-- Working toward platform stability improvements
+* Currently in active development (v0.6.1-alpha coming next)
+* New town-based tracking system
+* Backend preparation for future multi-game support
+* Working toward advanced filtering and UI improvements
 
 ## Contributing
-This project welcomes community contributions. Please report any issues or submit pull requests through the project's GitHub repository.
+This project welcomes community contributions. If anyone happens to see this, please report any issues or submit pull requests through the project's GitHub repository.
 
 ## License
-MIT License.
+MIT License
