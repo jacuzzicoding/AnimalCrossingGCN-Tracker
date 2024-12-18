@@ -1,12 +1,12 @@
 # AnimalCrossingGCN-Tracker
-Version: v0.6.0-alpha (Development)
-Last Updated: December 16th, 2024
+Version: v0.6.1-alpha (Development)
+Last Updated: December 18th, 2024
 Author: Brock Jenkinson (@jacuzzicoding)
 
 ## Project Overview
 The AnimalCrossingGCN-Tracker is a comprehensive companion app for tracking Animal Crossing GameCube museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
 
-Version v0.6.0-alpha introduces town tracking functionality and lays the groundwork for future multi-game support while maintaining the streamlined interface introduced in v0.5.0.
+Version v0.6.1-alpha introduces donation timestamp tracking while building upon the town tracking and multi-game support foundation established in v0.6.0.
 
 ## Features
 
@@ -16,12 +16,17 @@ Version v0.6.0-alpha introduces town tracking functionality and lays the groundw
   * Bugs (40 items)
   * Fish (40 items)
   * Art (13 pieces)
-* Town-based collection tracking (NEW)
+* Donation timestamp system (NEW)
+* Town-based collection tracking
 * Modern floating category navigation
 * Enhanced search functionality
 * SwiftData integration for persistence
 
 ### Technical Improvements
+* Comprehensive donation tracking system:
+  * Timestamp integration across all models
+  * DetailMoreInfoView implementation
+  * Enhanced SwiftData model updates
 * Backend preparation for future multi-game support:
   * ACGame enum system implementation
   * Version-specific data structures
@@ -30,6 +35,7 @@ Version v0.6.0-alpha introduces town tracking functionality and lays the groundw
 * Improved item organization by town
 
 ### UI Components
+* DetailMoreInfoView for donation timestamps
 * Floating category switcher with custom icons
 * Streamlined navigation system
 * Refined search functionality
@@ -41,12 +47,17 @@ AnimalCrossingGCN-Tracker/
 ├── App/
 │   └── AnimalCrossingGCN_TrackerApp.swift
 ├── Models/
-│   ├── ACGame.swift
-│   ├── CollectibleItem.swift
-│   ├── Fossil.swift
-│   ├── Bug.swift
-│   ├── Fish.swift
-│   └── Art.swift
+│   ├── Core/
+│   │   ├── ACGame.swift
+│   │   ├── CollectibleItem.swift
+│   │   ├── Fossil.swift
+│   │   ├── Bug.swift
+│   │   ├── Fish.swift
+│   │   └── Art.swift
+│   ├── Extensions/
+│   │   └── DonationTimestampableExt.swift
+│   └── Protocols/
+│       └── DonationTimestampable.swift
 ├── Views/
 │   ├── Main/
 │   │   ├── ContentView.swift
@@ -54,6 +65,7 @@ AnimalCrossingGCN-Tracker/
 │   ├── Components/
 │   │   ├── FloatingCategorySwitcher.swift
 │   │   ├── CollectibleRow.swift
+│   │   ├── DetailMoreInfoView.swift
 │   │   └── CategorySection.swift
 │   └── Detail/
 │       ├── FossilDetailView.swift
@@ -90,8 +102,9 @@ AnimalCrossingGCN-Tracker/
 * SwiftUI and SwiftData knowledge for contributions
 
 ## Development Status
-* Currently in active development (v0.6.1-alpha coming next)
-* New town-based tracking system
+* Currently in active development (v0.7.0 planned for January 2025)
+* New donation timestamp tracking system
+* Enhanced town-based tracking
 * Backend preparation for future multi-game support
 * Working toward advanced filtering and UI improvements
 
