@@ -11,11 +11,13 @@ import SwiftUI
 
 @Model
 class Art {
+	//Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var basedOn: String
     //var imageName: String // this will store the name of the image file
     var isDonated: Bool
+	var donationDate: Date?
     var gameRawValues: [String]
     
     // Computed property to access ACGame enums
@@ -34,9 +36,12 @@ class Art {
         self.basedOn = basedOn
         //self.imageName = imageName
         self.isDonated = isDonated
+		self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
+//conform to DonationTimestampable
+extension Art: DonationTimestampable { }
 
 struct ArtDetailView: View {
     var art: Art
@@ -47,6 +52,11 @@ struct ArtDetailView: View {
                 .font(.subheadline)
                 .foregroundColor(.primary)
 
+			if let donationDate = art.formattedDonationDate {
+				Text("Donated: \(donationDate)")
+					.font(.subheadline)
+					.foregroundColor(.secondary)
+			}
             // I will uncomment this once we have images in the assets folder
             // Image(art.imageName)
             //     .resizable()
