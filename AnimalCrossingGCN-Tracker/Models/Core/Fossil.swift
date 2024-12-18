@@ -35,38 +35,45 @@ class Fossil {
     }
 }
 
-// Detail view for Fossil
 struct FossilDetailView: View {
-    var fossil: Fossil
+	var fossil: Fossil
 
-    var body: some View {
-        VStack(alignment: .leading) {
-            if let part = fossil.part {
-                Text("Part: \(part)")
-                    .font(.title2)
-            }
-            //store the donation date
-            if let donationDate = fossil.formattedDonationDate {
-                Text("Donated: \(donationDate)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
+	var body: some View {
+		VStack(alignment: .leading) {
+			if let part = fossil.part {
+				Text("Part: \(part)")
+					.font(.title2)
+			}
+			
+			if let donationDate = fossil.formattedDonationDate {
+				Text("Donated: \(donationDate)")
+					.font(.subheadline)
+					.foregroundColor(.secondary)
+			}
 
-            Toggle("Donated", isOn: Binding(
-                get: { fossil.isDonated },
-                set: { newValue in
-                    fossil.isDonated = newValue
-                }
-            ))
-            .padding(.top)
+			Toggle("Donated", isOn: Binding(
+				get: { fossil.isDonated },
+				set: { newValue in
+					if newValue {
+						fossil.isDonated = true
+						fossil.donationDate = Date()
+						print("Debug: Donation date set to \(Date())")
+					} else {
+						fossil.isDonated = false
+						fossil.donationDate = nil
+						print("Debug: Donation date removed")
+					}
+				}
+			))
+			.padding(.top)
 
-            DetailMoreInfoView(item: fossil) //the more info button
+			DetailMoreInfoView(item: fossil)
 
-            Spacer()
-        }
-        .padding()
-        .navigationTitle(fossil.name)
-    }
+			Spacer()
+		}
+		.padding()
+		.navigationTitle(fossil.name)
+	}
 }
 
 func getDefaultFossils() -> [Fossil] {

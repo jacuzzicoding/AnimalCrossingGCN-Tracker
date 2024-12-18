@@ -67,7 +67,15 @@ struct ArtDetailView: View {
             Toggle("Donated", isOn: Binding(
                 get: { art.isDonated },
                 set: { newValue in
-                    art.isDonated = newValue
+                    if newValue {
+                        art.isDonated = true
+                        art.donationDate = Date()
+                        print("Debug: Donation date set to \(Date())")
+                    } else {
+                        art.isDonated = false
+                        art.donationDate = nil
+                        print("Debug: Donation date removed")
+                    }
                 }
             ))
             .padding(.top)

@@ -55,7 +55,15 @@ struct BugDetailView: View {
             Toggle("Donated", isOn: Binding(
                 get: { bug.isDonated },
                 set: { newValue in
-                    bug.isDonated = newValue
+                    if newValue {
+                        bug.isDonated = true
+                        bug.donationDate = Date()
+                        print("Debug: Donation date set to \(Date())")
+                    } else {
+                        bug.isDonated = false
+                        bug.donationDate = nil
+                        print("Debug: Donation date removed")
+                    }
                 }
             ))
             .padding(.top)
