@@ -39,41 +39,46 @@ class Fish {
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
-//conform to DonationTimestampable
-extension Fish: DonationTimestampable { }
 
 struct FishDetailView: View {
-    var Fish: Fish
+	var Fish: Fish
 
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Season: \(Fish.season)")
-                .font(.title2)
-            
-            Text("Location: \(Fish.location)")
-            
-            //store the donation date
-            if let donationDate = Fish.formattedDonationDate {
-                Text("Donated: \(donationDate)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
+	var body: some View {
+		VStack(alignment: .leading) {
+			Text("Season: \(Fish.season)")
+				.font(.title2)
+			
+			Text("Location: \(Fish.location)")
+			
+			if let donationDate = Fish.formattedDonationDate {
+				Text("Donated: \(donationDate)")
+					.font(.subheadline)
+					.foregroundColor(.secondary)
+			}
 
-            Toggle("Donated", isOn: Binding(
-                get: { Fish.isDonated },
-                set: { newValue in
-                    Fish.isDonated = newValue
-                }
-            ))
-            .padding(.top)
+			Toggle("Donated", isOn: Binding(
+				get: { Fish.isDonated },
+				set: { newValue in
+					if newValue {
+						Fish.isDonated = true
+						Fish.donationDate = Date()
+						print("Debug: Setting donation date to \(Date())")
+					} else {
+						Fish.isDonated = false
+						Fish.donationDate = nil
+						print("Debug: Clearing donation date")
+					}
+				}
+			))
+			.padding(.top)
 
-            DetailMoreInfoView(item: Fish) 
+			DetailMoreInfoView(item: Fish)
 
-            Spacer()
-        }
-        .padding()
-        .navigationTitle(Fish.name)
-    }
+			Spacer()
+		}
+		.padding()
+		.navigationTitle(Fish.name)
+	}
 }
 
 func getDefaultFish() -> [Fish] {
