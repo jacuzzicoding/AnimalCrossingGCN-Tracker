@@ -40,8 +40,7 @@ class Art {
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
-//conform to DonationTimestampable
-extension Art: DonationTimestampable { }
+
 
 struct ArtDetailView: View {
     var art: Art

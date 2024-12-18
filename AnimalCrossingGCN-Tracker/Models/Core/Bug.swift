@@ -37,8 +37,6 @@ class Bug {
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
-//conform to DonationTimestampable
-extension Bug: DonationTimestampable { }
 
 struct BugDetailView: View {
     var bug: Bug

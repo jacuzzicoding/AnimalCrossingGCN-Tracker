@@ -34,8 +34,6 @@ class Fossil {
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
-//conform to DonationTimestampable
-extension Fossil: DonationTimestampable { }
 
 // Detail view for Fossil
 struct FossilDetailView: View {
