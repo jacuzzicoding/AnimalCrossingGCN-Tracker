@@ -10,10 +10,12 @@ import SwiftUI
 
 @Model
 class Bug {
+    //Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var season: String?
     var isDonated: Bool
+    var donationDate: Date?
     var gameRawValues: [String]
     
     // Computed property to access ACGame enums
@@ -31,6 +33,7 @@ class Bug {
         self.name = name
         self.season = season
         self.isDonated = isDonated
+        self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
@@ -42,14 +45,30 @@ struct BugDetailView: View {
         VStack(alignment: .leading) {
             Text("Season: \(bug.season ?? "N/A")")
                 .font(.title2)
-            
+            //store the donation date
+            if let donationDate = bug.formattedDonationDate {
+                Text("Donated: \(donationDate)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
             Toggle("Donated", isOn: Binding(
                 get: { bug.isDonated },
                 set: { newValue in
-                    bug.isDonated = newValue
+                    if newValue {
+                        bug.isDonated = true
+                        bug.donationDate = Date()
+                        print("Debug: Donation date set to \(Date())")
+                    } else {
+                        bug.isDonated = false
+                        bug.donationDate = nil
+                        print("Debug: Donation date removed")
+                    }
                 }
             ))
             .padding(.top)
+
+            DetailMoreInfoView(item: bug)
 
             Spacer()
         }

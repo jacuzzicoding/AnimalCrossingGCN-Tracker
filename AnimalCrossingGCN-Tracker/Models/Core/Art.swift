@@ -11,11 +11,13 @@ import SwiftUI
 
 @Model
 class Art {
+	//Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var basedOn: String
     //var imageName: String // this will store the name of the image file
     var isDonated: Bool
+	var donationDate: Date?
     var gameRawValues: [String]
     
     // Computed property to access ACGame enums
@@ -34,9 +36,11 @@ class Art {
         self.basedOn = basedOn
         //self.imageName = imageName
         self.isDonated = isDonated
+		self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
+
 
 struct ArtDetailView: View {
     var art: Art
@@ -47,6 +51,11 @@ struct ArtDetailView: View {
                 .font(.subheadline)
                 .foregroundColor(.primary)
 
+			if let donationDate = art.formattedDonationDate {
+				Text("Donated: \(donationDate)")
+					.font(.subheadline)
+					.foregroundColor(.secondary)
+			}
             // I will uncomment this once we have images in the assets folder
             // Image(art.imageName)
             //     .resizable()
@@ -58,11 +67,21 @@ struct ArtDetailView: View {
             Toggle("Donated", isOn: Binding(
                 get: { art.isDonated },
                 set: { newValue in
-                    art.isDonated = newValue
+                    if newValue {
+                        art.isDonated = true
+                        art.donationDate = Date()
+                        print("Debug: Donation date set to \(Date())")
+                    } else {
+                        art.isDonated = false
+                        art.donationDate = nil
+                        print("Debug: Donation date removed")
+                    }
                 }
             ))
             .padding(.top)
 
+			DetailMoreInfoView(item: art)
+			
             Spacer()
         }
         .padding()

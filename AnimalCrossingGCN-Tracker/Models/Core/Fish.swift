@@ -10,11 +10,13 @@ import SwiftUI
 
 @Model
 class Fish {
+    //Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var season: String
     var location: String
     var isDonated: Bool
+    var donationDate: Date?
     var gameRawValues: [String]
     
     // Computed property to access ACGame enums
@@ -33,33 +35,50 @@ class Fish {
         self.season = season
         self.location = location
         self.isDonated = isDonated
+        self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
 
 struct FishDetailView: View {
-    var Fish: Fish
+	var Fish: Fish
 
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Season: \(Fish.season)")
-                .font(.title2)
-            
-            Text("Location: \(Fish.location)")
-                
-            Toggle("Donated", isOn: Binding(
-                get: { Fish.isDonated },
-                set: { newValue in
-                    Fish.isDonated = newValue
-                }
-            ))
-            .padding(.top)
+	var body: some View {
+		VStack(alignment: .leading) {
+			Text("Season: \(Fish.season)")
+				.font(.title2)
+			
+			Text("Location: \(Fish.location)")
+			
+			if let donationDate = Fish.formattedDonationDate {
+				Text("Donated: \(donationDate)")
+					.font(.subheadline)
+					.foregroundColor(.secondary)
+			}
 
-            Spacer()
-        }
-        .padding()
-        .navigationTitle(Fish.name)
-    }
+			Toggle("Donated", isOn: Binding(
+				get: { Fish.isDonated },
+				set: { newValue in
+					if newValue {
+						Fish.isDonated = true
+						Fish.donationDate = Date()
+						print("Debug: Setting donation date to \(Date())")
+					} else {
+						Fish.isDonated = false
+						Fish.donationDate = nil
+						print("Debug: Clearing donation date")
+					}
+				}
+			))
+			.padding(.top)
+
+			DetailMoreInfoView(item: Fish)
+
+			Spacer()
+		}
+		.padding()
+		.navigationTitle(Fish.name)
+	}
 }
 
 func getDefaultFish() -> [Fish] {

@@ -6,10 +6,10 @@ import Foundation
 import SwiftUI
 import SwiftData
 
-extension Fossil: CollectibleItem {}
-extension Bug: CollectibleItem {}
-extension Fish: CollectibleItem {}
-extension Art: CollectibleItem {}
+extension Fossil: CollectibleItem, DonationTimestampable {}
+extension Bug: CollectibleItem, DonationTimestampable {}
+extension Fish: CollectibleItem, DonationTimestampable {}
+extension Art: CollectibleItem, DonationTimestampable {}
 
 class CategoryManager: ObservableObject {
     @Published var selectedCategory: Category = .fossils
