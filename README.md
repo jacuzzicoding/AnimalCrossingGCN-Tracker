@@ -1,7 +1,7 @@
 # AnimalCrossingGCN-Tracker
-Version: v0.6.1-alpha (Development)
-Last Updated: December 18th, 2024
-Author: Brock Jenkinson (@jacuzzicoding)
+*Version: v0.6.1-alpha (Development)
+*Last Updated: December 18th, 2024
+*Author: Brock Jenkinson (@jacuzzicoding)
 
 ## Project Overview
 The AnimalCrossingGCN-Tracker is a comprehensive companion app for tracking Animal Crossing GameCube museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
