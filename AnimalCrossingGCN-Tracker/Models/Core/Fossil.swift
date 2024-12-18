@@ -7,10 +7,12 @@ import SwiftUI
 
 @Model
 class Fossil {
+    //Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var part: String?
     var isDonated: Bool
+    var donationDate: Date?
     var gameRawValues: [String]  // New storage property
     
     // Computed property for games
@@ -28,9 +30,14 @@ class Fossil {
         self.name = name
         self.part = part
         self.isDonated = isDonated
+        self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
+//conform to DonationTimestampable
+extension Fossil: DonationTimestampable { }
+
+// Detail view for Fossil
 struct FossilDetailView: View {
     var fossil: Fossil
 
@@ -39,6 +46,12 @@ struct FossilDetailView: View {
             if let part = fossil.part {
                 Text("Part: \(part)")
                     .font(.title2)
+            }
+            //store the donation date
+            if let donationDate = fossil.formattedDonationDate {
+                Text("Donated: \(donationDate)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
             }
             
             Toggle("Donated", isOn: Binding(
