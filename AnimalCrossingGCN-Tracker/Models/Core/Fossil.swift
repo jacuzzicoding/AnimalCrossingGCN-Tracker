@@ -53,7 +53,7 @@ struct FossilDetailView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
-            
+
             Toggle("Donated", isOn: Binding(
                 get: { fossil.isDonated },
                 set: { newValue in
@@ -61,6 +61,8 @@ struct FossilDetailView: View {
                 }
             ))
             .padding(.top)
+
+            DetailMoreInfoView(item: fossil) //the more info button
 
             Spacer()
         }
