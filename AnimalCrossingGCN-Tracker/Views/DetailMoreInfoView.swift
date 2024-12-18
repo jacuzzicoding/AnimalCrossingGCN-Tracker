@@ -31,6 +31,10 @@ struct DetailMoreInfoView<Item: CollectibleItem>: View {
 			}
 			
 			if isExpanded {
+				/*Debug info
+				Text("Debug: isDonated = \(item.isDonated.description)")
+				Text("Debug: donationDate = \(item.donationDate?.description ?? "nil")")
+				*/
 				VStack(alignment: .leading, spacing: 12) {
 					if item.isDonated, let donationDate = item.donationDate {
 						HStack(spacing: 12) {
