@@ -84,20 +84,20 @@ class DataManager: ObservableObject {
 
     /// Tracks the number of donations made each month and year.
     func trackDonations() {
-        let descriptor = FetchDescriptor<DonationTimestampable>()
+        let descriptor = FetchDescriptor<Fossil>()
         
         do {
-            let donations = try modelContext.fetch(descriptor)
+            let fossils = try modelContext.fetch(descriptor)
             let calendar = Calendar.current
             
-            let monthlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
-                if let month = donation.donationMonth {
+            let monthlyDonations = fossils.reduce(into: [Int: Int]()) { result, fossil in
+                if let month = fossil.donationMonth {
                     result[month, default: 0] += 1
                 }
             }
             
-            let yearlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
-                if let year = donation.donationYear {
+            let yearlyDonations = fossils.reduce(into: [Int: Int]()) { result, fossil in
+                if let year = fossil.donationYear {
                     result[year, default: 0] += 1
                 }
             }
@@ -111,14 +111,14 @@ class DataManager: ObservableObject {
 
     /// Identifies peak donation periods and analyzes the factors contributing to these peaks.
     func analyzeDonationTrends() {
-        let descriptor = FetchDescriptor<DonationTimestampable>()
+        let descriptor = FetchDescriptor<Fossil>()
         
         do {
-            let donations = try modelContext.fetch(descriptor)
+            let fossils = try modelContext.fetch(descriptor)
             let calendar = Calendar.current
             
-            let monthlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
-                if let month = donation.donationMonth {
+            let monthlyDonations = fossils.reduce(into: [Int: Int]()) { result, fossil in
+                if let month = fossil.donationMonth {
                     result[month, default: 0] += 1
                 }
             }
@@ -126,8 +126,8 @@ class DataManager: ObservableObject {
             let peakMonth = monthlyDonations.max { a, b in a.value < b.value }
             print("Peak Donation Month: \(peakMonth?.key ?? 0) with \(peakMonth?.value ?? 0) donations")
             
-            let yearlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
-                if let year = donation.donationYear {
+            let yearlyDonations = fossils.reduce(into: [Int: Int]()) { result, fossil in
+                if let year = fossil.donationYear {
                     result[year, default: 0] += 1
                 }
             }
@@ -144,20 +144,20 @@ class DataManager: ObservableObject {
         let categories: [Category] = [.fossils, .bugs, .fish, .art]
         
         for category in categories {
-            let descriptor = FetchDescriptor<DonationTimestampable>(predicate: NSPredicate(format: "category == %@", category.rawValue))
+            let descriptor = FetchDescriptor<Fossil>(predicate: NSPredicate(format: "category == %@", category.rawValue))
             
             do {
-                let donations = try modelContext.fetch(descriptor)
+                let fossils = try modelContext.fetch(descriptor)
                 let calendar = Calendar.current
                 
-                let monthlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
-                    if let month = donation.donationMonth {
+                let monthlyDonations = fossils.reduce(into: [Int: Int]()) { result, fossil in
+                    if let month = fossil.donationMonth {
                         result[month, default: 0] += 1
                     }
                 }
                 
-                let yearlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
-                    if let year = donation.donationYear {
+                let yearlyDonations = fossils.reduce(into: [Int: Int]()) { result, fossil in
+                    if let year = fossil.donationYear {
                         result[year, default: 0] += 1
                     }
                 }

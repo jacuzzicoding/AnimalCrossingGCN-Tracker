@@ -4,6 +4,8 @@ protocol DonationTimestampable {
 	// Required properties that conforming types must implement
 	var isDonated: Bool { get set }
 	var donationDate: Date? { get set }
+    var donationMonth: Int? { get }
+    var donationYear: Int? { get }
 }
 
 // Default implementations for all DonationTimestampable types
