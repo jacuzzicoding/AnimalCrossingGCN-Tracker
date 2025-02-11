@@ -1,26 +1,16 @@
-//
-//  Art.swift
-//  AnimalCrossingGCN-Tracker
-//
-//  Created by Brock Jenkinson on 10/5/24.
-//
-
 import Foundation
 import SwiftData
 import SwiftUI
 
 @Model
 class Art {
-	//Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var basedOn: String
-    //var imageName: String // this will store the name of the image file
     var isDonated: Bool
-	var donationDate: Date?
+    var donationDate: Date?
     var gameRawValues: [String]
     
-    // Computed property to access ACGame enums
     var games: [ACGame] {
         get {
             gameRawValues.compactMap { ACGame(rawValue: $0) }
@@ -34,13 +24,11 @@ class Art {
         self.id = UUID()
         self.name = name
         self.basedOn = basedOn
-        //self.imageName = imageName
         self.isDonated = isDonated
-		self.donationDate = nil
+        self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
-
 
 struct ArtDetailView: View {
     var art: Art
@@ -51,18 +39,11 @@ struct ArtDetailView: View {
                 .font(.subheadline)
                 .foregroundColor(.primary)
 
-			if let donationDate = art.formattedDonationDate {
-				Text("Donated: \(donationDate)")
-					.font(.subheadline)
-					.foregroundColor(.secondary)
-			}
-            // I will uncomment this once we have images in the assets folder
-            // Image(art.imageName)
-            //     .resizable()
-            //     .scaledToFit()
-            //     .frame(height: 200)
-            //     .cornerRadius(8)
-            //     .padding(.top)
+            if let donationDate = art.formattedDonationDate {
+                Text("Donated: \(donationDate)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
 
             Toggle("Donated", isOn: Binding(
                 get: { art.isDonated },
@@ -80,8 +61,8 @@ struct ArtDetailView: View {
             ))
             .padding(.top)
 
-			DetailMoreInfoView(item: art)
-			
+            DetailMoreInfoView(item: art)
+            
             Spacer()
         }
         .padding()

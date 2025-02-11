@@ -1,9 +1,3 @@
-//
-//  Fish.swift
-//  AnimalCrossingGCN-Tracker
-//
-//  Created by Brock Jenkinson on 10/6/24.
-//
 import Foundation
 import SwiftData
 import SwiftUI

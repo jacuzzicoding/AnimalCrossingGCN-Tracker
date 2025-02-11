@@ -1,7 +1,3 @@
-//
-//  ContentView.swift
-// 
-
 import Foundation
 import SwiftUI
 import SwiftData
@@ -135,6 +131,11 @@ struct CollectibleRow<T: CollectibleItem>: View {
                         .foregroundColor(.secondary)
                 } else if let art = item as? Art {
                     Text("Based on: \(art.basedOn)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                if let donationDate = item.donationDate {
+                    Text("Donated: \(donationDate.formatted(date: .long, time: .omitted))")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
