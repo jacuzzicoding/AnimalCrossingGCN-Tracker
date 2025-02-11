@@ -1,4 +1,3 @@
-// DataManager.swift
 import Foundation
 import SwiftData
 import Combine
@@ -80,6 +79,95 @@ class DataManager: ObservableObject {
             fetchCurrentTown()
         } catch {
             print("Error deleting town: \(error)")
+        }
+    }
+
+    /// Tracks the number of donations made each month and year.
+    func trackDonations() {
+        let descriptor = FetchDescriptor<DonationTimestampable>()
+        
+        do {
+            let donations = try modelContext.fetch(descriptor)
+            let calendar = Calendar.current
+            
+            let monthlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
+                if let month = donation.donationMonth {
+                    result[month, default: 0] += 1
+                }
+            }
+            
+            let yearlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
+                if let year = donation.donationYear {
+                    result[year, default: 0] += 1
+                }
+            }
+            
+            print("Monthly Donations: \(monthlyDonations)")
+            print("Yearly Donations: \(yearlyDonations)")
+        } catch {
+            print("Error tracking donations: \(error)")
+        }
+    }
+
+    /// Identifies peak donation periods and analyzes the factors contributing to these peaks.
+    func analyzeDonationTrends() {
+        let descriptor = FetchDescriptor<DonationTimestampable>()
+        
+        do {
+            let donations = try modelContext.fetch(descriptor)
+            let calendar = Calendar.current
+            
+            let monthlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
+                if let month = donation.donationMonth {
+                    result[month, default: 0] += 1
+                }
+            }
+            
+            let peakMonth = monthlyDonations.max { a, b in a.value < b.value }
+            print("Peak Donation Month: \(peakMonth?.key ?? 0) with \(peakMonth?.value ?? 0) donations")
+            
+            let yearlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
+                if let year = donation.donationYear {
+                    result[year, default: 0] += 1
+                }
+            }
+            
+            let peakYear = yearlyDonations.max { a, b in a.value < b.value }
+            print("Peak Donation Year: \(peakYear?.key ?? 0) with \(peakYear?.value ?? 0) donations")
+        } catch {
+            print("Error analyzing donation trends: \(error)")
+        }
+    }
+
+    /// Compares donation trends across different categories (e.g., fossils, bugs, fish, art).
+    func compareDonationTrends() {
+        let categories: [Category] = [.fossils, .bugs, .fish, .art]
+        
+        for category in categories {
+            let descriptor = FetchDescriptor<DonationTimestampable>(predicate: NSPredicate(format: "category == %@", category.rawValue))
+            
+            do {
+                let donations = try modelContext.fetch(descriptor)
+                let calendar = Calendar.current
+                
+                let monthlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
+                    if let month = donation.donationMonth {
+                        result[month, default: 0] += 1
+                    }
+                }
+                
+                let yearlyDonations = donations.reduce(into: [Int: Int]()) { result, donation in
+                    if let year = donation.donationYear {
+                        result[year, default: 0] += 1
+                    }
+                }
+                
+                print("Category: \(category.rawValue)")
+                print("Monthly Donations: \(monthlyDonations)")
+                print("Yearly Donations: \(yearlyDonations)")
+            } catch {
+                print("Error comparing donation trends for category \(category.rawValue): \(error)")
+            }
         }
     }
 }

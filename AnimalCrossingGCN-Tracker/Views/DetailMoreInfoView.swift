@@ -1,10 +1,3 @@
-//
-//  DetailMoreInfoView.swift
-//  AnimalCrossingGCN-Tracker
-//
-//  Created by Brock Jenkinson on 12/18/24.
-//
-
 import SwiftUI
 
 struct DetailMoreInfoView<Item: CollectibleItem>: View {
@@ -60,6 +53,11 @@ struct DetailMoreInfoView<Item: CollectibleItem>: View {
 			}
 		}
 		.padding(.horizontal)
+		.onChange(of: item.isDonated) { newValue in
+			if newValue {
+				item.logDonation()
+			}
+		}
 	}
 }
 

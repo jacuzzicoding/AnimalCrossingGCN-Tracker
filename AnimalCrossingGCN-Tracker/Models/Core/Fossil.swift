@@ -1,6 +1,3 @@
-//
-//  Fossil.swift
-//
 import Foundation
 import SwiftData
 import SwiftUI
