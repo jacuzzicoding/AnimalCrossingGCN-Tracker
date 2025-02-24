@@ -9,7 +9,7 @@ import SwiftData
 import SwiftUI
 
 @Model
-class Bug {
+class Bug: DonationTimestampable {
     //Properties
     @Attribute(.unique) var id: UUID
     var name: String
@@ -39,41 +39,48 @@ class Bug {
 }
 
 struct BugDetailView: View {
-    var bug: Bug
+    @Bindable var bug: Bug
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Season: \(bug.season ?? "N/A")")
-                .font(.title2)
-            //store the donation date
-            if let donationDate = bug.formattedDonationDate {
-                Text("Donated: \(donationDate)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-
-            Toggle("Donated", isOn: Binding(
-                get: { bug.isDonated },
-                set: { newValue in
-                    if newValue {
-                        bug.isDonated = true
-                        bug.donationDate = Date()
-                        print("Debug: Donation date set to \(Date())")
-                    } else {
-                        bug.isDonated = false
-                        bug.donationDate = nil
-                        print("Debug: Donation date removed")
+        CommonDetailView(item: $bug) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Season information
+                HStack {
+                    Image(systemName: "calendar")
+                        .foregroundColor(.green)
+                        .font(.headline)
+                    Text("Season: \(bug.season ?? "Unknown")")
+                        .font(.headline)
+                }
+                .padding()
+                .background(Color.green.opacity(0.1))
+                .cornerRadius(8)
+                
+                // Game availability section
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Available In:")
+                        .font(.headline)
+                    
+                    HStack {
+                        ForEach(bug.games, id: \.self) { game in
+                            VStack {
+                                Image(systemName: game.icon)
+                                Text(game.shortName)
+                                    .font(.caption)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                        Spacer()
                     }
                 }
-            ))
-            .padding(.top)
-
-            DetailMoreInfoView(item: bug)
-
-            Spacer()
+                .padding()
+                .background(Color.secondary.opacity(0.05))
+                .cornerRadius(8)
+            }
         }
-        .padding()
-        .navigationTitle(bug.name)
     }
 }
 

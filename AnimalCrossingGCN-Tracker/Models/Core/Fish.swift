@@ -9,7 +9,7 @@ import SwiftData
 import SwiftUI
 
 @Model
-class Fish {
+class Fish: DonationTimestampable {
     //Properties
     @Attribute(.unique) var id: UUID
     var name: String
@@ -41,44 +41,61 @@ class Fish {
 }
 
 struct FishDetailView: View {
-	var Fish: Fish
+    @Bindable var fish: Fish
 
-	var body: some View {
-		VStack(alignment: .leading) {
-			Text("Season: \(Fish.season)")
-				.font(.title2)
-			
-			Text("Location: \(Fish.location)")
-			
-			if let donationDate = Fish.formattedDonationDate {
-				Text("Donated: \(donationDate)")
-					.font(.subheadline)
-					.foregroundColor(.secondary)
-			}
-
-			Toggle("Donated", isOn: Binding(
-				get: { Fish.isDonated },
-				set: { newValue in
-					if newValue {
-						Fish.isDonated = true
-						Fish.donationDate = Date()
-						print("Debug: Setting donation date to \(Date())")
-					} else {
-						Fish.isDonated = false
-						Fish.donationDate = nil
-						print("Debug: Clearing donation date")
-					}
-				}
-			))
-			.padding(.top)
-
-			DetailMoreInfoView(item: Fish)
-
-			Spacer()
-		}
-		.padding()
-		.navigationTitle(Fish.name)
-	}
+    var body: some View {
+        CommonDetailView(item: $fish) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Season information
+                HStack {
+                    Image(systemName: "calendar")
+                        .foregroundColor(.blue)
+                        .font(.headline)
+                    Text("Season: \(fish.season)")
+                        .font(.headline)
+                }
+                .padding()
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(8)
+                
+                // Location information
+                HStack {
+                    Image(systemName: "mappin.and.ellipse")
+                        .foregroundColor(.blue)
+                        .font(.headline)
+                    Text("Location: \(fish.location)")
+                        .font(.headline)
+                }
+                .padding()
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(8)
+                
+                // Game availability section
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Available In:")
+                        .font(.headline)
+                    
+                    HStack {
+                        ForEach(fish.games, id: \.self) { game in
+                            VStack {
+                                Image(systemName: game.icon)
+                                Text(game.shortName)
+                                    .font(.caption)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                        Spacer()
+                    }
+                }
+                .padding()
+                .background(Color.secondary.opacity(0.05))
+                .cornerRadius(8)
+            }
+        }
+    }
 }
 
 func getDefaultFish() -> [Fish] {

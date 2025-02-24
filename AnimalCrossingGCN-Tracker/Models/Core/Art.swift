@@ -10,14 +10,14 @@ import SwiftData
 import SwiftUI
 
 @Model
-class Art {
-	//Properties
+class Art: DonationTimestampable {
+    //Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var basedOn: String
     //var imageName: String // this will store the name of the image file
     var isDonated: Bool
-	var donationDate: Date?
+    var donationDate: Date?
     var gameRawValues: [String]
     
     // Computed property to access ACGame enums
@@ -36,56 +36,76 @@ class Art {
         self.basedOn = basedOn
         //self.imageName = imageName
         self.isDonated = isDonated
-		self.donationDate = nil
+        self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
     }
 }
 
-
 struct ArtDetailView: View {
-    var art: Art
+    @Bindable var art: Art
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Based on: \(art.basedOn)")
-                .font(.subheadline)
-                .foregroundColor(.primary)
-
-			if let donationDate = art.formattedDonationDate {
-				Text("Donated: \(donationDate)")
-					.font(.subheadline)
-					.foregroundColor(.secondary)
-			}
-            // I will uncomment this once we have images in the assets folder
-            // Image(art.imageName)
-            //     .resizable()
-            //     .scaledToFit()
-            //     .frame(height: 200)
-            //     .cornerRadius(8)
-            //     .padding(.top)
-
-            Toggle("Donated", isOn: Binding(
-                get: { art.isDonated },
-                set: { newValue in
-                    if newValue {
-                        art.isDonated = true
-                        art.donationDate = Date()
-                        print("Debug: Donation date set to \(Date())")
-                    } else {
-                        art.isDonated = false
-                        art.donationDate = nil
-                        print("Debug: Donation date removed")
+        CommonDetailView(item: $art) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Artwork details
+                HStack {
+                    Image(systemName: "paintpalette.fill")
+                        .foregroundColor(.purple)
+                        .font(.headline)
+                    Text("Based on:")
+                        .font(.headline)
+                }
+                .padding(.horizontal)
+                
+                Text(art.basedOn)
+                    .font(.subheadline)
+                    .padding(.horizontal)
+                
+                // Future image display
+                // Once we have images, we can uncomment this
+                /*
+                VStack {
+                    Text("Artwork Preview")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Image(art.imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 200)
+                        .cornerRadius(8)
+                }
+                .padding()
+                .background(Color.secondary.opacity(0.05))
+                .cornerRadius(8)
+                */
+                
+                // Game availability section
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Available In:")
+                        .font(.headline)
+                    
+                    HStack {
+                        ForEach(art.games, id: \.self) { game in
+                            VStack {
+                                Image(systemName: game.icon)
+                                Text(game.shortName)
+                                    .font(.caption)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                        Spacer()
                     }
                 }
-            ))
-            .padding(.top)
-
-			DetailMoreInfoView(item: art)
-			
-            Spacer()
+                .padding()
+                .background(Color.secondary.opacity(0.05))
+                .cornerRadius(8)
+            }
+            .padding(.bottom)
         }
-        .padding()
-        .navigationTitle(art.name)
     }
 }
 

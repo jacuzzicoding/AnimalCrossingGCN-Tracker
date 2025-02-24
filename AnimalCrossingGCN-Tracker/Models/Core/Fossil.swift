@@ -6,7 +6,7 @@ import SwiftData
 import SwiftUI
 
 @Model
-class Fossil {
+class Fossil: DonationTimestampable {
     //Properties
     @Attribute(.unique) var id: UUID
     var name: String
@@ -36,44 +36,50 @@ class Fossil {
 }
 
 struct FossilDetailView: View {
-	var fossil: Fossil
+    @Bindable var fossil: Fossil
 
-	var body: some View {
-		VStack(alignment: .leading) {
-			if let part = fossil.part {
-				Text("Part: \(part)")
-					.font(.title2)
-			}
-			
-			if let donationDate = fossil.formattedDonationDate {
-				Text("Donated: \(donationDate)")
-					.font(.subheadline)
-					.foregroundColor(.secondary)
-			}
-
-			Toggle("Donated", isOn: Binding(
-				get: { fossil.isDonated },
-				set: { newValue in
-					if newValue {
-						fossil.isDonated = true
-						fossil.donationDate = Date()
-						print("Debug: Donation date set to \(Date())")
-					} else {
-						fossil.isDonated = false
-						fossil.donationDate = nil
-						print("Debug: Donation date removed")
-					}
-				}
-			))
-			.padding(.top)
-
-			DetailMoreInfoView(item: fossil)
-
-			Spacer()
-		}
-		.padding()
-		.navigationTitle(fossil.name)
-	}
+    var body: some View {
+        CommonDetailView(item: $fossil) {
+            VStack(alignment: .leading, spacing: 12) {
+                if let part = fossil.part {
+                    HStack {
+                        Image(systemName: "fossil.shell.fill")
+                            .foregroundColor(.brown)
+                            .font(.headline)
+                        Text("Part: \(part)")
+                            .font(.headline)
+                    }
+                    .padding()
+                    .background(Color.brown.opacity(0.1))
+                    .cornerRadius(8)
+                }
+                
+                // Game availability section
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Available In:")
+                        .font(.headline)
+                    
+                    HStack {
+                        ForEach(fossil.games, id: \.self) { game in
+                            VStack {
+                                Image(systemName: game.icon)
+                                Text(game.shortName)
+                                    .font(.caption)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                        Spacer()
+                    }
+                }
+                .padding()
+                .background(Color.secondary.opacity(0.05))
+                .cornerRadius(8)
+            }
+        }
+    }
 }
 
 func getDefaultFossils() -> [Fossil] {
