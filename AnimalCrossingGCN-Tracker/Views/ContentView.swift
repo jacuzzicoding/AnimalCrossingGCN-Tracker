@@ -6,10 +6,10 @@ import Foundation
 import SwiftUI
 import SwiftData
 
-extension Fossil: CollectibleItem, DonationTimestampable {}
-extension Bug: CollectibleItem, DonationTimestampable {}
-extension Fish: CollectibleItem, DonationTimestampable {}
-extension Art: CollectibleItem, DonationTimestampable {}
+extension Fossil: CollectibleItem {}
+extension Bug: CollectibleItem {}
+extension Fish: CollectibleItem {}
+extension Art: CollectibleItem {}
 
 class CategoryManager: ObservableObject {
     @Published var selectedCategory: Category = .fossils
@@ -62,7 +62,7 @@ enum Category: String, CaseIterable {
             }
         case .fish:
             if let fish = item as? Fish {
-                FishDetailView(Fish: fish)
+                FishDetailView(fish: fish)
             }
         case .art:
             if let art = item as? Art {
@@ -142,6 +142,14 @@ struct CollectibleRow<T: CollectibleItem>: View {
             
             Spacer()
             
+            // Display donation date if available
+            if item.isDonated, let date = item.donationDate {
+                Text(date.formatted(date: .abbreviated, time: .omitted))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.trailing, 8)
+            }
+            
             // Enhanced donation indicator
             Image(systemName: item.isDonated ? "checkmark.circle.fill" : "circle")
                 .foregroundColor(item.isDonated ? .green : .gray)
@@ -206,6 +214,9 @@ struct ContentView: View { // Updated ContentView
     @EnvironmentObject var dataManager: DataManager
     @State private var isEditingTown = false
     @State private var newTownName: String = ""
+    
+    // Donation history
+    @State private var showingDonationHistory = false
 
     // Category manager
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -219,9 +230,10 @@ struct ContentView: View { // Updated ContentView
                 HStack {
                     Text("Town Name:")
                         .font(.headline)
-                    Spacer()
+                    
                     Text(dataManager.currentTown?.name ?? "Loading...")
                         .font(.title2)
+                    
                     Button(action: {
                         // Initialize with current town name or empty if not set
                         newTownName = dataManager.currentTown?.name ?? ""
@@ -229,6 +241,22 @@ struct ContentView: View { // Updated ContentView
                     }) {
                         Image(systemName: "pencil")
                             .foregroundColor(.blue)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                    
+                    Spacer()
+                    
+                    // Donation History Button
+                    Button(action: {
+                        showingDonationHistory = true
+                    }) {
+                        Label("Donation History", systemImage: "chart.bar.doc.horizontal")
+                            .font(.callout)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.accentColor.opacity(0.1))
+                            .foregroundColor(.accentColor)
+                            .cornerRadius(8)
                     }
                     .buttonStyle(BorderlessButtonStyle())
                 }
@@ -251,7 +279,13 @@ struct ContentView: View { // Updated ContentView
             FloatingCategorySwitcher()
                 .padding(.bottom, 20)
         }
+        .sheet(isPresented: $showingDonationHistory) {
+            NavigationStack {
+                DonationHistoryView(modelContext: modelContext)
+            }
+        }
     }
+    
     /*Data Loading Section*/ //moving to DataManager.swift soon
     // Keeping the existing loadData function unchanged
     private func loadData() {
@@ -289,7 +323,7 @@ struct ContentView: View { // Updated ContentView
                 BugDetailView(bug: bug)
             }
             .navigationDestination(for: Fish.self) { fish in
-                FishDetailView(Fish: fish)
+                FishDetailView(fish: fish)
             }
             .navigationDestination(for: Art.self) { art in
                 ArtDetailView(art: art)
@@ -303,6 +337,15 @@ struct ContentView: View { // Updated ContentView
                 NavigationStack {
                     addNavigationDestinations(mainContent)
                         .navigationTitle("Museum Tracker")
+                        .toolbar {
+                            ToolbarItem(placement: .primaryAction) {
+                                Button(action: {
+                                    showingDonationHistory = true
+                                }) {
+                                    Image(systemName: "chart.bar.doc.horizontal")
+                                }
+                            }
+                        }
                 }
             } else {
                 // iPad/Mac section
