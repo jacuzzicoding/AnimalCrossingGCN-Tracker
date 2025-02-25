@@ -9,13 +9,12 @@ import SwiftUI
 import SwiftData
 
 struct CommonDetailView<Item: CollectibleItem, Content: View>: View {
-    @Environment(\.modelContext) private var modelContext
-    var item: Item
+    @Binding var item: Item
     let additionalContent: Content
     @State private var showingDonationHistory = false
     
-    init(item: Item, @ViewBuilder additionalContent: () -> Content) {
-        self.item = item
+    init(item: Binding<Item>, @ViewBuilder additionalContent: () -> Content) {
+        self._item = item
         self.additionalContent = additionalContent()
     }
     
@@ -26,7 +25,7 @@ struct CommonDetailView<Item: CollectibleItem, Content: View>: View {
                 additionalContent
                 
                 // Donation date picker
-                DonationDatePickerView(item: item)
+                DonationDatePickerView(item: $item)
                 
                 // More info
                 DetailMoreInfoView(item: item)
@@ -55,9 +54,27 @@ struct CommonDetailView<Item: CollectibleItem, Content: View>: View {
         .navigationTitle(item.name)
         .sheet(isPresented: $showingDonationHistory) {
             NavigationStack {
-                DonationHistoryView(modelContext: modelContext)
+                if let modelContext = item.modelContext {
+                    DonationHistoryView(modelContext: modelContext)
+                } else {
+                    Text("Unable to access model context")
+                        .foregroundColor(.red)
+                }
             }
         }
+    }
+}
+
+// MARK: - Extensions for accessing ModelContext
+
+extension CollectibleItem {
+    var modelContext: ModelContext? {
+        // Try to get the ModelContext from the object
+        // This assumes the item is a ModelObject (from SwiftData)
+		guard let modelObject = (Mirror(reflecting: self).descendant("_$observationRegistrar")? as AnyObject).descendant("context") else {
+            return nil
+        }
+        return modelObject as? ModelContext
     }
 }
 
@@ -67,7 +84,7 @@ struct CommonDetailView_Previews: PreviewProvider {
     
     static var previews: some View {
         NavigationStack {
-            CommonDetailView(item: previewFossil) {
+            CommonDetailView(item: .constant(previewFossil)) {
                 Text("Fossil-specific content would go here")
                     .padding()
                     .background(Color.secondary.opacity(0.1))
