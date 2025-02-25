@@ -66,25 +66,25 @@ class DonationTrackingViewModel: ObservableObject {
         var allItems: [AnyCollectibleItem] = []
         
         // Load fossils
-        let fossilDescriptor = FetchDescriptor<Fossil>(predicate: buildPredicate(for: Fossil.self))
+        let fossilDescriptor = FetchDescriptor<Fossil>(predicate: buildPredicate(for: .fossils))
         if let fossils = try? modelContext.fetch(fossilDescriptor) {
             allItems.append(contentsOf: fossils.map { AnyCollectibleItem($0) })
         }
         
         // Load bugs
-        let bugDescriptor = FetchDescriptor<Bug>(predicate: buildPredicate(for: Bug.self))
+        let bugDescriptor = FetchDescriptor<Bug>(predicate: buildPredicate(for: .bugs))
         if let bugs = try? modelContext.fetch(bugDescriptor) {
             allItems.append(contentsOf: bugs.map { AnyCollectibleItem($0) })
         }
         
         // Load fish
-        let fishDescriptor = FetchDescriptor<Fish>(predicate: buildPredicate(for: Fish.self))
+        let fishDescriptor = FetchDescriptor<Fish>(predicate: buildPredicate(for: .fish))
         if let fish = try? modelContext.fetch(fishDescriptor) {
             allItems.append(contentsOf: fish.map { AnyCollectibleItem($0) })
         }
         
         // Load art
-        let artDescriptor = FetchDescriptor<Art>(predicate: buildPredicate(for: Art.self))
+        let artDescriptor = FetchDescriptor<Art>(predicate: buildPredicate(for: .art))
         if let art = try? modelContext.fetch(artDescriptor) {
             allItems.append(contentsOf: art.map { AnyCollectibleItem($0) })
         }
@@ -132,7 +132,7 @@ class DonationTrackingViewModel: ObservableObject {
         for category in allCategories {
             switch category {
             case .fossils:
-                let descriptor = FetchDescriptor<Fossil>(predicate: buildPredicate(for: Fossil.self))
+                let descriptor = FetchDescriptor<Fossil>(predicate: buildPredicate(for: .fossils))
                 if let fossils = try? modelContext.fetch(descriptor) {
                     totalDonations += fossils.filter { 
                         $0.isDonated && 
@@ -140,7 +140,7 @@ class DonationTrackingViewModel: ObservableObject {
                     }.count
                 }
             case .bugs:
-                let descriptor = FetchDescriptor<Bug>(predicate: buildPredicate(for: Bug.self))
+                let descriptor = FetchDescriptor<Bug>(predicate: buildPredicate(for: .bugs))
                 if let bugs = try? modelContext.fetch(descriptor) {
                     totalDonations += bugs.filter { 
                         $0.isDonated && 
@@ -148,7 +148,7 @@ class DonationTrackingViewModel: ObservableObject {
                     }.count
                 }
             case .fish:
-                let descriptor = FetchDescriptor<Fish>(predicate: buildPredicate(for: Fish.self))
+                let descriptor = FetchDescriptor<Fish>(predicate: buildPredicate(for: .fish))
                 if let fish = try? modelContext.fetch(descriptor) {
                     totalDonations += fish.filter { 
                         $0.isDonated && 
@@ -156,7 +156,7 @@ class DonationTrackingViewModel: ObservableObject {
                     }.count
                 }
             case .art:
-                let descriptor = FetchDescriptor<Art>(predicate: buildPredicate(for: Art.self))
+                let descriptor = FetchDescriptor<Art>(predicate: buildPredicate(for: .art))
                 if let art = try? modelContext.fetch(descriptor) {
                     totalDonations += art.filter { 
                         $0.isDonated && 
@@ -182,7 +182,7 @@ class DonationTrackingViewModel: ObservableObject {
         
         // Load fossils if category is selected
         if selectedCategories.contains(.fossils) {
-            let fossilDescriptor = FetchDescriptor<Fossil>(predicate: buildPredicate(for: Fossil.self))
+            let fossilDescriptor = FetchDescriptor<Fossil>(predicate: buildPredicate(for: .fossils))
             if let fossils = try? modelContext.fetch(fossilDescriptor) {
                 allItems.append(contentsOf: fossils.map { AnyCollectibleItem($0) })
             }
@@ -190,7 +190,7 @@ class DonationTrackingViewModel: ObservableObject {
         
         // Load bugs if category is selected
         if selectedCategories.contains(.bugs) {
-            let bugDescriptor = FetchDescriptor<Bug>(predicate: buildPredicate(for: Bug.self))
+            let bugDescriptor = FetchDescriptor<Bug>(predicate: buildPredicate(for: .bugs))
             if let bugs = try? modelContext.fetch(bugDescriptor) {
                 allItems.append(contentsOf: bugs.map { AnyCollectibleItem($0) })
             }
@@ -198,7 +198,7 @@ class DonationTrackingViewModel: ObservableObject {
         
         // Load fish if category is selected
         if selectedCategories.contains(.fish) {
-            let fishDescriptor = FetchDescriptor<Fish>(predicate: buildPredicate(for: Fish.self))
+            let fishDescriptor = FetchDescriptor<Fish>(predicate: buildPredicate(for: .fish))
             if let fish = try? modelContext.fetch(fishDescriptor) {
                 allItems.append(contentsOf: fish.map { AnyCollectibleItem($0) })
             }
@@ -206,7 +206,7 @@ class DonationTrackingViewModel: ObservableObject {
         
         // Load art if category is selected
         if selectedCategories.contains(.art) {
-            let artDescriptor = FetchDescriptor<Art>(predicate: buildPredicate(for: Art.self))
+            let artDescriptor = FetchDescriptor<Art>(predicate: buildPredicate(for: .art))
             if let art = try? modelContext.fetch(artDescriptor) {
                 allItems.append(contentsOf: art.map { AnyCollectibleItem($0) })
             }
@@ -223,19 +223,21 @@ class DonationTrackingViewModel: ObservableObject {
             .map { $0 }
     }
     
-    // Generic function to build predicate for a specific type
-    private func buildPredicate<T: CollectibleItem>(for type: T.Type) -> Predicate<T> {
-        // If no game is selected, return a predicate that matches everything
-        guard let selectedGame = selectedGame else {
-            return #Predicate<T> { _ in true }
-        }
+    private func buildPredicate(for category: ItemCategory) -> Predicate<some CollectibleItem> {
+        var predicates: [Predicate<some CollectibleItem>] = []
         
-        // Create a game filter predicate
-        return #Predicate<T> { item in
-            item.games.contains { $0.rawValue == selectedGame.rawValue }
+        // Add game filter if selected
+        if let selectedGame = selectedGame {
+            predicates.append(#Predicate { item in
+                item.games.contains { $0.rawValue == selectedGame.rawValue }
+            })
         }
         
         // Date range filter will be applied after fetching since donationDate might be nil
+        
+        return predicates.isEmpty
+            ? #Predicate { _ in true }
+            : predicates.reduce(#Predicate { _ in true }, { $0 && $1 })
     }
     
     private func dateRangeContains(_ date: Date) -> Bool {

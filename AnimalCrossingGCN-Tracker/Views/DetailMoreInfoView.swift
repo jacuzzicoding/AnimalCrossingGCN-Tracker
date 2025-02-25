@@ -51,29 +51,6 @@ struct DetailMoreInfoView<Item: CollectibleItem>: View {
 						}
 					}
 					
-					// Game Version Info
-					HStack(spacing: 12) {
-						Image(systemName: "gamecontroller")
-							.foregroundColor(.secondary)
-						
-						VStack(alignment: .leading) {
-							Text("Available in")
-								.font(.caption)
-								.foregroundColor(.secondary)
-							
-							HStack {
-								ForEach(item.games, id: \.self) { game in
-									Text(game.shortName)
-										.font(.caption)
-										.padding(.horizontal, 6)
-										.padding(.vertical, 2)
-										.background(Color.blue.opacity(0.1))
-										.cornerRadius(4)
-								}
-							}
-						}
-					}
-					
 					// Future info sections can be added here
 				}
 				.padding()
