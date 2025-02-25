@@ -39,7 +39,7 @@ struct FossilDetailView: View {
     @Bindable var fossil: Fossil
 
     var body: some View {
-        CommonDetailView(item: $fossil) {
+        CommonDetailView(item: fossil) {
             VStack(alignment: .leading, spacing: 12) {
                 if let part = fossil.part {
                     HStack {

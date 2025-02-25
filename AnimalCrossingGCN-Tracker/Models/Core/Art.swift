@@ -45,7 +45,7 @@ struct ArtDetailView: View {
     @Bindable var art: Art
 
     var body: some View {
-        CommonDetailView(item: $art) {
+        CommonDetailView(item: art) {
             VStack(alignment: .leading, spacing: 12) {
                 // Artwork details
                 HStack {

@@ -44,7 +44,7 @@ struct FishDetailView: View {
     @Bindable var fish: Fish
 
     var body: some View {
-        CommonDetailView(item: $fish) {
+        CommonDetailView(item: fish) {
             VStack(alignment: .leading, spacing: 12) {
                 // Season information
                 HStack {
