@@ -34,29 +34,36 @@ struct DonationHistoryView: View {
                 filtersSection
                 
                 // Main content based on selected tab
-                TabView(selection: $selectedTab) {
-                    overviewTab.tag(0)
-                    historyTab.tag(1)
-                    calendarTab.tag(2)
+                Group {
+                    if selectedTab == 0 {
+                        overviewTab
+                    } else if selectedTab == 1 {
+                        historyTab
+                    } else {
+                        calendarTab
+                    }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
             }
             .navigationTitle("Donation History")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        Task {
-                            await viewModel.resetFilters()
-                        }
-                    }) {
-                        Label("Reset", systemImage: "arrow.counterclockwise")
-                    }
+                ToolbarItem {
+                    resetButton
                 }
             }
             .task {
                 await viewModel.loadDonationData()
             }
+        }
+    }
+    
+    private var resetButton: some View {
+        Button(action: {
+            viewModel.resetFilters()
+        }) {
+            Label("Reset", systemImage: "arrow.counterclockwise")
         }
     }
     
@@ -68,11 +75,11 @@ struct DonationHistoryView: View {
                 Text("Filters")
                     .font(.headline)
                 Spacer()
-                Button(action: {
+                Button {
                     Task {
                         await viewModel.applyFilters()
                     }
-                }) {
+                } label: {
                     Text("Apply")
                         .fontWeight(.medium)
                         .foregroundColor(.white)
