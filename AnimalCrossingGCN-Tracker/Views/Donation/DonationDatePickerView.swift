@@ -6,46 +6,91 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct DonationDatePickerView<Item: CollectibleItem>: View {
-    @Binding var item: Item
+    var item: Item
     @State private var isShowingDatePicker = false
     @State private var selectedDate: Date
+    @State private var isDonated: Bool
     
-    init(item: Binding<Item>) {
-        self._item = item
-        self._selectedDate = State(initialValue: item.wrappedValue.donationDate ?? Date())
+    init(item: Item) {
+        self.item = item
+        self._selectedDate = State(initialValue: item.donationDate ?? Date())
+        self._isDonated = State(initialValue: item.isDonated)
     }
     
     var body: some View {
         VStack(spacing: 12) {
             // Donation status toggle
             Toggle("Donated to Museum", isOn: Binding(
-                get: { item.isDonated },
+                get: { isDonated },
                 set: { newValue in
-                    if newValue {
-                        item.isDonated = true
-                        if item.donationDate == nil {
-                            // Only set to current date if not already set
-                            item.donationDate = Date()
-                            selectedDate = Date()
+                    isDonated = newValue
+                    
+                    // Update the actual model
+                    if let model = item as? Fossil {
+                        if newValue {
+                            model.isDonated = true
+                            if model.donationDate == nil {
+                                model.donationDate = Date()
+                                selectedDate = Date()
+                            }
+                        } else {
+                            model.isDonated = false
                         }
-                    } else {
-                        item.isDonated = false
-                        // Leave donationDate as is unless explicitly cleared
+                    } else if let model = item as? Bug {
+                        if newValue {
+                            model.isDonated = true
+                            if model.donationDate == nil {
+                                model.donationDate = Date()
+                                selectedDate = Date()
+                            }
+                        } else {
+                            model.isDonated = false
+                        }
+                    } else if let model = item as? Fish {
+                        if newValue {
+                            model.isDonated = true
+                            if model.donationDate == nil {
+                                model.donationDate = Date()
+                                selectedDate = Date()
+                            }
+                        } else {
+                            model.isDonated = false
+                        }
+                    } else if let model = item as? Art {
+                        if newValue {
+                            model.isDonated = true
+                            if model.donationDate == nil {
+                                model.donationDate = Date()
+                                selectedDate = Date()
+                            }
+                        } else {
+                            model.isDonated = false
+                        }
                     }
                 }
             ))
             .padding(.vertical, 4)
             
-            if item.isDonated {
+            if isDonated {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("Donation Date")
                             .font(.subheadline)
                         Spacer()
                         Button(action: {
-                            item.donationDate = nil
+                            // Clear the donation date
+                            if let model = item as? Fossil {
+                                model.donationDate = nil
+                            } else if let model = item as? Bug {
+                                model.donationDate = nil
+                            } else if let model = item as? Fish {
+                                model.donationDate = nil
+                            } else if let model = item as? Art {
+                                model.donationDate = nil
+                            }
                         }) {
                             Text("Clear")
                                 .font(.caption)
@@ -59,7 +104,7 @@ struct DonationDatePickerView<Item: CollectibleItem>: View {
                         }
                     }) {
                         HStack {
-                            if let date = item.donationDate {
+                            if let date = getCurrentDonationDate() {
                                 Text(date.formatted(date: .long, time: .omitted))
                                     .foregroundColor(.primary)
                             } else {
@@ -84,14 +129,33 @@ struct DonationDatePickerView<Item: CollectibleItem>: View {
                             )
                             .datePickerStyle(.graphical)
                             .onChange(of: selectedDate) { oldValue, newValue in
-                                item.donationDate = newValue
+                                // Update the model's donation date
+                                if let model = item as? Fossil {
+                                    model.donationDate = newValue
+                                } else if let model = item as? Bug {
+                                    model.donationDate = newValue
+                                } else if let model = item as? Fish {
+                                    model.donationDate = newValue
+                                } else if let model = item as? Art {
+                                    model.donationDate = newValue
+                                }
                             }
                             
                             HStack {
                                 Button(action: {
                                     // Set to today
                                     selectedDate = Date()
-                                    item.donationDate = Date()
+                                    
+                                    // Update the model
+                                    if let model = item as? Fossil {
+                                        model.donationDate = Date()
+                                    } else if let model = item as? Bug {
+                                        model.donationDate = Date()
+                                    } else if let model = item as? Fish {
+                                        model.donationDate = Date()
+                                    } else if let model = item as? Art {
+                                        model.donationDate = Date()
+                                    }
                                 }) {
                                     Text("Today")
                                         .frame(maxWidth: .infinity)
@@ -122,7 +186,7 @@ struct DonationDatePickerView<Item: CollectibleItem>: View {
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
                     
-                    if let donationDate = item.donationDate {
+                    if let donationDate = getCurrentDonationDate() {
                         Text("Donated \(getRelativeTimeDescription(from: donationDate))")
                             .font(.caption)
                             .foregroundColor(.secondary)
@@ -132,10 +196,24 @@ struct DonationDatePickerView<Item: CollectibleItem>: View {
                 }
             }
         }
-        .animation(.easeInOut, value: item.isDonated)
+        .animation(.easeInOut, value: isDonated)
         .padding()
         .background(Color.secondary.opacity(0.05))
         .cornerRadius(12)
+    }
+    
+    // Helper function to get current donation date from the actual model
+    private func getCurrentDonationDate() -> Date? {
+        if let model = item as? Fossil {
+            return model.donationDate
+        } else if let model = item as? Bug {
+            return model.donationDate
+        } else if let model = item as? Fish {
+            return model.donationDate
+        } else if let model = item as? Art {
+            return model.donationDate
+        }
+        return nil
     }
     
     // Helper function to generate relative time descriptions
@@ -152,7 +230,7 @@ struct DonationDatePickerView_Previews: PreviewProvider {
     
     static var previews: some View {
         VStack {
-            DonationDatePickerView(item: .constant(previewFossil))
+            DonationDatePickerView(item: previewFossil)
                 .padding()
         }
         .previewLayout(.sizeThatFits)
