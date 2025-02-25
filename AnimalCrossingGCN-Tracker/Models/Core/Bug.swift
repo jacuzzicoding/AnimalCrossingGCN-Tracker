@@ -42,7 +42,7 @@ struct BugDetailView: View {
     @Bindable var bug: Bug
 
     var body: some View {
-        CommonDetailView(item: bug) {
+        CommonDetailView(item: $bug) {
             VStack(alignment: .leading, spacing: 12) {
                 // Season information
                 HStack {
