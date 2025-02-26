@@ -11,17 +11,13 @@ class Town {
     var gameVersion: String // Stores the ACGame.rawValue
     var creationDate: Date
     
-    // Relationships to donated items
-    @Relationship(deleteRule: .nullify, inverse: \Fossil.town)
+    // Relationships to donated items - using arrays for now, without explicit bidirectional links
     var fossils: [Fossil]?
     
-    @Relationship(deleteRule: .nullify, inverse: \Bug.town)
     var bugs: [Bug]?
     
-    @Relationship(deleteRule: .nullify, inverse: \Fish.town)
     var fish: [Fish]?
     
-    @Relationship(deleteRule: .nullify, inverse: \Art.town)
     var art: [Art]?
     
     // Computed property for game enum
