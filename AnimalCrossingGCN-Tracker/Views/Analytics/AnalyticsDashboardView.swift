@@ -7,8 +7,7 @@
 
 import SwiftUI
 import Charts
-import SwiftData
-import UIKit  // Add this import for UIColor
+import SwiftData // Add this import for UIColor
 
 #if canImport(UIKit)
 import UIKit
