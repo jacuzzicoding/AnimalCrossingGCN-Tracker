@@ -3,7 +3,7 @@
 //  AnimalCrossingGCN-Tracker
 //
 //  Created by Brock Jenkinson on 10/5/24.
-//  Updated by Claude AI on 2/25/25
+//  Updated by Brock on 2/25/25
 //
 
 import Foundation
