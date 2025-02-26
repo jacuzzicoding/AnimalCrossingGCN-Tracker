@@ -296,8 +296,11 @@ struct ContentView: View { // Updated ContentView
                                     }
                                 }
                                 .padding()
-                                .background(Color(.systemGray6))
-                                .cornerRadius(10)
+                                #if os(iOS)
+                                .background(Color(uiColor: UIColor.systemGray6))
+                                #else
+                                .background(Color.secondary.opacity(0.1))
+                                #endif
                                 
                                 // Note about accessing full analytics
                                 Text("Tap 'Full Analytics' below to access detailed charts and visualizations")
@@ -449,10 +452,8 @@ struct ContentView: View { // Updated ContentView
                 }
                 .padding()
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") {
-                            showingFullAnalytics = false
-                        }
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        // Keep your existing toolbar content here
                     }
                 }
             }
