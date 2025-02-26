@@ -9,6 +9,12 @@ import SwiftUI
 import Charts
 import SwiftData
 
+// Define BackgroundLevel enum outside the extension
+enum BackgroundLevel {
+    case secondary
+    case tertiary
+}
+
 // Extension to handle hierarchical backgrounds across iOS versions
 extension View {
     @ViewBuilder
@@ -25,18 +31,13 @@ extension View {
         } else {
             switch level {
             case .secondary:
-                self.background(Color(uiColor: .secondarySystemBackground))
+                self.background(Color(uiColor: UIColor.secondarySystemBackground))
                     .cornerRadius(cornerRadius)
             case .tertiary:
-                self.background(Color(uiColor: .tertiarySystemBackground))
+                self.background(Color(uiColor: UIColor.tertiarySystemBackground))
                     .cornerRadius(cornerRadius)
             }
         }
-    }
-    
-    enum BackgroundLevel {
-        case secondary
-        case tertiary
     }
 }
 
