@@ -4,6 +4,9 @@
 import Foundation
 import SwiftUI
 import SwiftData
+import Charts
+
+// Import analytics components
 
 struct FloatingCategorySwitcher: View { //new file for the floating category switcher
     @EnvironmentObject var categoryManager: CategoryManager
@@ -13,22 +16,23 @@ struct FloatingCategorySwitcher: View { //new file for the floating category swi
 #if os(macOS)
             RoundedRectangle(cornerRadius: 16)
                 .fill(Material.regular.opacity(0.8))
-                .frame(width: 300, height: 100)
+                .frame(width: 370, height: 100)
                 .allowsHitTesting(false)
 #else //ios
             RoundedRectangle(cornerRadius: 16)
                 .fill(.regularMaterial)
-                .frame(width: 310, height: 105)
+                .frame(width: 380, height: 105)
 #endif
             //buttons layer
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
+                // Standard category buttons
                 ForEach(Category.allCases, id: \.self) { category in
                     Button {
                         debugPrint("Button pressed for category: \(category)")
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            categoryManager.selectedCategory = category
+                            categoryManager.switchCategory(category)
                         }
-                    debugPrint("Button action completed for category: \(category)")
+                        debugPrint("Button action completed for category: \(category)")
                     } label: {
                         VStack {
                             Image(systemName: category.symbolName)
@@ -37,15 +41,31 @@ struct FloatingCategorySwitcher: View { //new file for the floating category swi
                                 .font(.caption)
                         }
                         .padding()
-                        .background(categoryManager.selectedCategory == category ? Color.blue : Color.gray.opacity(0.2))
-                        .foregroundColor(categoryManager.selectedCategory == category ? .white : .primary)
+                        .background(categoryManager.selectedCategory == category && !categoryManager.showingAnalytics ? Color.blue : Color.gray.opacity(0.2))
+                        .foregroundColor(categoryManager.selectedCategory == category && !categoryManager.showingAnalytics ? .white : .primary)
                         .cornerRadius(10)
                     }
-//#if os(macOS)
-                    .buttonStyle(PlainButtonStyle())
-                    .focusable(false)
-//#endif
                 }
+                
+                // Analytics button
+                Button {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        categoryManager.showAnalytics()
+                    }
+                } label: {
+                    VStack {
+                        Image(systemName: "chart.bar.fill")
+                            .font(.headline)
+                        Text("Analytics")
+                            .font(.caption)
+                    }
+                    .padding()
+                    .background(categoryManager.showingAnalytics ? Color.blue : Color.gray.opacity(0.2))
+                    .foregroundColor(categoryManager.showingAnalytics ? .white : .primary)
+                    .cornerRadius(10)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .focusable(false)
             }
             .padding()
         }
