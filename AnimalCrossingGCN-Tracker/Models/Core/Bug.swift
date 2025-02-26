@@ -3,7 +3,7 @@
 //  AnimalCrossingGCN-Tracker
 //
 //  Created by Brock Jenkinson on 10/5/24.
-//  Updated by Brock on 2/25/25
+//  Updated by Brock on 2/26/25
 //
 
 import Foundation
@@ -18,6 +18,9 @@ class Bug: CollectibleItem, DonationTimestampable {
     var isDonated: Bool
     var donationDate: Date?
     var gameRawValues: [String]
+    
+    // Reference to town - removing explicit relationship temporarily
+    var town: Town?
     
     // Computed property to access ACGame enums
     var games: [ACGame] {

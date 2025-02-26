@@ -19,8 +19,8 @@ class Fossil: CollectibleItem, DonationTimestampable {
     var donationDate: Date?
     var gameRawValues: [String]  // Storage property for game enums
     
-    // Town relationship
-    @Relationship(inverse: \Town.fossils) var town: Town?
+    // Reference to town - removing explicit relationship temporarily
+    var town: Town?
     
     // Computed property for games
     var games: [ACGame] {
