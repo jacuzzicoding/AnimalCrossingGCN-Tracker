@@ -452,9 +452,15 @@ struct ContentView: View { // Updated ContentView
                 }
                 .padding()
                 .toolbar {
+                    #if os(iOS)
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         // Keep your existing toolbar content here
                     }
+                    #else
+                    ToolbarItemGroup(placement: .automatic) {
+                        // Keep your existing toolbar content here
+                    }
+                    #endif
                 }
             }
             .environmentObject(dataManager)
