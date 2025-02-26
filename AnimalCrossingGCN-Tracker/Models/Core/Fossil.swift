@@ -3,7 +3,7 @@
 //  AnimalCrossingGCN-Tracker
 //
 //  Created by Brock Jenkinson on 10/5/24.
-//  Updated by Brock on 2/25/25
+//  Updated by Brock on 2/26/25
 //
 
 import Foundation
@@ -11,13 +11,16 @@ import SwiftData
 
 @Model
 class Fossil: CollectibleItem, DonationTimestampable {
-    //Properties
+    // Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var part: String?
     var isDonated: Bool
     var donationDate: Date?
     var gameRawValues: [String]  // Storage property for game enums
+    
+    // Town relationship
+    @Relationship(inverse: \Town.fossils) var town: Town?
     
     // Computed property for games
     var games: [ACGame] {
