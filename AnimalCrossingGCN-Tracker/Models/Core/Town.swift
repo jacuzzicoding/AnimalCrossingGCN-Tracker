@@ -11,14 +11,8 @@ class Town {
     var gameVersion: String // Stores the ACGame.rawValue
     var creationDate: Date
     
-    // Relationships to donated items - using arrays for now, without explicit bidirectional links
-    var fossils: [Fossil]?
-    
-    var bugs: [Bug]?
-    
-    var fish: [Fish]?
-    
-    var art: [Art]?
+    // We'll handle relationships through the service layer
+    // rather than explicit bidirectional references
     
     // Computed property for game enum
     var game: ACGame? {
@@ -31,48 +25,6 @@ class Town {
             }
         }
     }
-    
-    // Progress tracking computed properties
-    var fossilProgress: Double {
-        guard let fossils = fossils, !fossils.isEmpty else { return 0.0 }
-        let donated = fossils.filter { $0.isDonated }.count
-        return Double(donated) / Double(fossils.count)
-    }
-    
-    var bugProgress: Double {
-        guard let bugs = bugs, !bugs.isEmpty else { return 0.0 }
-        let donated = bugs.filter { $0.isDonated }.count
-        return Double(donated) / Double(bugs.count)
-    }
-    
-    var fishProgress: Double {
-        guard let fish = fish, !fish.isEmpty else { return 0.0 }
-        let donated = fish.filter { $0.isDonated }.count
-        return Double(donated) / Double(fish.count)
-    }
-    
-    var artProgress: Double {
-        guard let art = art, !art.isEmpty else { return 0.0 }
-        let donated = art.filter { $0.isDonated }.count
-        return Double(donated) / Double(art.count)
-    }
-    
-    var totalProgress: Double {
-        let fossilWeight = fossilProgress * (Double(fossils?.count ?? 0))
-        let bugWeight = bugProgress * (Double(bugs?.count ?? 0))
-        let fishWeight = fishProgress * (Double(fish?.count ?? 0))
-        let artWeight = artProgress * (Double(art?.count ?? 0))
-        
-        let totalItems = Double(
-            (fossils?.count ?? 0) +
-            (bugs?.count ?? 0) +
-            (fish?.count ?? 0) +
-            (art?.count ?? 0)
-        )
-        
-        guard totalItems > 0 else { return 0.0 }
-        return (fossilWeight + bugWeight + fishWeight + artWeight) / totalItems
-    }
 
     init(name: String, playerName: String = "Player", game: ACGame = .ACGCN) {
         self.id = UUID()
@@ -80,9 +32,5 @@ class Town {
         self.playerName = playerName
         self.gameVersion = game.rawValue
         self.creationDate = Date()
-        self.fossils = []
-        self.bugs = []
-        self.fish = []
-        self.art = []
     }
 }

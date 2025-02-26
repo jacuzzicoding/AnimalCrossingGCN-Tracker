@@ -19,8 +19,8 @@ class Bug: CollectibleItem, DonationTimestampable {
     var donationDate: Date?
     var gameRawValues: [String]
     
-    // Reference to town - removing explicit relationship temporarily
-    var town: Town?
+    // Store the town ID rather than a direct relationship
+    var townId: UUID?
     
     // Computed property to access ACGame enums
     var games: [ACGame] {

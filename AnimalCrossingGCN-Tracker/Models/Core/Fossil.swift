@@ -11,7 +11,7 @@ import SwiftData
 
 @Model
 class Fossil: CollectibleItem, DonationTimestampable {
-    // Properties
+    //Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var part: String?
@@ -19,8 +19,8 @@ class Fossil: CollectibleItem, DonationTimestampable {
     var donationDate: Date?
     var gameRawValues: [String]  // Storage property for game enums
     
-    // Reference to town - removing explicit relationship temporarily
-    var town: Town?
+    // Store the town ID rather than a direct relationship
+    var townId: UUID?
     
     // Computed property for games
     var games: [ACGame] {
