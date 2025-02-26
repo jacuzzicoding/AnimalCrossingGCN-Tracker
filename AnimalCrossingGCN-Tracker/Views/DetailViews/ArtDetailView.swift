@@ -2,7 +2,7 @@
 //  ArtDetailView.swift
 //  AnimalCrossingGCN-Tracker
 //
-//  Created by Claude AI on 2/25/25.
+//  Created by Brock on 2/25/25.
 //
 
 import SwiftUI
