@@ -17,12 +17,8 @@ protocol CollectibleItem: Identifiable, Hashable {
     var games: [ACGame] { get set }
 }
 
-//CollectibleItem automatically conforms to DonationTimestampable
-extension CollectibleItem {
-    // This means any type that conforms to CollectibleItem
-    // automatically gets DonationTimestampable for free
-    var donationDate: Date? {
-        get { self.donationDate }
-        set { self.donationDate = newValue }
-    }
-}
+// CollectibleItem should explicitly conform to DonationTimestampable
+// but no automatic extension is needed since each model will directly implement
+// both protocols with their own properties
+
+// Remove the circular reference extension
