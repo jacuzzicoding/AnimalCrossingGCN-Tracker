@@ -10,17 +10,21 @@ import Charts
 import SwiftData
 import UIKit  // Add this import for UIColor
 
+#if canImport(UIKit)
+import UIKit
+#endif
+
 // Define BackgroundLevel enum outside the extension
 enum BackgroundLevel {
     case secondary
     case tertiary
 }
 
-// Extension to handle hierarchical backgrounds across iOS versions
+// Extension to handle hierarchical backgrounds across iOS versions and platforms
 extension View {
     @ViewBuilder
     func hierarchicalBackground(level: BackgroundLevel = .secondary, cornerRadius: CGFloat = 10) -> some View {
-        if #available(iOS 17.0, *) {
+        if #available(iOS 17.0, macOS 14.0, *) {
             switch level {
             case .secondary:
                 self.background(.background.secondary)
@@ -30,6 +34,7 @@ extension View {
                     .cornerRadius(cornerRadius)
             }
         } else {
+            #if os(iOS)
             switch level {
             case .secondary:
                 self.background(Color(uiColor: UIColor.secondarySystemBackground))
@@ -38,6 +43,17 @@ extension View {
                 self.background(Color(uiColor: UIColor.tertiarySystemBackground))
                     .cornerRadius(cornerRadius)
             }
+            #else
+            // For macOS or other platforms
+            switch level {
+            case .secondary:
+                self.background(Color.secondary.opacity(0.2))
+                    .cornerRadius(cornerRadius)
+            case .tertiary:
+                self.background(Color.secondary.opacity(0.1))
+                    .cornerRadius(cornerRadius)
+            }
+            #endif
         }
     }
 }
