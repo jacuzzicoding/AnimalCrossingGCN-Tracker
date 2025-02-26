@@ -1,12 +1,12 @@
 # AnimalCrossingGCN-Tracker
-* Version: v0.6.1-alpha (Development)
-* Last Updated: December 18th, 2024
+* Version: v0.6.2-alpha
+* Last Updated: February 25th, 2025
 * Author: Brock Jenkinson (@jacuzzicoding)
 
 ## Project Overview
 The AnimalCrossingGCN-Tracker is a comprehensive companion app for tracking Animal Crossing GameCube museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
 
-Version v0.6.1-alpha introduces donation timestamp tracking while building upon the town tracking and multi-game support foundation established in v0.6.0.
+Version v0.6.5-alpha focuses on architectural improvements to increase code modularity and maintainability. This testing build (phase1) has completed the model-view separation and is proceeding with implementing the repository pattern.
 
 ## Features
 
@@ -16,13 +16,17 @@ Version v0.6.1-alpha introduces donation timestamp tracking while building upon 
   * Bugs (40 items)
   * Fish (40 items)
   * Art (13 pieces)
-* Donation timestamp system (NEW)
+* Donation timestamp system
 * Town-based collection tracking
 * Modern floating category navigation
 * Enhanced search functionality
 * SwiftData integration for persistence
 
 ### Technical Improvements
+* Architectural enhancements (v0.6.5-alpha):
+  * ✅ Phase 1: Complete separation of models from views
+  * ✅ Phase 2: Repository pattern implementation (in progress)
+  * ⬜ Phase 3: Enhanced model relationships and services
 * Comprehensive donation tracking system:
   * Timestamp integration across all models
   * DetailMoreInfoView implementation
@@ -48,33 +52,56 @@ AnimalCrossingGCN-Tracker/
 │   └── AnimalCrossingGCN_TrackerApp.swift
 ├── Models/
 │   ├── Core/
-│   │   ├── ACGame.swift
-│   │   ├── CollectibleItem.swift
+│   │   ├── Item.swift
+│   │   ├── Games.swift
+│   │   ├── Town.swift
 │   │   ├── Fossil.swift
 │   │   ├── Bug.swift
 │   │   ├── Fish.swift
 │   │   └── Art.swift
 │   ├── Extensions/
-│   │   └── DonationTimestampableExt.swift
-│   └── Protocols/
-│       └── DonationTimestampable.swift
+│   │   └── Various model extensions
+│   ├── Protocols/
+│   │   └── DonationTimestampable.swift
+│   └── View Models/
+│       └── Various view models
 ├── Views/
-│   ├── Main/
-│   │   ├── ContentView.swift
-│   │   └── CategoryView.swift
-│   ├── Components/
-│   │   ├── FloatingCategorySwitcher.swift
-│   │   ├── CollectibleRow.swift
-│   │   ├── DetailMoreInfoView.swift
-│   │   └── CategorySection.swift
-│   └── Detail/
+│   ├── ContentView.swift
+│   ├── MainListView.swift
+│   ├── DetailMoreInfoView.swift
+│   ├── EditTownView.swift
+│   ├── FloatingCategorySwitcher.swift
+│   └── DetailViews/
 │       ├── FossilDetailView.swift
 │       ├── BugDetailView.swift
 │       ├── FishDetailView.swift
 │       └── ArtDetailView.swift
-└── Managers/
-    └── DataManager.swift
+├── Managers/
+│   └── DataManager.swift
+└── Utilities/
+    └── Various utility files
 ```
+
+## Development Status
+
+### Current Build Progress
+* **v0.6.5-alpha-phase1 (February 25, 2025)**
+  * ✅ Completed Phase 1: Model-View Separation
+  * ✅ Created DetailViews for each model type
+  * ✅ Removed view code from all model files
+  * ✅ Fixed protocol conformance
+  * ✅ Verified with successful compilation and testing
+  * ✅ Phase 2: Repository Pattern Implementation
+  * ✅ Verified with successful compilation and testing
+* **Next Development Phases**
+  * ⬜ Phase 3: Model Relationship Enhancement
+
+### Long-term Roadmap
+* v0.7.0 planned for early 2025
+* Advanced filtering and donation visualization
+* Enhanced town-based tracking
+* Complete multi-game support
+* UI improvements and transition animations
 
 ## Platform Support
 
@@ -90,23 +117,11 @@ AnimalCrossingGCN-Tracker/
 * Native menu bar integration
 * Platform-specific UI refinements
 
-## Known Issues
-* Search limited to current category
-* No transition animations for category switches
-* Additional macOS performance testing needed
-
 ## Technical Requirements
 * Xcode 15+
 * iOS 17.0+
 * macOS 14.0+
 * SwiftUI and SwiftData knowledge for contributions
-
-## Development Status
-* Currently in active development (v0.7.0 planned for January 2025)
-* New donation timestamp tracking system
-* Enhanced town-based tracking
-* Backend preparation for future multi-game support
-* Working toward advanced filtering and UI improvements
 
 ## Contributing
 This project welcomes community contributions. If anyone happens to see this, please report any issues or submit pull requests through the project's GitHub repository.

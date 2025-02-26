@@ -3,13 +3,14 @@
 //  AnimalCrossingGCN-Tracker
 //
 //  Created by Brock Jenkinson on 10/6/24.
+//  Updated by Brock on 2/25/25
 //
+
 import Foundation
 import SwiftData
-import SwiftUI
 
 @Model
-class Fish {
+class Fish: CollectibleItem, DonationTimestampable {
     //Properties
     @Attribute(.unique) var id: UUID
     var name: String
@@ -38,47 +39,6 @@ class Fish {
         self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
     }
-}
-
-struct FishDetailView: View {
-	var Fish: Fish
-
-	var body: some View {
-		VStack(alignment: .leading) {
-			Text("Season: \(Fish.season)")
-				.font(.title2)
-			
-			Text("Location: \(Fish.location)")
-			
-			if let donationDate = Fish.formattedDonationDate {
-				Text("Donated: \(donationDate)")
-					.font(.subheadline)
-					.foregroundColor(.secondary)
-			}
-
-			Toggle("Donated", isOn: Binding(
-				get: { Fish.isDonated },
-				set: { newValue in
-					if newValue {
-						Fish.isDonated = true
-						Fish.donationDate = Date()
-						print("Debug: Setting donation date to \(Date())")
-					} else {
-						Fish.isDonated = false
-						Fish.donationDate = nil
-						print("Debug: Clearing donation date")
-					}
-				}
-			))
-			.padding(.top)
-
-			DetailMoreInfoView(item: Fish)
-
-			Spacer()
-		}
-		.padding()
-		.navigationTitle(Fish.name)
-	}
 }
 
 func getDefaultFish() -> [Fish] {
