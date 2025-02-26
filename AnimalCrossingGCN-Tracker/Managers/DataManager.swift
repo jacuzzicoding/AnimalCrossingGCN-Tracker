@@ -3,6 +3,7 @@ import Foundation
 import SwiftData
 import Combine
 import SwiftUI
+import Charts
 
 class DataManager: ObservableObject {
     // Access to the Model Context
@@ -17,6 +18,7 @@ class DataManager: ObservableObject {
     
     // Services
     private var donationService: DonationService
+    private var analyticsService: AnalyticsService
 
     // Published properties to notify views of changes
     @Published var currentTown: Town?
@@ -35,6 +37,7 @@ class DataManager: ObservableObject {
         
         // Initialize services
         self.donationService = DonationService(modelContext: modelContext)
+        self.analyticsService = AnalyticsService(modelContext: modelContext, donationService: donationService)
         
         // Fetch current town
         fetchCurrentTown()
@@ -368,6 +371,32 @@ class DataManager: ObservableObject {
             "fish": fishRepository.getByGame(game),
             "art": artRepository.getByGame(game)
         ]
+    }
+    
+    // MARK: - Analytics
+    
+    /// Gets donation activity by month for the current town
+    /// - Parameters:
+    ///   - startDate: Optional start date for filtering
+    ///   - endDate: Optional end date for filtering
+    /// - Returns: Array of monthly donation activity data
+    func getDonationActivityByMonth(startDate: Date? = nil, endDate: Date? = nil) -> [MonthlyDonationActivity] {
+        guard let town = currentTown else { return [] }
+        return analyticsService.getDonationActivityByMonth(town: town, startDate: startDate, endDate: endDate)
+    }
+    
+    /// Gets category completion data for the current town
+    /// - Returns: Category completion data
+    func getCategoryCompletionData() -> CategoryCompletionData? {
+        guard let town = currentTown else { return nil }
+        return analyticsService.getCategoryCompletionData(town: town)
+    }
+    
+    /// Gets seasonal data for the current town
+    /// - Returns: Seasonal data
+    func getSeasonalData() -> SeasonalData? {
+        guard let town = currentTown else { return nil }
+        return analyticsService.getSeasonalData(town: town)
     }
     
     // MARK: - Progress Tracking
