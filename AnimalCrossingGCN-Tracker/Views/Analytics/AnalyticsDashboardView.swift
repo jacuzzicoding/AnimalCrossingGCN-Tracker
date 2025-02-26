@@ -9,6 +9,37 @@ import SwiftUI
 import Charts
 import SwiftData
 
+// Extension to handle hierarchical backgrounds across iOS versions
+extension View {
+    @ViewBuilder
+    func hierarchicalBackground(level: BackgroundLevel = .secondary, cornerRadius: CGFloat = 10) -> some View {
+        if #available(iOS 17.0, *) {
+            switch level {
+            case .secondary:
+                self.background(.background.secondary)
+                    .cornerRadius(cornerRadius)
+            case .tertiary:
+                self.background(.background.tertiary)
+                    .cornerRadius(cornerRadius)
+            }
+        } else {
+            switch level {
+            case .secondary:
+                self.background(Color(uiColor: .secondarySystemBackground))
+                    .cornerRadius(cornerRadius)
+            case .tertiary:
+                self.background(Color(uiColor: .tertiarySystemBackground))
+                    .cornerRadius(cornerRadius)
+            }
+        }
+    }
+    
+    enum BackgroundLevel {
+        case secondary
+        case tertiary
+    }
+}
+
 // Main Dashboard View
 struct AnalyticsDashboardView: View {
     @EnvironmentObject var dataManager: DataManager
@@ -111,12 +142,12 @@ struct AnalyticsDashboardView: View {
     }
     
     private func loadData() {
-        guard let town = dataManager.currentTown else { return }
-        
-        // Load actual data from the DataManager
-        timelineData = dataManager.getDonationActivityByMonth()
-        completionData = dataManager.getCategoryCompletionData()
-        seasonalData = dataManager.getSeasonalData()
+        if dataManager.currentTown != nil {
+            // Load actual data from the DataManager
+            timelineData = dataManager.getDonationActivityByMonth()
+            completionData = dataManager.getCategoryCompletionData()
+            seasonalData = dataManager.getSeasonalData()
+        }
     }
     
     // Dashboard card views
@@ -136,8 +167,7 @@ struct AnalyticsDashboardView: View {
                 .tint(.purple)
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
+        .hierarchicalBackground()
     }
     
     private func recentActivityCard(data: [MonthlyDonationActivity]) -> some View {
@@ -160,8 +190,7 @@ struct AnalyticsDashboardView: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
+        .hierarchicalBackground()
     }
     
     private func currentSeasonCard(season: SeasonalCompletion) -> some View {
@@ -198,8 +227,7 @@ struct AnalyticsDashboardView: View {
                 .padding(.top, 4)
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
+        .hierarchicalBackground()
     }
     
     private func categoryBreakdownCard(completion: CategoryCompletionData) -> some View {
@@ -215,8 +243,7 @@ struct AnalyticsDashboardView: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
+        .hierarchicalBackground()
     }
 }
 
@@ -304,8 +331,7 @@ struct DonationTimelineView: View {
             if filteredData.isEmpty {
                 Text("No donation data available for this time period")
                     .frame(maxWidth: .infinity, maxHeight: 300)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
+                    .hierarchicalBackground()
             } else {
                 Chart {
                     ForEach(filteredData) { activity in
@@ -370,8 +396,7 @@ struct DonationTimelineView: View {
             }
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .hierarchicalBackground(level: .tertiary, cornerRadius: 12)
         .shadow(radius: 2)
     }
 }
@@ -483,8 +508,7 @@ struct CategoryCompletionChartView: View {
             }
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .hierarchicalBackground(level: .tertiary, cornerRadius: 12)
         .shadow(radius: 2)
     }
 }
@@ -568,8 +592,7 @@ struct SeasonalAnalysisView: View {
                         }
                     }
                     .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
+                    .hierarchicalBackground()
                 }
                 .padding(.bottom)
             }
@@ -622,8 +645,7 @@ struct SeasonalAnalysisView: View {
             }
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .hierarchicalBackground(level: .tertiary, cornerRadius: 12)
         .shadow(radius: 2)
     }
 }
@@ -662,8 +684,7 @@ struct SeasonalCompletionCard: View {
                 .bold()
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
+        .hierarchicalBackground()
     }
     
     private func getMonthName(from abbreviation: String) -> String {
