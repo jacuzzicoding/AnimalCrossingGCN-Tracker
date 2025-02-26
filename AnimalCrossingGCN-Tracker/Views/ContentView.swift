@@ -6,10 +6,7 @@ import Foundation
 import SwiftUI
 import SwiftData
 
-extension Fossil: CollectibleItem, DonationTimestampable {}
-extension Bug: CollectibleItem, DonationTimestampable {}
-extension Fish: CollectibleItem, DonationTimestampable {}
-extension Art: CollectibleItem, DonationTimestampable {}
+// Protocol conformance is now handled directly in each model file
 
 class CategoryManager: ObservableObject {
     @Published var selectedCategory: Category = .fossils
@@ -62,7 +59,7 @@ enum Category: String, CaseIterable {
             }
         case .fish:
             if let fish = item as? Fish {
-                FishDetailView(Fish: fish)
+                FishDetailView(fish: fish)
             }
         case .art:
             if let art = item as? Art {
@@ -289,7 +286,7 @@ struct ContentView: View { // Updated ContentView
                 BugDetailView(bug: bug)
             }
             .navigationDestination(for: Fish.self) { fish in
-                FishDetailView(Fish: fish)
+                FishDetailView(fish: fish)
             }
             .navigationDestination(for: Art.self) { art in
                 ArtDetailView(art: art)
