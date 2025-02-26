@@ -8,6 +8,7 @@
 import SwiftUI
 import Charts
 import SwiftData
+import UIKit  // Add this import for UIColor
 
 // Define BackgroundLevel enum outside the extension
 enum BackgroundLevel {
