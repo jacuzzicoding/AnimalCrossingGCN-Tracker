@@ -17,6 +17,13 @@ class AnalyticsService {
     private let fishRepository: FishRepository
     private let artRepository: ArtRepository
     
+    // Caching properties
+    private var cachedTimelineData: [String: [MonthlyDonationActivity]] = [:]
+    private var cachedCompletionData: [String: CategoryCompletionData] = [:]
+    private var cachedSeasonalData: [String: SeasonalData] = [:]
+    private var lastCacheTime: Date?
+    private let cacheExpirationInterval: TimeInterval = 300 // 5 minutes
+    
     /// Initializes the service with required dependencies
     /// - Parameters:
     ///   - modelContext: The SwiftData context to use
@@ -30,6 +37,22 @@ class AnalyticsService {
         self.artRepository = ArtRepository(modelContext: modelContext)
     }
     
+    // MARK: - Cache Management
+    
+    /// Invalidates the analytics cache
+    func invalidateCache() {
+        cachedTimelineData.removeAll()
+        cachedCompletionData.removeAll()
+        cachedSeasonalData.removeAll()
+        lastCacheTime = nil
+    }
+    
+    /// Checks if the cache is still valid
+    private func isCacheValid() -> Bool {
+        guard let lastCacheTime = lastCacheTime else { return false }
+        return Date().timeIntervalSince(lastCacheTime) < cacheExpirationInterval
+    }
+    
     // MARK: - Timeline Analytics
     
     /// Get donation activity by month for a specific town
@@ -39,10 +62,18 @@ class AnalyticsService {
     ///   - endDate: Optional end date for filtering
     /// - Returns: Array of monthly donation activity data
     func getDonationActivityByMonth(town: Town, startDate: Date? = nil, endDate: Date? = nil) -> [MonthlyDonationActivity] {
-        let fossils = donationService.getFossilsForTown(town: town).filter { $0.isDonated && $0.donationDate != nil }
-        let bugs = donationService.getBugsForTown(town: town).filter { $0.isDonated && $0.donationDate != nil }
-        let fish = donationService.getFishForTown(town: town).filter { $0.isDonated && $0.donationDate != nil }
-        let artPieces = donationService.getArtForTown(town: town).filter { $0.isDonated && $0.donationDate != nil }
+        let cacheKey = "\(town.id)_\(startDate?.description ?? "nil")_\(endDate?.description ?? "nil")"
+        
+        // Check cache first
+        if isCacheValid(), let cachedData = cachedTimelineData[cacheKey] {
+            return cachedData
+        }
+        
+        // Get all donated items for the town
+        let fossils = donationService.getFossilsForTown(town: town).filter { $0.isDonated }
+        let bugs = donationService.getBugsForTown(town: town).filter { $0.isDonated }
+        let fish = donationService.getFishForTown(town: town).filter { $0.isDonated }
+        let artPieces = donationService.getArtForTown(town: town).filter { $0.isDonated }
         
         // Group by month
         var monthlyActivity: [String: MonthlyDonationActivity] = [:]
@@ -53,17 +84,41 @@ class AnalyticsService {
         processMonthlyDonations(fish, category: .fish, into: &monthlyActivity, startDate: startDate, endDate: endDate)
         processMonthlyDonations(artPieces, category: .art, into: &monthlyActivity, startDate: startDate, endDate: endDate)
         
+        // If no months were created but we have donations, create an entry for the current month
+        if monthlyActivity.isEmpty && (fossils.count + bugs.count + fish.count + artPieces.count > 0) {
+            let today = Date()
+            let calendar = Calendar.current
+            let month = calendar.startOfDay(for: calendar.date(from: DateComponents(
+                year: calendar.component(.year, from: today),
+                month: calendar.component(.month, from: today),
+                day: 1
+            ))!)
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM"
+            let monthStr = dateFormatter.string(from: month)
+            
+            monthlyActivity[monthStr] = MonthlyDonationActivity(
+                month: month,
+                fossilCount: fossils.count,
+                bugCount: bugs.count,
+                fishCount: fish.count,
+                artCount: artPieces.count,
+                totalCount: fossils.count + bugs.count + fish.count + artPieces.count
+            )
+        }
+        
         // Convert to array and sort by date
-        return monthlyActivity.values.sorted { $0.month < $1.month }
+        let result = monthlyActivity.values.sorted { $0.month < $1.month }
+        
+        // Cache the result
+        cachedTimelineData[cacheKey] = result
+        lastCacheTime = Date()
+        
+        return result
     }
     
-    /// Process donations into monthly activity
-    /// - Parameters:
-    ///   - items: The items to process
-    ///   - category: The category of the items
-    ///   - monthlyActivity: The dictionary to store results in
-    ///   - startDate: Optional start date for filtering
-    ///   - endDate: Optional end date for filtering
+    /// Process donations into monthly activity, handling items that may not have dates
     private func processMonthlyDonations<T: CollectibleItem & DonationTimestampable & PersistentModel>(
         _ items: [T],
         category: DonationCategory,
@@ -75,40 +130,77 @@ class AnalyticsService {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM"
         
+        // First try to use items with actual donation dates
         for item in items {
-            guard let donationDate = item.donationDate else { continue }
-            
-            // Check date range if specified
-            if let startDate = startDate, donationDate < startDate { continue }
-            if let endDate = endDate, donationDate > endDate { continue }
-            
-            let monthStr = dateFormatter.string(from: donationDate)
+            if let donationDate = item.donationDate {
+                // Check date range if specified
+                if let startDate = startDate, donationDate < startDate { continue }
+                if let endDate = endDate, donationDate > endDate { continue }
+                
+                let monthStr = dateFormatter.string(from: donationDate)
+                let month = calendar.startOfDay(for: calendar.date(from: DateComponents(
+                    year: calendar.component(.year, from: donationDate),
+                    month: calendar.component(.month, from: donationDate),
+                    day: 1
+                ))!)
+                
+                if var activity = monthlyActivity[monthStr] {
+                    // Update existing month
+                    switch category {
+                    case .fossil: activity.fossilCount += 1
+                    case .bug: activity.bugCount += 1
+                    case .fish: activity.fishCount += 1
+                    case .art: activity.artCount += 1
+                    }
+                    activity.totalCount += 1
+                    monthlyActivity[monthStr] = activity
+                } else {
+                    // Create new month entry
+                    var activity = MonthlyDonationActivity(month: month, fossilCount: 0, bugCount: 0, fishCount: 0, artCount: 0)
+                    switch category {
+                    case .fossil: activity.fossilCount = 1
+                    case .bug: activity.bugCount = 1
+                    case .fish: activity.fishCount = 1
+                    case .art: activity.artCount = 1
+                    }
+                    activity.totalCount = 1
+                    monthlyActivity[monthStr] = activity
+                }
+            }
+        }
+        
+        // If we didn't add any items with dates, but we have donated items without dates,
+        // put them in the current month as a fallback
+        let itemsWithDates = items.filter { $0.donationDate != nil }
+        if itemsWithDates.count == 0 && items.count > 0 {
+            let today = Date()
+            let monthStr = dateFormatter.string(from: today)
             let month = calendar.startOfDay(for: calendar.date(from: DateComponents(
-                year: calendar.component(.year, from: donationDate),
-                month: calendar.component(.month, from: donationDate),
+                year: calendar.component(.year, from: today),
+                month: calendar.component(.month, from: today),
                 day: 1
             ))!)
             
             if var activity = monthlyActivity[monthStr] {
-                // Update existing month
+                // Add to existing month
                 switch category {
-                case .fossil: activity.fossilCount += 1
-                case .bug: activity.bugCount += 1
-                case .fish: activity.fishCount += 1
-                case .art: activity.artCount += 1
+                case .fossil: activity.fossilCount += items.count
+                case .bug: activity.bugCount += items.count
+                case .fish: activity.fishCount += items.count
+                case .art: activity.artCount += items.count
                 }
-                activity.totalCount += 1
+                activity.totalCount += items.count
                 monthlyActivity[monthStr] = activity
             } else {
-                // Create new month entry
+                // Create new month
                 var activity = MonthlyDonationActivity(month: month, fossilCount: 0, bugCount: 0, fishCount: 0, artCount: 0)
                 switch category {
-                case .fossil: activity.fossilCount = 1
-                case .bug: activity.bugCount = 1
-                case .fish: activity.fishCount = 1
-                case .art: activity.artCount = 1
+                case .fossil: activity.fossilCount = items.count
+                case .bug: activity.bugCount = items.count
+                case .fish: activity.fishCount = items.count
+                case .art: activity.artCount = items.count
                 }
-                activity.totalCount = 1
+                activity.totalCount = items.count
                 monthlyActivity[monthStr] = activity
             }
         }
@@ -120,6 +212,13 @@ class AnalyticsService {
     /// - Parameter town: The town to analyze
     /// - Returns: Category completion data
     func getCategoryCompletionData(town: Town) -> CategoryCompletionData {
+        let cacheKey = "\(town.id)_completion"
+        
+        // Check cache first
+        if isCacheValid(), let cachedData = cachedCompletionData[cacheKey] {
+            return cachedData
+        }
+        
         let fossilProgress = donationService.getFossilProgressForTown(town: town)
         let bugProgress = donationService.getBugProgressForTown(town: town)
         let fishProgress = donationService.getFishProgressForTown(town: town)
@@ -130,7 +229,7 @@ class AnalyticsService {
         let fish = donationService.getFishForTown(town: town)
         let artPieces = donationService.getArtForTown(town: town)
         
-        return CategoryCompletionData(
+        let result = CategoryCompletionData(
             fossilCount: fossils.count,
             fossilDonated: fossils.filter { $0.isDonated }.count,
             fossilProgress: fossilProgress,
@@ -145,6 +244,12 @@ class AnalyticsService {
             artProgress: artProgress,
             totalProgress: donationService.getTotalProgressForTown(town: town)
         )
+        
+        // Cache the result
+        cachedCompletionData[cacheKey] = result
+        lastCacheTime = Date()
+        
+        return result
     }
     
     // MARK: - Seasonal Analysis
@@ -153,11 +258,25 @@ class AnalyticsService {
     /// - Parameter town: The town to analyze
     /// - Returns: Seasonal data
     func getSeasonalData(town: Town) -> SeasonalData {
+        let cacheKey = "\(town.id)_seasonal"
+        
+        // Check cache first
+        if isCacheValid(), let cachedData = cachedSeasonalData[cacheKey] {
+            return cachedData
+        }
+        
         let bugs = donationService.getBugsForTown(town: town)
         let fish = donationService.getFishForTown(town: town)
         
         var seasonalBugs: [String: [Bug]] = [:]
         var seasonalFish: [String: [Fish]] = [:]
+        
+        // Initialize all months to ensure we have complete data
+        let monthAbbreviations = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        for month in monthAbbreviations {
+            seasonalBugs[month] = []
+            seasonalFish[month] = []
+        }
         
         // Map bugs to seasons
         for bug in bugs {
@@ -232,9 +351,21 @@ class AnalyticsService {
             }
         }
         
-        return SeasonalData(
-            seasonalCompletion: seasonalCompletion.values.sorted { $0.season < $1.season }
-        )
+        // Convert seasonalCompletion to array, sorted by month
+        let monthOrder = Dictionary(uniqueKeysWithValues: monthAbbreviations.enumerated().map { ($1, $0) })
+        let seasonalCompletionArray = seasonalCompletion.values.sorted { 
+            let order1 = monthOrder[$0.season] ?? 0
+            let order2 = monthOrder[$1.season] ?? 0
+            return order1 < order2
+        }
+        
+        let result = SeasonalData(seasonalCompletion: seasonalCompletionArray)
+        
+        // Cache the result
+        cachedSeasonalData[cacheKey] = result
+        lastCacheTime = Date()
+        
+        return result
     }
     
     // Helper method to parse season strings into individual months
@@ -277,6 +408,11 @@ class AnalyticsService {
                     months.append(monthAbbreviations[idx])
                 }
             }
+        }
+        
+        // If no months were found, return all months (available all year)
+        if months.isEmpty {
+            return monthAbbreviations
         }
         
         return months

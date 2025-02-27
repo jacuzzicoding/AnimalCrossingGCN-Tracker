@@ -246,85 +246,196 @@ struct ContentView: View { // Updated ContentView
 
                 // Display either the main list or analytics view based on the CategoryManager state
                 if categoryManager.showingAnalytics {
-                    VStack {
-                        Text("Analytics Dashboard")
-                            .font(.headline)
-                            .padding(.bottom)
-                            
-                        // Create a simple analytics view directly within ContentView for now
-                        if let town = dataManager.currentTownDTO {
-                            VStack(spacing: 16) {
-                                // Progress overview
-                                VStack(alignment: .leading) {
-                                    Text("Museum Progress")
-                                        .font(.title3)
+                ScrollView {
+                VStack(spacing: 20) {
+                Text("Analytics Dashboard")
+                    .font(.headline)
+                    .padding(.top)
+                        
+                    // Create a simplified preview of the analytics dashboard
+                if let completionData = dataManager.getCategoryCompletionData() {
+                // Museum progress card
+                VStack(alignment: .leading) {
+                HStack {
+                Image(systemName: "museum.fill")
+                        .foregroundColor(Color(red: 107/255, green: 211/255, blue: 139/255)) // .acLeafGreen
+                    Text("Museum Progress")
+                    .font(.headline)
+                }
+                
+                HStack {
+                Text("\(completionData.totalDonated) of \(completionData.totalCount) items donated")
+                    Spacer()
+                    Text("\(Int(completionData.totalProgress * 100))%")
+                        .bold()
+                }
+                
+                ProgressView(value: completionData.totalProgress)
+                .tint(Color(red: 107/255, green: 211/255, blue: 139/255))
+                }
+                .padding()
+                #if os(iOS)
+                .background(Color(uiColor: UIColor.secondarySystemBackground))
+                #else
+                .background(Color.secondary.opacity(0.2))
+                #endif
+                .cornerRadius(10)
+                .padding(.horizontal)
+                
+                // Category progress
+                VStack(alignment: .leading) {
+                HStack {
+                Image(systemName: "square.grid.2x2.fill")
+                .foregroundColor(Color(red: 161/255, green: 122/255, blue: 196/255)) // .acBlathersPurple
+                Text("Categories")
+                    .font(.headline)
+                }
+                .padding(.bottom, 2)
+                
+                // Fossils
+                HStack {
+                        Image(systemName: "leaf.arrow.circlepath")
+                            .foregroundColor(Color(red: 184/255, green: 125/255, blue: 75/255)) // .acMuseumBrown
+                            Text("Fossils")
+                        Spacer()
+                        Text("\(completionData.fossilDonated)/\(completionData.fossilCount)")
+                            .font(.subheadline)
+                        Text("\(Int(completionData.fossilProgress * 100))%")
+                            .bold()
+                    }
+                    ProgressView(value: completionData.fossilProgress)
+                        .tint(Color(red: 184/255, green: 125/255, blue: 75/255))
+                
+                // Bugs
+                HStack {
+                        Image(systemName: "ant.fill")
+                            .foregroundColor(.green)
+                        Text("Bugs")
+                    Spacer()
+                        Text("\(completionData.bugDonated)/\(completionData.bugCount)")
+                        .font(.subheadline)
+                        Text("\(Int(completionData.bugProgress * 100))%")
+                            .bold()
+                    }
+                    ProgressView(value: completionData.bugProgress)
+                        .tint(.green)
+                        
+                        // Fish
+                            HStack {
+                            Image(systemName: "fish.fill")
+                            .foregroundColor(Color(red: 122/255, green: 205/255, blue: 244/255)) // .acOceanBlue
+                                Text("Fish")
+                                    Spacer()
+                                        Text("\(completionData.fishDonated)/\(completionData.fishCount)")
+                                            .font(.subheadline)
+                                        Text("\(Int(completionData.fishProgress * 100))%")
+                                            .bold()
+                                    }
+                                    ProgressView(value: completionData.fishProgress)
+                                        .tint(Color(red: 122/255, green: 205/255, blue: 244/255))
                                     
+                                    // Art
                                     HStack {
-                                        Text("Overall: \(Int(town.totalProgress * 100))%")
+                                        Image(systemName: "paintpalette.fill")
+                                            .foregroundColor(Color(red: 161/255, green: 122/255, blue: 196/255)) // .acBlathersPurple
+                                        Text("Art")
                                         Spacer()
+                                        Text("\(completionData.artDonated)/\(completionData.artCount)")
+                                            .font(.subheadline)
+                                        Text("\(Int(completionData.artProgress * 100))%")
+                                            .bold()
                                     }
-                                    ProgressView(value: town.totalProgress)
-                                        .tint(.purple)
-                                    
-                                    Divider()
-                                    
-                                    // Category progress
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text("Fossils: \(Int(town.fossilProgress * 100))%")
-                                            ProgressView(value: town.fossilProgress)
-                                                .tint(.brown)
-                                        }
-                                        VStack(alignment: .leading) {
-                                            Text("Bugs: \(Int(town.bugProgress * 100))%")
-                                            ProgressView(value: town.bugProgress)
-                                                .tint(.green)
-                                        }
-                                    }
-                                    
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text("Fish: \(Int(town.fishProgress * 100))%")
-                                            ProgressView(value: town.fishProgress)
-                                                .tint(.blue)
-                                        }
-                                        VStack(alignment: .leading) {
-                                            Text("Art: \(Int(town.artProgress * 100))%")
-                                            ProgressView(value: town.artProgress)
-                                                .tint(.purple)
-                                        }
-                                    }
+                                    ProgressView(value: completionData.artProgress)
+                                        .tint(Color(red: 161/255, green: 122/255, blue: 196/255))
                                 }
                                 .padding()
-                            .padding(.bottom, 120) // Add extra bottom padding to prevent overlap with FloatingCategorySwitcher
                                 #if os(iOS)
-                                .background(Color(uiColor: UIColor.systemGray6))
+                                .background(Color(uiColor: UIColor.secondarySystemBackground))
                                 #else
-                                .background(Color.secondary.opacity(0.1))
+                                .background(Color.secondary.opacity(0.2))
                                 #endif
+                                .cornerRadius(10)
+                                .padding(.horizontal)
                                 
-                                // Note about accessing full analytics
-                                Text("Tap 'Full Analytics' below to access detailed charts and visualizations")
-                                    .font(.caption)
-                                    .multilineTextAlignment(.center)
+                                // Timeline preview
+                                let timelineData = dataManager.getDonationActivityByMonth()
+                                if !timelineData.isEmpty {
+                                    VStack(alignment: .leading) {
+                                        HStack {
+                                            Image(systemName: "clock.arrow.circlepath")
+                                                .foregroundColor(Color(red: 250/255, green: 216/255, blue: 123/255)) // .acBellYellow
+                                            Text("Recent Activity")
+                                                .font(.headline)
+                                        }
+                                        .padding(.bottom, 2)
+                                        
+                                        ForEach(Array(timelineData.suffix(3))) { activity in
+                                            HStack {
+                                                Text(activity.formattedMonth)
+                                                Spacer()
+                                                Text("\(activity.totalCount) items")
+                                                    .bold()
+                                            }
+                                            .padding(.vertical, 2)
+                                        }
+                                    }
                                     .padding()
+                                    #if os(iOS)
+                                    .background(Color(uiColor: UIColor.secondarySystemBackground))
+                                    #else
+                                    .background(Color.secondary.opacity(0.2))
+                                    #endif
+                                    .cornerRadius(10)
+                                    .padding(.horizontal)
+                                }
                                 
                                 // Button to show full analytics
                                 Button(action: {
                                     showingFullAnalytics = true
                                 }) {
-                                    Text("Full Analytics")
+                                    HStack {
+                                        Image(systemName: "chart.bar.xaxis")
+                                        Text("View Full Analytics")
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
                                 }
+                                .padding(.horizontal)
+                                .padding(.top, 5)
+                            } else {
+                                VStack(spacing: 20) {
+                                    Image(systemName: "chart.line.uptrend.xyaxis")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.secondary)
+                                    
+                                    Text("No analytics data available")
+                                        .foregroundColor(.secondary)
+                                    
+                                    Text("Add donations to see detailed analytics")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        
+                                    // Generate test data button in debug mode
+                                    #if DEBUG
+                                    Button(action: {
+                                        dataManager.generateTestDonationData()
+                                    }) {
+                                        Text("Generate Test Data")
+                                            .padding()
+                                            .background(Color.blue)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(10)
+                                    }
+                                    #endif
+                                }
+                                .frame(maxWidth: .infinity, minHeight: 300)
                                 .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
                             }
-                            .padding()
-                        } else {
-                            Text("Select a town to view analytics")
-                                .foregroundColor(.secondary)
                         }
+                        .padding(.bottom, 120) // Add extra bottom padding to prevent overlap with FloatingCategorySwitcher
                     }
                 } else {
                     // Existing search and main list content
@@ -426,44 +537,23 @@ struct ContentView: View { // Updated ContentView
         .sheet(isPresented: $showingFullAnalytics) {
             // Show full analytics dashboard in a sheet
             NavigationView {
-                VStack {
-                    Text("Analytics Dashboard")
-                        .font(.largeTitle)
-                        .padding(.bottom)
-                        
-                    if let town = dataManager.currentTownDTO {
-                        // Show progress information
-                        Text("Town: \(town.name)")
-                            .font(.headline)
-                        Text("Overall Progress: \(Int(town.totalProgress * 100))%")
-                            .padding(.bottom)
-                            
-                        // Display message about the implementation
-                        Text("The full analytics implementation is being integrated.")
-                            .multilineTextAlignment(.center)
-                            .padding()
-                        
-                        Text("In the complete implementation, this screen will show donation timelines, category breakdowns, and seasonal availability charts.")
-                            .multilineTextAlignment(.center)
-                            .font(.caption)
-                            .padding()
-                    } else {
-                        Text("Please select a town to view analytics")
-                            .foregroundColor(.secondary)
+                AnalyticsDashboardView()
+                    .navigationTitle("Analytics Dashboard")
+                    .toolbar {
+                        #if os(iOS)
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") {
+                                showingFullAnalytics = false
+                            }
+                        }
+                        #else
+                        ToolbarItem {
+                            Button("Done") {
+                                showingFullAnalytics = false
+                            }
+                        }
+                        #endif
                     }
-                }
-                .padding()
-                .toolbar {
-                    #if os(iOS)
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        // Keep your existing toolbar content here
-                    }
-                    #else
-                    ToolbarItemGroup(placement: .automatic) {
-                        // Keep your existing toolbar content here
-                    }
-                    #endif
-                }
             }
             .environmentObject(dataManager)
         }
