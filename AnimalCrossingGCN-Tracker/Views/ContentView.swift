@@ -212,8 +212,9 @@ struct ContentView: View { // Updated ContentView
     @State private var isEditingTown = false
     @State private var newTownName: String = ""
     
-    // Analytics sheet
+    // Sheets
     @State private var showingFullAnalytics = false
+    @State private var showingGlobalSearch = false
 
     // Category manager
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -507,6 +508,15 @@ struct ContentView: View { // Updated ContentView
                 NavigationStack {
                     addNavigationDestinations(mainContent)
                         .navigationTitle("Museum Tracker")
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button(action: {
+                                    showingGlobalSearch = true
+                                }) {
+                                    Image(systemName: "magnifyingglass")
+                                }
+                            }
+                        }
                 }
             } else {
                 // iPad/Mac section
@@ -524,6 +534,15 @@ struct ContentView: View { // Updated ContentView
 #endif
                 }
                 .navigationTitle("Museum Tracker")
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button(action: {
+                            showingGlobalSearch = true
+                        }) {
+                            Image(systemName: "magnifyingglass")
+                        }
+                    }
+                }
             }
         }
         .environmentObject(categoryManager)
@@ -556,6 +575,12 @@ struct ContentView: View { // Updated ContentView
                     }
             }
             .environmentObject(dataManager)
+        }
+        .sheet(isPresented: $showingGlobalSearch) {
+            // Show global search in a sheet
+            GlobalSearchView()
+                .environmentObject(dataManager)
+                .environmentObject(categoryManager)
         }
     }
 }
