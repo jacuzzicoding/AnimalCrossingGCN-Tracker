@@ -441,7 +441,7 @@ struct AnalyticsDashboardView: View {
         .hierarchicalBackground()
         .animation(.easeIn, value: completion.totalProgress)
     }
-}
+
 
 // Helper view for mini progress indicators
 struct CategoryMiniProgress: View {
