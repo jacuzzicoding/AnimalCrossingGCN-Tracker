@@ -50,6 +50,8 @@ class DataManager: ObservableObject {
             guard let self = self else { return }
             self.currentTown = self.townRepository.ensureTownExists()
             if let town = self.currentTown {
+                // Ensure all collectible items are properly linked to the town
+                self.ensureItemsAreLinkedToCurrentTown()
                 self.updateTownDTO(town)
             }
         }
