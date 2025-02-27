@@ -5,18 +5,26 @@
 import Foundation
 import SwiftUI
 import SwiftData
+import Charts
 
 // Protocol conformance is now handled directly in each model file
 
 class CategoryManager: ObservableObject {
     @Published var selectedCategory: Category = .fossils
     @Published var selectedItem: (any CollectibleItem)? = nil
+    @Published var showingAnalytics: Bool = false
     
     func switchCategory(_ newCategory: Category) {
         if selectedCategory != newCategory {
             selectedItem = nil  // Clear selection when switching categories
             selectedCategory = newCategory
+            showingAnalytics = false
         }
+    }
+    
+    func showAnalytics() {
+        selectedItem = nil  // Clear selection
+        showingAnalytics = true
     }
 }
 
@@ -203,6 +211,9 @@ struct ContentView: View { // Updated ContentView
     @EnvironmentObject var dataManager: DataManager
     @State private var isEditingTown = false
     @State private var newTownName: String = ""
+    
+    // Analytics sheet
+    @State private var showingFullAnalytics = false
 
     // Category manager
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -233,20 +244,105 @@ struct ContentView: View { // Updated ContentView
 
                 Divider()
 
-                // Existing search and main list content
-                SearchBar(text: $searchText)
-                MainListView(
-                    searchText: $searchText,
-                    fossilsQuery: fossilsQuery,
-                    bugsQuery: bugsQuery,
-                    fishQuery: fishQuery,
-                    artQuery: artQuery
-                )
+                // Display either the main list or analytics view based on the CategoryManager state
+                if categoryManager.showingAnalytics {
+                    VStack {
+                        Text("Analytics Dashboard")
+                            .font(.headline)
+                            .padding(.bottom)
+                            
+                        // Create a simple analytics view directly within ContentView for now
+                        if let town = dataManager.currentTownDTO {
+                            VStack(spacing: 16) {
+                                // Progress overview
+                                VStack(alignment: .leading) {
+                                    Text("Museum Progress")
+                                        .font(.title3)
+                                    
+                                    HStack {
+                                        Text("Overall: \(Int(town.totalProgress * 100))%")
+                                        Spacer()
+                                    }
+                                    ProgressView(value: town.totalProgress)
+                                        .tint(.purple)
+                                    
+                                    Divider()
+                                    
+                                    // Category progress
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            Text("Fossils: \(Int(town.fossilProgress * 100))%")
+                                            ProgressView(value: town.fossilProgress)
+                                                .tint(.brown)
+                                        }
+                                        VStack(alignment: .leading) {
+                                            Text("Bugs: \(Int(town.bugProgress * 100))%")
+                                            ProgressView(value: town.bugProgress)
+                                                .tint(.green)
+                                        }
+                                    }
+                                    
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            Text("Fish: \(Int(town.fishProgress * 100))%")
+                                            ProgressView(value: town.fishProgress)
+                                                .tint(.blue)
+                                        }
+                                        VStack(alignment: .leading) {
+                                            Text("Art: \(Int(town.artProgress * 100))%")
+                                            ProgressView(value: town.artProgress)
+                                                .tint(.purple)
+                                        }
+                                    }
+                                }
+                                .padding()
+                            .padding(.bottom, 120) // Add extra bottom padding to prevent overlap with FloatingCategorySwitcher
+                                #if os(iOS)
+                                .background(Color(uiColor: UIColor.systemGray6))
+                                #else
+                                .background(Color.secondary.opacity(0.1))
+                                #endif
+                                
+                                // Note about accessing full analytics
+                                Text("Tap 'Full Analytics' below to access detailed charts and visualizations")
+                                    .font(.caption)
+                                    .multilineTextAlignment(.center)
+                                    .padding()
+                                
+                                // Button to show full analytics
+                                Button(action: {
+                                    showingFullAnalytics = true
+                                }) {
+                                    Text("Full Analytics")
+                                }
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                            }
+                            .padding()
+                        } else {
+                            Text("Select a town to view analytics")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                } else {
+                    // Existing search and main list content
+                    SearchBar(text: $searchText)
+                    MainListView(
+                        searchText: $searchText,
+                        fossilsQuery: fossilsQuery,
+                        bugsQuery: bugsQuery,
+                        fishQuery: fishQuery,
+                        artQuery: artQuery
+                    )
+                }
             }
 
             // Floating category switcher overlay
             FloatingCategorySwitcher()
                 .padding(.bottom, 20)
+                .padding(.horizontal, 10) // Add horizontal padding to prevent edge overlap
         }
     }
     /*Data Loading Section*/ //moving to DataManager.swift soon
@@ -326,6 +422,50 @@ struct ContentView: View { // Updated ContentView
         .sheet(isPresented: $isEditingTown) {
             EditTownView(isPresented: $isEditingTown, townName: $newTownName)
                 .environmentObject(dataManager)
+        }
+        .sheet(isPresented: $showingFullAnalytics) {
+            // Show full analytics dashboard in a sheet
+            NavigationView {
+                VStack {
+                    Text("Analytics Dashboard")
+                        .font(.largeTitle)
+                        .padding(.bottom)
+                        
+                    if let town = dataManager.currentTownDTO {
+                        // Show progress information
+                        Text("Town: \(town.name)")
+                            .font(.headline)
+                        Text("Overall Progress: \(Int(town.totalProgress * 100))%")
+                            .padding(.bottom)
+                            
+                        // Display message about the implementation
+                        Text("The full analytics implementation is being integrated.")
+                            .multilineTextAlignment(.center)
+                            .padding()
+                        
+                        Text("In the complete implementation, this screen will show donation timelines, category breakdowns, and seasonal availability charts.")
+                            .multilineTextAlignment(.center)
+                            .font(.caption)
+                            .padding()
+                    } else {
+                        Text("Please select a town to view analytics")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding()
+                .toolbar {
+                    #if os(iOS)
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        // Keep your existing toolbar content here
+                    }
+                    #else
+                    ToolbarItemGroup(placement: .automatic) {
+                        // Keep your existing toolbar content here
+                    }
+                    #endif
+                }
+            }
+            .environmentObject(dataManager)
         }
     }
 }

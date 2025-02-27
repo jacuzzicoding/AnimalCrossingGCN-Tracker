@@ -9,6 +9,7 @@
 
 import SwiftUI
 import SwiftData
+import Charts
 
 @main
 struct AnimalCrossingGCN_TrackerApp: App {
