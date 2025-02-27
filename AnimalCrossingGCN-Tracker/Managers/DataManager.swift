@@ -719,7 +719,7 @@ class DataManager: ObservableObject {
         // Link fossils that aren't already linked
         for fossil in allFossils.filter({ !townFossilIds.contains($0.id) }) {
             // Only link if compatible with town's game
-            if fossil.games.contains(town.game) {
+            if let townGame = town.game, fossil.games.contains(townGame) {
                 donationService.linkFossilToTown(fossil: fossil, town: town)
                 fossilsLinked += 1
             }
@@ -727,7 +727,7 @@ class DataManager: ObservableObject {
         
         // Link bugs that aren't already linked
         for bug in allBugs.filter({ !townBugIds.contains($0.id) }) {
-            if bug.games.contains(town.game) {
+            if let townGame = town.game, bug.games.contains(townGame) {
                 donationService.linkBugToTown(bug: bug, town: town)
                 bugsLinked += 1
             }
@@ -735,7 +735,7 @@ class DataManager: ObservableObject {
         
         // Link fish that aren't already linked
         for fish in allFish.filter({ !townFishIds.contains($0.id) }) {
-            if fish.games.contains(town.game) {
+            if let townGame = town.game, fish.games.contains(townGame) {
                 donationService.linkFishToTown(fish: fish, town: town)
                 fishLinked += 1
             }
@@ -743,7 +743,7 @@ class DataManager: ObservableObject {
         
         // Link art that isn't already linked
         for art in allArt.filter({ !townArtIds.contains($0.id) }) {
-            if art.games.contains(town.game) {
+            if let townGame = town.game, art.games.contains(townGame) {
                 donationService.linkArtToTown(art: art, town: town)
                 artLinked += 1
             }
