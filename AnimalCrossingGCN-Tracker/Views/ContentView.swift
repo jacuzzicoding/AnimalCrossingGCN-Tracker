@@ -296,6 +296,7 @@ struct ContentView: View { // Updated ContentView
                                     }
                                 }
                                 .padding()
+                            .padding(.bottom, 120) // Add extra bottom padding to prevent overlap with FloatingCategorySwitcher
                                 #if os(iOS)
                                 .background(Color(uiColor: UIColor.systemGray6))
                                 #else
@@ -341,6 +342,7 @@ struct ContentView: View { // Updated ContentView
             // Floating category switcher overlay
             FloatingCategorySwitcher()
                 .padding(.bottom, 20)
+                .padding(.horizontal, 10) // Add horizontal padding to prevent edge overlap
         }
     }
     /*Data Loading Section*/ //moving to DataManager.swift soon
