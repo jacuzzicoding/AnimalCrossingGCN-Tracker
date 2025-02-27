@@ -68,7 +68,7 @@ struct AnalyticsDashboardView: View {
     @State private var selectedTab: Int = 0
     
     var body: some View {
-        VStack {
+        VStack(spacing: 16) {
             if let town = dataManager.currentTownDTO {
                 VStack(alignment: .leading) {
                     HStack {
