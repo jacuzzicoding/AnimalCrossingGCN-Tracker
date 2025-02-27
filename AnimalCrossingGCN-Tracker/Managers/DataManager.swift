@@ -646,4 +646,46 @@ class DataManager: ObservableObject {
         }
         print("-------------------------------------------\n")
     }
+
+    /// Debugging method to check analytics data
+    func debugAnalyticsData() {
+        guard let town = currentTown else { 
+            print("DEBUG: No current town selected")
+            return 
+        }
+        
+        // Get raw counts from repositories
+        let allFossils = fossilRepository.getAll()
+        let allBugs = bugRepository.getAll()
+        let allFish = fishRepository.getAll()
+        let allArt = artRepository.getAll()
+        
+        print("DEBUG: Total items in repositories - Fossils: \(allFossils.count), Bugs: \(allBugs.count), Fish: \(allFish.count), Art: \(allArt.count)")
+        
+        // Get town-specific items
+        let townFossils = donationService.getFossilsForTown(town: town)
+        let townBugs = donationService.getBugsForTown(town: town)
+        let townFish = donationService.getFishForTown(town: town)
+        let townArt = donationService.getArtForTown(town: town)
+        
+        print("DEBUG: Town items - Fossils: \(townFossils.count), Bugs: \(townBugs.count), Fish: \(townFish.count), Art: \(townArt.count)")
+        
+        // Check donations
+        let donatedFossils = townFossils.filter { $0.isDonated }.count
+        let donatedBugs = townBugs.filter { $0.isDonated }.count
+        let donatedFish = townFish.filter { $0.isDonated }.count
+        let donatedArt = townArt.filter { $0.isDonated }.count
+        
+        print("DEBUG: Donated items - Fossils: \(donatedFossils)/\(townFossils.count), Bugs: \(donatedBugs)/\(townBugs.count), Fish: \(donatedFish)/\(townFish.count), Art: \(donatedArt)/\(townArt.count)")
+        
+        // Check townId values - convert UUID to string for comparison
+        if !townFossils.isEmpty {
+            if let townId = townFossils[0].townId {
+                print("DEBUG: Sample fossil townId: \(townId)")
+            } else {
+                print("DEBUG: Sample fossil townId is nil")
+            }
+            print("DEBUG: Current town ID: \(town.id.uuidString)")
+        }
+    }
 }
