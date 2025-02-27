@@ -111,6 +111,44 @@ class DonationService {
 			}
 		}
 	}
+    
+    /// Marks an item as donated with a specific timestamp (for testing)
+    func markItemAsDonated<T: CollectibleItem & PersistentModel>(_ item: T, withDate date: Date) {
+        if let fossil = item as? Fossil {
+            // Fetch all fossils and find by ID (more reliable than predicates)
+            let descriptor = FetchDescriptor<Fossil>()
+            if let fossils = try? modelContext.fetch(descriptor),
+               let fossilToUpdate = fossils.first(where: { $0.id == fossil.id }) {
+                fossilToUpdate.isDonated = true
+                fossilToUpdate.donationDate = date
+                try? modelContext.save()
+            }
+        } else if let bug = item as? Bug {
+            let descriptor = FetchDescriptor<Bug>()
+            if let bugs = try? modelContext.fetch(descriptor),
+               let bugToUpdate = bugs.first(where: { $0.id == bug.id }) {
+                bugToUpdate.isDonated = true
+                bugToUpdate.donationDate = date
+                try? modelContext.save()
+            }
+        } else if let fish = item as? Fish {
+            let descriptor = FetchDescriptor<Fish>()
+            if let allFish = try? modelContext.fetch(descriptor),
+               let fishToUpdate = allFish.first(where: { $0.id == fish.id }) {
+                fishToUpdate.isDonated = true
+                fishToUpdate.donationDate = date
+                try? modelContext.save()
+            }
+        } else if let art = item as? Art {
+            let descriptor = FetchDescriptor<Art>()
+            if let artPieces = try? modelContext.fetch(descriptor),
+               let artToUpdate = artPieces.first(where: { $0.id == art.id }) {
+                artToUpdate.isDonated = true
+                artToUpdate.donationDate = date
+                try? modelContext.save()
+            }
+        }
+    }
 	
 	/// Unmarks an item as donated and removes the timestamp
 	func unmarkItemAsDonated<T: CollectibleItem & PersistentModel>(_ item: T) {

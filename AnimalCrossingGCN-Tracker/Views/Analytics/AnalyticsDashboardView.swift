@@ -13,6 +13,17 @@ import SwiftData // Add this import for UIColor
 import UIKit
 #endif
 
+// Define Animal Crossing color extension
+extension Color {
+    static let acLeafGreen = Color(red: 107/255, green: 211/255, blue: 139/255) // #6BD38B
+    static let acMuseumBrown = Color(red: 184/255, green: 125/255, blue: 75/255) // #B87D4B
+    static let acOceanBlue = Color(red: 122/255, green: 205/255, blue: 244/255) // #7ACDF4
+    static let acBellYellow = Color(red: 250/255, green: 216/255, blue: 123/255) // #FAD87B
+    static let acBlathersPurple = Color(red: 161/255, green: 122/255, blue: 196/255) // #A17AC4
+    static let acPumpkinOrange = Color(red: 237/255, green: 138/255, blue: 51/255) // #ED8A33
+    static let acWinterBlue = Color(red: 138/255, green: 189/255, blue: 222/255) // #8ABDDE
+}
+
 // Define BackgroundLevel enum outside the extension
 enum BackgroundLevel {
     case secondary
@@ -57,6 +68,57 @@ extension View {
     }
 }
 
+#if DEBUG
+// Debug view to show analytics data metrics
+struct AnalyticsDebugView: View {
+    let timelineData: [MonthlyDonationActivity]
+    let completionData: CategoryCompletionData?
+    let fossilsWithDates: Int
+    let bugsWithDates: Int
+    let fishWithDates: Int
+    let artWithDates: Int
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Debug Information")
+                .font(.headline)
+            
+            Text("Timeline Data: \(timelineData.count) months")
+                .font(.caption)
+            
+            Text("Items with donation dates:")
+                .font(.caption)
+            Text("- Fossils: \(fossilsWithDates)")
+                .font(.caption)
+            Text("- Bugs: \(bugsWithDates)")
+                .font(.caption)
+            Text("- Fish: \(fishWithDates)")
+                .font(.caption)
+            Text("- Art: \(artWithDates)")
+                .font(.caption)
+            
+            if let completion = completionData {
+                Text("Completion Data:")
+                    .font(.caption)
+                Text("- Fossils: \(completion.fossilDonated)/\(completion.fossilCount) (\(Int(completion.fossilProgress * 100))%)")
+                    .font(.caption)
+                Text("- Bugs: \(completion.bugDonated)/\(completion.bugCount) (\(Int(completion.bugProgress * 100))%)")
+                    .font(.caption)
+                Text("- Fish: \(completion.fishDonated)/\(completion.fishCount) (\(Int(completion.fishProgress * 100))%)")
+                    .font(.caption)
+                Text("- Art: \(completion.artDonated)/\(completion.artCount) (\(Int(completion.artProgress * 100))%)")
+                    .font(.caption)
+                Text("- Total: \(completion.totalDonated)/\(completion.totalCount) (\(Int(completion.totalProgress * 100))%)")
+                    .font(.caption)
+            }
+        }
+        .padding(8)
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(8)
+    }
+}
+#endif
+
 // Main Dashboard View
 struct AnalyticsDashboardView: View {
     @EnvironmentObject var dataManager: DataManager
@@ -64,6 +126,12 @@ struct AnalyticsDashboardView: View {
     @State private var timelineData: [MonthlyDonationActivity] = []
     @State private var completionData: CategoryCompletionData?
     @State private var seasonalData: SeasonalData?
+    
+    // For debug information
+    @State private var fossilsWithDates: Int = 0
+    @State private var bugsWithDates: Int = 0
+    @State private var fishWithDates: Int = 0
+    @State private var artWithDates: Int = 0
     
     @State private var selectedTab: Int = 0
     
@@ -113,6 +181,19 @@ struct AnalyticsDashboardView: View {
                                 if let completion = completionData {
                                     categoryBreakdownCard(completion: completion)
                                 }
+                                
+                                #if DEBUG
+                                // Debug information
+                                AnalyticsDebugView(
+                                    timelineData: timelineData,
+                                    completionData: completionData,
+                                    fossilsWithDates: fossilsWithDates,
+                                    bugsWithDates: bugsWithDates,
+                                    fishWithDates: fishWithDates,
+                                    artWithDates: artWithDates
+                                )
+                                .padding(.top, 16)
+                                #endif
                             }
                         }
                         
@@ -156,22 +237,55 @@ struct AnalyticsDashboardView: View {
         .onChange(of: dataManager.currentTown) { _, _ in
             loadData()
         }
+        #if DEBUG
+        .toolbar {
+            ToolbarItem {
+                Button("Generate Test Data") {
+                    dataManager.generateTestDonationData()
+                    loadData() // Reload analytics data after generating test data
+                }
+                .buttonStyle(.bordered)
+                .tint(.blue)
+            }
+        }
+        #endif
     }
     
     private func loadData() {
-        if dataManager.currentTown != nil {
-            // Load actual data from the DataManager
-            timelineData = dataManager.getDonationActivityByMonth()
-            completionData = dataManager.getCategoryCompletionData()
-            seasonalData = dataManager.getSeasonalData()
-        }
+        guard let _ = dataManager.currentTown else { return }
+        
+        // Ensure the cache is invalidated to get fresh data
+        dataManager.analyticsService.invalidateCache()
+        
+        // Load actual data from the DataManager
+        timelineData = dataManager.getDonationActivityByMonth()
+        completionData = dataManager.getCategoryCompletionData()
+        seasonalData = dataManager.getSeasonalData()
+        
+        // For debug information, count items with donation dates
+        let fossils = dataManager.getFossilsForCurrentTown()
+        let bugs = dataManager.getBugsForCurrentTown()
+        let fish = dataManager.getFishForCurrentTown()
+        let art = dataManager.getArtForCurrentTown()
+        
+        fossilsWithDates = fossils.filter { $0.isDonated && $0.donationDate != nil }.count
+        bugsWithDates = bugs.filter { $0.isDonated && $0.donationDate != nil }.count
+        fishWithDates = fish.filter { $0.isDonated && $0.donationDate != nil }.count
+        artWithDates = art.filter { $0.isDonated && $0.donationDate != nil }.count
+        
+        print("Analytics data loaded: \(timelineData.count) months, \(fossilsWithDates + bugsWithDates + fishWithDates + artWithDates) items with dates")
+    }
     }
     
-    // Dashboard card views
+    // MARK: - Dashboard card views
     private func overallProgressCard(completion: CategoryCompletionData) -> some View {
         VStack(alignment: .leading) {
-            Text("Museum Progress")
-                .font(.headline)
+            HStack {
+                Image(systemName: "museum.fill")
+                    .foregroundColor(.acLeafGreen)
+                Text("Museum Progress")
+                    .font(.headline)
+            }
             
             HStack {
                 Text("\(completion.totalDonated) of \(completion.totalCount) items donated")
@@ -181,28 +295,53 @@ struct AnalyticsDashboardView: View {
             }
             
             ProgressView(value: completion.totalProgress)
-                .tint(.purple)
+                .tint(.acLeafGreen)
+                .animation(.spring(duration: 0.6), value: completion.totalProgress)
         }
         .padding()
         .hierarchicalBackground()
+        .animation(.easeIn, value: completion.totalProgress)
     }
     
     private func recentActivityCard(data: [MonthlyDonationActivity]) -> some View {
         VStack(alignment: .leading) {
-            Text("Recent Activity")
-                .font(.headline)
+            HStack {
+                Image(systemName: "clock.arrow.circlepath")
+                    .foregroundColor(.acBellYellow)
+                Text("Recent Activity")
+                    .font(.headline)
+            }
             
-            ForEach(data) { activity in
+            if data.isEmpty {
                 HStack {
-                    Text(activity.formattedMonth)
                     Spacer()
-                    Text("\(activity.totalCount) donations")
-                        .bold()
+                    VStack {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.title)
+                            .foregroundColor(.gray)
+                            .padding(.bottom, 4)
+                        Text("No donation data yet")
+                            .foregroundColor(.secondary)
+                        Text("Donate items to see your activity")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
                 }
-                .padding(.vertical, 4)
-                
-                if data.last?.id != activity.id {
-                    Divider()
+                .padding(.vertical)
+            } else {
+                ForEach(data) { activity in
+                    HStack {
+                        Text(activity.formattedMonth)
+                        Spacer()
+                        Text("\(activity.totalCount) donations")
+                            .bold()
+                    }
+                    .padding(.vertical, 4)
+                    
+                    if data.last?.id != activity.id {
+                        Divider()
+                    }
                 }
             }
         }
@@ -212,55 +351,95 @@ struct AnalyticsDashboardView: View {
     
     private func currentSeasonCard(season: SeasonalCompletion) -> some View {
         VStack(alignment: .leading) {
-            Text("Currently Available")
-                .font(.headline)
+            HStack {
+                Image(systemName: "leaf.fill")
+                    .foregroundColor(.acLeafGreen)
+                Text("Currently Available")
+                    .font(.headline)
+            }
             
             HStack {
                 VStack(alignment: .leading) {
-                    Text("Bugs")
-                        .font(.subheadline)
                     HStack {
                         Image(systemName: "ant.fill")
                             .foregroundColor(.green)
-                        Text("\(season.bugDonated) of \(season.bugCount)")
+                        Text("Bugs")
+                            .font(.subheadline)
                     }
+                    Text("\(season.bugDonated) of \(season.bugCount)")
+                        .foregroundColor(.secondary)
+                    ProgressView(value: season.bugProgress)
+                        .tint(.green)
+                        .animation(.spring(duration: 0.6), value: season.bugProgress)
                 }
                 
                 Spacer()
                 
                 VStack(alignment: .leading) {
-                    Text("Fish")
-                        .font(.subheadline)
                     HStack {
                         Image(systemName: "fish.fill")
                             .foregroundColor(.blue)
-                        Text("\(season.fishDonated) of \(season.fishCount)")
+                        Text("Fish")
+                            .font(.subheadline)
                     }
+                    Text("\(season.fishDonated) of \(season.fishCount)")
+                        .foregroundColor(.secondary)
+                    ProgressView(value: season.fishProgress)
+                        .tint(.blue)
+                        .animation(.spring(duration: 0.6), value: season.fishProgress)
                 }
             }
             
-            Text("This month: \(Int(season.totalProgress * 100))% complete")
-                .font(.caption)
-                .padding(.top, 4)
+            HStack {
+                Spacer()
+                Text("This month: \(Int(season.totalProgress * 100))% complete")
+                    .font(.caption)
+                    .padding(.top, 4)
+                    .foregroundColor(seasonColor(for: season.season))
+                    .bold()
+            }
         }
         .padding()
         .hierarchicalBackground()
+        .animation(.easeIn, value: season.totalProgress)
+    }
+    
+    private func seasonColor(for month: String) -> Color {
+        let springMonths = ["Mar", "Apr", "May"]
+        let summerMonths = ["Jun", "Jul", "Aug"]
+        let fallMonths = ["Sep", "Oct", "Nov"]
+        // Winter is the default
+        
+        if springMonths.contains(month) {
+            return .acLeafGreen // Spring green
+        } else if summerMonths.contains(month) {
+            return .acBellYellow // Summer yellow
+        } else if fallMonths.contains(month) {
+            return .acPumpkinOrange // Fall orange
+        } else {
+            return .acWinterBlue // Winter blue
+        }
     }
     
     private func categoryBreakdownCard(completion: CategoryCompletionData) -> some View {
         VStack(alignment: .leading) {
-            Text("Categories")
-                .font(.headline)
+            HStack {
+                Image(systemName: "square.grid.2x2.fill")
+                    .foregroundColor(.acBlathersPurple)
+                Text("Categories")
+                    .font(.headline)
+            }
             
             HStack {
-                CategoryMiniProgress(label: "Fossils", progress: completion.fossilProgress, color: .brown)
-                CategoryMiniProgress(label: "Bugs", progress: completion.bugProgress, color: .green)
-                CategoryMiniProgress(label: "Fish", progress: completion.fishProgress, color: .blue)
-                CategoryMiniProgress(label: "Art", progress: completion.artProgress, color: .purple)
+                CategoryMiniProgress(label: "Fossils", progress: completion.fossilProgress, color: .acMuseumBrown, icon: "leaf.arrow.circlepath")
+                CategoryMiniProgress(label: "Bugs", progress: completion.bugProgress, color: .green, icon: "ant.fill")
+                CategoryMiniProgress(label: "Fish", progress: completion.fishProgress, color: .acOceanBlue, icon: "fish.fill")
+                CategoryMiniProgress(label: "Art", progress: completion.artProgress, color: .acBlathersPurple, icon: "paintpalette.fill")
             }
         }
         .padding()
         .hierarchicalBackground()
+        .animation(.easeIn, value: completion.totalProgress)
     }
 }
 
@@ -269,6 +448,7 @@ struct CategoryMiniProgress: View {
     let label: String
     let progress: Double
     let color: Color
+    let icon: String
     
     var body: some View {
         VStack {
@@ -278,17 +458,22 @@ struct CategoryMiniProgress: View {
             ZStack {
                 Circle()
                     .stroke(color.opacity(0.2), lineWidth: 5)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 50, height: 50)
                 
                 Circle()
                     .trim(from: 0, to: CGFloat(progress))
                     .stroke(color, style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                    .frame(width: 40, height: 40)
+                    .frame(width: 50, height: 50)
                     .rotationEffect(.degrees(-90))
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: progress)
                 
-                Text("\(Int(progress * 100))%")
-                    .font(.system(size: 10))
-                    .bold()
+                VStack {
+                    Image(systemName: icon)
+                        .font(.caption)
+                    Text("\(Int(progress * 100))%")
+                        .font(.system(size: 9))
+                        .bold()
+                }
             }
         }
     }
@@ -299,7 +484,7 @@ struct CategoryMiniProgress: View {
 // Timeline Chart View
 struct DonationTimelineView: View {
     let timelineData: [MonthlyDonationActivity]
-    @State private var selectedTimeFrame: TimeFrame = .year
+    @State private var selectedTimeFrame: TimeFrame = .all
     
     enum TimeFrame: String, CaseIterable, Identifiable {
         case quarter = "3 Months"
@@ -319,13 +504,16 @@ struct DonationTimelineView: View {
         switch selectedTimeFrame {
         case .quarter:
             let threeMonthsAgo = calendar.date(byAdding: .month, value: -3, to: now)!
-            return timelineData.filter { $0.month >= threeMonthsAgo }
+            let filtered = timelineData.filter { $0.month >= threeMonthsAgo }
+            return filtered.isEmpty ? timelineData : filtered
         case .halfYear:
             let sixMonthsAgo = calendar.date(byAdding: .month, value: -6, to: now)!
-            return timelineData.filter { $0.month >= sixMonthsAgo }
+            let filtered = timelineData.filter { $0.month >= sixMonthsAgo }
+            return filtered.isEmpty ? timelineData : filtered
         case .year:
             let oneYearAgo = calendar.date(byAdding: .year, value: -1, to: now)!
-            return timelineData.filter { $0.month >= oneYearAgo }
+            let filtered = timelineData.filter { $0.month >= oneYearAgo }
+            return filtered.isEmpty ? timelineData : filtered
         case .all:
             return timelineData
         }
@@ -346,67 +534,91 @@ struct DonationTimelineView: View {
             .padding(.bottom)
             
             if filteredData.isEmpty {
-                Text("No donation data available for this time period")
-                    .frame(maxWidth: .infinity, maxHeight: 300)
-                    .hierarchicalBackground()
-            } else {
-                Chart {
-                    ForEach(filteredData) { activity in
-                        BarMark(
-                            x: .value("Month", activity.formattedMonth),
-                            y: .value("Fossils", activity.fossilCount)
-                        )
-                        .foregroundStyle(Color.brown)
-                        
-                        BarMark(
-                            x: .value("Month", activity.formattedMonth),
-                            y: .value("Bugs", activity.bugCount)
-                        )
-                        .foregroundStyle(Color.green)
-                        
-                        BarMark(
-                            x: .value("Month", activity.formattedMonth),
-                            y: .value("Fish", activity.fishCount)
-                        )
-                        .foregroundStyle(Color.blue)
-                        
-                        BarMark(
-                            x: .value("Month", activity.formattedMonth),
-                            y: .value("Art", activity.artCount)
-                        )
-                        .foregroundStyle(Color.purple)
-                    }
+                VStack {
+                    Spacer()
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.system(size: 40))
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .padding(.bottom, 8)
+                    Text("No donation data available for this time period")
+                        .foregroundColor(.secondary)
+                    Text("Try selecting a different time period or donate more items")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    Spacer()
                 }
-                .chartForegroundStyleScale([
-                    "Fossils": Color.brown,
-                    "Bugs": Color.green,
-                    "Fish": Color.blue,
-                    "Art": Color.purple
-                ])
-                .chartLegend(position: .bottom, alignment: .center)
-                .chartXAxis {
-                    AxisMarks(preset: .aligned, values: .automatic) { value in
-                        if let month = value.as(String.self) {
-                            // Only show every other month label when many months are displayed
-                            if filteredData.count > 6 && filteredData.firstIndex(where: { $0.formattedMonth == month })! % 2 != 0 {
-                                AxisValueLabel {
-                                    Text(" ")
-                                }
-                            } else {
-                                let components = month.components(separatedBy: " ")
-                                AxisValueLabel {
-                                    VStack {
-                                        if components.count > 1 {
-                                            Text(components[0].prefix(3))
-                                            Text(components[1])
-                                                .font(.caption)
-                                        } else {
-                                            Text(month)
+                .frame(maxWidth: .infinity, maxHeight: 300)
+                .hierarchicalBackground()
+            } else {
+                VStack {
+                    Chart {
+                        ForEach(filteredData) { activity in
+                            BarMark(
+                                x: .value("Month", activity.formattedMonth),
+                                y: .value("Fossils", activity.fossilCount)
+                            )
+                            .foregroundStyle(Color.acMuseumBrown)
+                            
+                            BarMark(
+                                x: .value("Month", activity.formattedMonth),
+                                y: .value("Bugs", activity.bugCount)
+                            )
+                            .foregroundStyle(Color.green)
+                            
+                            BarMark(
+                                x: .value("Month", activity.formattedMonth),
+                                y: .value("Fish", activity.fishCount)
+                            )
+                            .foregroundStyle(Color.acOceanBlue)
+                            
+                            BarMark(
+                                x: .value("Month", activity.formattedMonth),
+                                y: .value("Art", activity.artCount)
+                            )
+                            .foregroundStyle(Color.acBlathersPurple)
+                        }
+                    }
+                    .chartForegroundStyleScale([
+                        "Fossils": Color.acMuseumBrown,
+                        "Bugs": Color.green,
+                        "Fish": Color.acOceanBlue,
+                        "Art": Color.acBlathersPurple
+                    ])
+                    .chartLegend(position: .bottom, alignment: .center)
+                    .chartXAxis {
+                        AxisMarks(preset: .aligned, values: .automatic) { value in
+                            if let month = value.as(String.self) {
+                                // Only show every other month label when many months are displayed
+                                if filteredData.count > 6 && filteredData.firstIndex(where: { $0.formattedMonth == month })! % 2 != 0 {
+                                    AxisValueLabel {
+                                        Text(" ")
+                                    }
+                                } else {
+                                    let components = month.components(separatedBy: " ")
+                                    AxisValueLabel {
+                                        VStack {
+                                            if components.count > 1 {
+                                                Text(components[0].prefix(3))
+                                                Text(components[1])
+                                                    .font(.caption)
+                                            } else {
+                                                Text(month)
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+                    
+                    // Show total donations
+                    if !filteredData.isEmpty {
+                        let total = filteredData.reduce(0) { $0 + $1.totalCount }
+                        Text("Total: \(total) donations")
+                            .font(.caption)
+                            .padding(.top, 4)
                     }
                 }
                 .frame(height: 300)
@@ -440,7 +652,7 @@ struct CategoryCompletionChartView: View {
                     }
                     
                     ProgressView(value: completionData.totalProgress)
-                        .tint(.purple)
+                        .tint(.acLeafGreen)
                     
                     Text("\(completionData.totalDonated) of \(completionData.totalCount) items donated")
                         .font(.caption)
@@ -459,7 +671,7 @@ struct CategoryCompletionChartView: View {
                             innerRadius: .ratio(0.6),
                             angularInset: 1.5
                         )
-                        .foregroundStyle(Color.brown)
+                        .foregroundStyle(Color.acMuseumBrown)
                         .opacity(0.8)
                         
                         SectorMark(
@@ -475,7 +687,7 @@ struct CategoryCompletionChartView: View {
                             innerRadius: .ratio(0.6),
                             angularInset: 1.5
                         )
-                        .foregroundStyle(Color.blue)
+                        .foregroundStyle(Color.acOceanBlue)
                         .opacity(0.8)
                         
                         SectorMark(
@@ -483,7 +695,7 @@ struct CategoryCompletionChartView: View {
                             innerRadius: .ratio(0.6),
                             angularInset: 1.5
                         )
-                        .foregroundStyle(Color.purple)
+                        .foregroundStyle(Color.acBlathersPurple)
                         .opacity(0.8)
                     }
                     .frame(height: 200)
@@ -495,7 +707,7 @@ struct CategoryCompletionChartView: View {
                         progress: completionData.fossilProgress,
                         donated: completionData.fossilDonated,
                         total: completionData.fossilCount,
-                        color: .brown
+                        color: .acMuseumBrown
                     )
                     
                     CategoryProgressView(
@@ -511,7 +723,7 @@ struct CategoryCompletionChartView: View {
                         progress: completionData.fishProgress,
                         donated: completionData.fishDonated,
                         total: completionData.fishCount,
-                        color: .blue
+                        color: .acOceanBlue
                     )
                     
                     CategoryProgressView(
@@ -519,7 +731,7 @@ struct CategoryCompletionChartView: View {
                         progress: completionData.artProgress,
                         donated: completionData.artDonated,
                         total: completionData.artCount,
-                        color: .purple
+                        color: .acBlathersPurple
                     )
                 }
             }
@@ -563,18 +775,18 @@ struct SeasonalAnalysisView: View {
     @State private var selectedSeason: String?
     
     let monthColors: [String: Color] = [
-        "Jan": .blue,
-        "Feb": .blue,
-        "Mar": .green,
-        "Apr": .green,
-        "May": .green,
-        "Jun": .yellow,
-        "Jul": .yellow,
-        "Aug": .yellow,
-        "Sep": .orange,
-        "Oct": .orange,
-        "Nov": .orange,
-        "Dec": .blue
+        "Jan": .acWinterBlue,
+        "Feb": .acWinterBlue,
+        "Mar": .acLeafGreen,
+        "Apr": .acLeafGreen,
+        "May": .acLeafGreen,
+        "Jun": .acBellYellow,
+        "Jul": .acBellYellow,
+        "Aug": .acBellYellow,
+        "Sep": .acPumpkinOrange,
+        "Oct": .acPumpkinOrange,
+        "Nov": .acPumpkinOrange,
+        "Dec": .acWinterBlue
     ]
     
     var body: some View {
@@ -605,7 +817,7 @@ struct SeasonalAnalysisView: View {
                             Text("\(currentSeason.fishDonated) of \(currentSeason.fishCount)")
                                 .foregroundColor(.secondary)
                             ProgressView(value: currentSeason.fishProgress)
-                                .tint(.blue)
+                                .tint(.acOceanBlue)
                         }
                     }
                     .padding()
@@ -627,12 +839,12 @@ struct SeasonalAnalysisView: View {
                         x: .value("Season", season.season),
                         y: .value("Fish", season.fishCount)
                     )
-                    .foregroundStyle(Color.blue)
+                    .foregroundStyle(Color.acOceanBlue)
                 }
             }
             .chartForegroundStyleScale([
                 "Bugs": Color.green,
-                "Fish": Color.blue
+                "Fish": Color.acOceanBlue
             ])
             .chartLegend(position: .bottom)
             .frame(height: 200)
@@ -692,7 +904,7 @@ struct SeasonalCompletionCard: View {
                 Text("\(completion.fishDonated)/\(completion.fishCount)")
                     .font(.caption)
             }
-            .foregroundColor(.blue)
+            .foregroundColor(.acOceanBlue)
             
             Spacer()
             
