@@ -3,14 +3,14 @@
 //  AnimalCrossingGCN-Tracker
 //
 //  Created by Brock Jenkinson on 10/5/24.
+//  Updated by Brock on 2/26/25
 //
 
 import Foundation
 import SwiftData
-import SwiftUI
 
 @Model
-class Art {
+class Art: CollectibleItem, DonationTimestampable {
 	//Properties
     @Attribute(.unique) var id: UUID
     var name: String
@@ -19,6 +19,9 @@ class Art {
     var isDonated: Bool
 	var donationDate: Date?
     var gameRawValues: [String]
+    
+    // Store the town ID rather than a direct relationship
+    var townId: UUID?
     
     // Computed property to access ACGame enums
     var games: [ACGame] {
@@ -38,54 +41,6 @@ class Art {
         self.isDonated = isDonated
 		self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
-    }
-}
-
-
-struct ArtDetailView: View {
-    var art: Art
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Based on: \(art.basedOn)")
-                .font(.subheadline)
-                .foregroundColor(.primary)
-
-			if let donationDate = art.formattedDonationDate {
-				Text("Donated: \(donationDate)")
-					.font(.subheadline)
-					.foregroundColor(.secondary)
-			}
-            // I will uncomment this once we have images in the assets folder
-            // Image(art.imageName)
-            //     .resizable()
-            //     .scaledToFit()
-            //     .frame(height: 200)
-            //     .cornerRadius(8)
-            //     .padding(.top)
-
-            Toggle("Donated", isOn: Binding(
-                get: { art.isDonated },
-                set: { newValue in
-                    if newValue {
-                        art.isDonated = true
-                        art.donationDate = Date()
-                        print("Debug: Donation date set to \(Date())")
-                    } else {
-                        art.isDonated = false
-                        art.donationDate = nil
-                        print("Debug: Donation date removed")
-                    }
-                }
-            ))
-            .padding(.top)
-
-			DetailMoreInfoView(item: art)
-			
-            Spacer()
-        }
-        .padding()
-        .navigationTitle(art.name)
     }
 }
 

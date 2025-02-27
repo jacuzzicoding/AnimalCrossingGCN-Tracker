@@ -3,13 +3,14 @@
 //  AnimalCrossingGCN-Tracker
 //
 //  Created by Brock Jenkinson on 10/5/24.
+//  Updated by Brock on 2/26/25
 //
+
 import Foundation
 import SwiftData
-import SwiftUI
 
 @Model
-class Bug {
+class Bug: CollectibleItem, DonationTimestampable {
     //Properties
     @Attribute(.unique) var id: UUID
     var name: String
@@ -17,6 +18,9 @@ class Bug {
     var isDonated: Bool
     var donationDate: Date?
     var gameRawValues: [String]
+    
+    // Store the town ID rather than a direct relationship
+    var townId: UUID?
     
     // Computed property to access ACGame enums
     var games: [ACGame] {
@@ -35,45 +39,6 @@ class Bug {
         self.isDonated = isDonated
         self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
-    }
-}
-
-struct BugDetailView: View {
-    var bug: Bug
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Season: \(bug.season ?? "N/A")")
-                .font(.title2)
-            //store the donation date
-            if let donationDate = bug.formattedDonationDate {
-                Text("Donated: \(donationDate)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-
-            Toggle("Donated", isOn: Binding(
-                get: { bug.isDonated },
-                set: { newValue in
-                    if newValue {
-                        bug.isDonated = true
-                        bug.donationDate = Date()
-                        print("Debug: Donation date set to \(Date())")
-                    } else {
-                        bug.isDonated = false
-                        bug.donationDate = nil
-                        print("Debug: Donation date removed")
-                    }
-                }
-            ))
-            .padding(.top)
-
-            DetailMoreInfoView(item: bug)
-
-            Spacer()
-        }
-        .padding()
-        .navigationTitle(bug.name)
     }
 }
 

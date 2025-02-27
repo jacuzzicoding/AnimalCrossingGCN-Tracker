@@ -1,19 +1,26 @@
 //
 //  Fossil.swift
+//  AnimalCrossingGCN-Tracker
 //
+//  Created by Brock Jenkinson on 10/5/24.
+//  Updated by Brock on 2/26/25
+//
+
 import Foundation
 import SwiftData
-import SwiftUI
 
 @Model
-class Fossil {
+class Fossil: CollectibleItem, DonationTimestampable {
     //Properties
     @Attribute(.unique) var id: UUID
     var name: String
     var part: String?
     var isDonated: Bool
     var donationDate: Date?
-    var gameRawValues: [String]  // New storage property
+    var gameRawValues: [String]  // Storage property for game enums
+    
+    // Store the town ID rather than a direct relationship
+    var townId: UUID?
     
     // Computed property for games
     var games: [ACGame] {
@@ -33,47 +40,6 @@ class Fossil {
         self.donationDate = nil
         self.gameRawValues = games.map { $0.rawValue }
     }
-}
-
-struct FossilDetailView: View {
-	var fossil: Fossil
-
-	var body: some View {
-		VStack(alignment: .leading) {
-			if let part = fossil.part {
-				Text("Part: \(part)")
-					.font(.title2)
-			}
-			
-			if let donationDate = fossil.formattedDonationDate {
-				Text("Donated: \(donationDate)")
-					.font(.subheadline)
-					.foregroundColor(.secondary)
-			}
-
-			Toggle("Donated", isOn: Binding(
-				get: { fossil.isDonated },
-				set: { newValue in
-					if newValue {
-						fossil.isDonated = true
-						fossil.donationDate = Date()
-						print("Debug: Donation date set to \(Date())")
-					} else {
-						fossil.isDonated = false
-						fossil.donationDate = nil
-						print("Debug: Donation date removed")
-					}
-				}
-			))
-			.padding(.top)
-
-			DetailMoreInfoView(item: fossil)
-
-			Spacer()
-		}
-		.padding()
-		.navigationTitle(fossil.name)
-	}
 }
 
 func getDefaultFossils() -> [Fossil] {

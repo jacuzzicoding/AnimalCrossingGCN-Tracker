@@ -1,12 +1,14 @@
 # AnimalCrossingGCN-Tracker
-* Version: v0.6.1-alpha (Development)
-* Last Updated: December 18th, 2024
+* Version: v0.7.0-alpha-preview-2
+* Last Updated: February 27th, 2025
 * Author: Brock Jenkinson (@jacuzzicoding)
+
+> **Important Notice**: v0.7.0-alpha-preview-2 introduces early implementation of the Analytics GUI. Some UI elements may not function as expected, but the core structure is in place.
 
 ## Project Overview
 The AnimalCrossingGCN-Tracker is a comprehensive companion app for tracking Animal Crossing GameCube museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
 
-Version v0.6.1-alpha introduces donation timestamp tracking while building upon the town tracking and multi-game support foundation established in v0.6.0.
+Version v0.7.0-alpha-preview-2 builds upon v0.7.0-alpha-preview by introducing an early implementation of Analytics GUI with visualization components and improved UI layout.
 
 ## Features
 
@@ -16,30 +18,52 @@ Version v0.6.1-alpha introduces donation timestamp tracking while building upon 
   * Bugs (40 items)
   * Fish (40 items)
   * Art (13 pieces)
-* Donation timestamp system (NEW)
-* Town-based collection tracking
+* Enhanced donation timestamp system
+* Advanced town-based collection tracking
+* Progress tracking by category and overall
 * Modern floating category navigation
 * Enhanced search functionality
 * SwiftData integration for persistence
 
+### Analytics Features (v0.7.0-alpha-preview-2)
+* Donation timeline visualization
+* Category completion charts
+* Seasonal availability analysis
+* Progress tracking dashboard
+* Time period filtering options
+* Interactive chart components
+* Enhanced UI layout with improved component spacing
+
 ### Technical Improvements
+* Architectural enhancements (v0.7.0-alpha-preview):
+  * ✅ Phase 1: Complete separation of models from views
+  * ✅ Phase 2: Repository pattern implementation
+  * ✅ Phase 3: Enhanced model relationships and service layer
 * Comprehensive donation tracking system:
-  * Timestamp integration across all models
-  * DetailMoreInfoView implementation
-  * Enhanced SwiftData model updates
-* Backend preparation for future multi-game support:
-  * ACGame enum system implementation
-  * Version-specific data structures
-  * Cross-game item availability framework
-* Enhanced data models with town tracking
-* Improved item organization by town
+  * Complete timestamp integration across all models
+  * Progress statistics by category
+  * Service layer for donation management
+  * Data Transfer Objects for clean presentation
+* Analytics service implementation (v0.7.0-alpha-preview-2):
+  * Timeline data processing
+  * Category completion calculations
+  * Seasonal data analysis
+  * Chart data transformations
+* UI layout enhancements (v0.7.0-alpha-preview-2):
+  * Improved FloatingCategorySwitcher with scrollable containers
+  * Enhanced component spacing and alignment
+  * Fixed overlap issues in nested views
+  * Better cross-platform layout compatibility
 
 ### UI Components
 * DetailMoreInfoView for donation timestamps
 * Floating category switcher with custom icons
+* Town-specific collection views
 * Streamlined navigation system
 * Refined search functionality
 * Platform-specific optimizations
+* Analytics dashboard with chart visualizations
+* Interactive timeline and category charts
 
 ## File Structure
 ```
@@ -48,33 +72,99 @@ AnimalCrossingGCN-Tracker/
 │   └── AnimalCrossingGCN_TrackerApp.swift
 ├── Models/
 │   ├── Core/
-│   │   ├── ACGame.swift
-│   │   ├── CollectibleItem.swift
+│   │   ├── Item.swift
+│   │   ├── Games.swift
+│   │   ├── Town.swift
 │   │   ├── Fossil.swift
 │   │   ├── Bug.swift
 │   │   ├── Fish.swift
 │   │   └── Art.swift
+│   ├── DTOs/
+│   │   ├── CollectibleDTO.swift
+│   │   └── TownDTO.swift
 │   ├── Extensions/
-│   │   └── DonationTimestampableExt.swift
-│   └── Protocols/
-│       └── DonationTimestampable.swift
+│   │   └── Various model extensions
+│   ├── Protocols/
+│   │   └── DonationTimestampable.swift
+│   └── View Models/
+│       └── Various view models
 ├── Views/
-│   ├── Main/
-│   │   ├── ContentView.swift
-│   │   └── CategoryView.swift
-│   ├── Components/
-│   │   ├── FloatingCategorySwitcher.swift
-│   │   ├── CollectibleRow.swift
-│   │   ├── DetailMoreInfoView.swift
-│   │   └── CategorySection.swift
-│   └── Detail/
+│   ├── ContentView.swift
+│   ├── ContentView+Analytics.swift
+│   ├── MainListView.swift
+│   ├── DetailMoreInfoView.swift
+│   ├── EditTownView.swift
+│   ├── FloatingCategorySwitcher.swift
+│   ├── Analytics/
+│   │   └── AnalyticsDashboardView.swift
+│   └── DetailViews/
 │       ├── FossilDetailView.swift
 │       ├── BugDetailView.swift
 │       ├── FishDetailView.swift
 │       └── ArtDetailView.swift
-└── Managers/
-    └── DataManager.swift
+├── Managers/
+│   └── DataManager.swift
+├── Repositories/
+│   ├── BaseRepository.swift
+│   ├── RepositoryProtocols.swift
+│   ├── FossilRepository.swift
+│   ├── BugRepository.swift
+│   ├── FishRepository.swift
+│   ├── ArtRepository.swift
+│   └── TownRepository.swift
+├── Services/
+│   ├── DonationService.swift
+│   └── AnalyticsService.swift
+└── Utilities/
+    └── Various utility files
 ```
+
+## Development Status
+
+### Current Build Progress
+* **v0.7.0-alpha-preview-2 (February 27, 2025)**
+  * ✅ Initial Analytics GUI implementation
+    * ✅ Created AnalyticsService for data processing
+    * ✅ Implemented chart visualizations with Swift Charts
+    * ✅ Added timeline, category, and seasonal analysis
+    * ✅ Enhanced FloatingCategorySwitcher UI layout
+    * ✅ Improved component spacing and alignment
+    * ✅ Fixed UI overlap issues
+  * ⬜ Test analytics with real donation data
+  * ⬜ Implement caching for performance optimization
+  * ⬜ Add export functionality for analytics data
+
+* **v0.7.0-alpha-preview (February 26, 2025)**
+  * ✅ Completed Phase 1: Model-View Separation
+  * ✅ Completed Phase 2: Repository Pattern Implementation
+  * ✅ Completed Phase 3: Model Relationship Enhancement
+    * ✅ Enhanced Town model with additional properties
+    * ✅ Implemented ID-based relationships between models
+    * ✅ Created service layer for business logic
+    * ✅ Implemented DTOs for data transformation
+    * ✅ Added progress tracking functionality
+    * ✅ Verified with successful compilation and testing
+
+### Breaking Changes
+Version v0.7.0-alpha-preview introduced breaking changes that impact save compatibility:
+1. Enhanced Town model with additional properties
+2. ID-based relationship system instead of direct references
+3. Modified data structure for all collectible items
+
+### Next Development Phase
+* v0.7.0-alpha full release plans:
+  * Complete analytics implementation with real data integration
+  * New Home Screen design with user choice-driven navigation
+  * Global search functionality with cross-category search
+  * Villager support with GameCube villagers database
+  * Unit tests for services and repositories
+  * Performance optimizations for analytics calculations
+
+### Long-term Roadmap
+* v0.7.x: Multi-game support beyond GameCube version
+* v0.8.0: Custom hand-drawn icons and thumbnails
+* v0.9.0: Enhanced iOS features (haptics, widgets)
+* v1.0.0: Full-featured Animal Crossing companion app
 
 ## Platform Support
 
@@ -83,30 +173,27 @@ AnimalCrossingGCN-Tracker/
 * Optimized floating UI elements
 * Native platform interactions
 * Responsive layouts for all screen sizes
+* SwiftCharts visualizations for analytics
 
 ### macOS
 * Complete feature parity with iOS
 * Enhanced keyboard navigation
 * Native menu bar integration
 * Platform-specific UI refinements
-
-## Known Issues
-* Search limited to current category
-* No transition animations for category switches
-* Additional macOS performance testing needed
+* Optimized chart layouts for desktop use
 
 ## Technical Requirements
-* Xcode 15+
+* Xcode 15.5+
 * iOS 17.0+
 * macOS 14.0+
 * SwiftUI and SwiftData knowledge for contributions
+* Swift Charts for analytics visualizations
 
-## Development Status
-* Currently in active development (v0.7.0 planned for January 2025)
-* New donation timestamp tracking system
-* Enhanced town-based tracking
-* Backend preparation for future multi-game support
-* Working toward advanced filtering and UI improvements
+## Known Issues in v0.7.0-alpha-preview-2
+* Some UI elements in the analytics dashboard may overlap or appear improperly positioned
+* Analytics charts may not display real data correctly in all scenarios
+* The analytics dashboard sheet may have positioning issues on smaller screens
+* Not all analytics features are fully functional yet
 
 ## Contributing
 This project welcomes community contributions. If anyone happens to see this, please report any issues or submit pull requests through the project's GitHub repository.
