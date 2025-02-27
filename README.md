@@ -1,14 +1,14 @@
 # AnimalCrossingGCN-Tracker
-* Version: v0.7.0-alpha-preview
-* Last Updated: February 26th, 2025
+* Version: v0.7.0-alpha-preview-2
+* Last Updated: February 27th, 2025
 * Author: Brock Jenkinson (@jacuzzicoding)
 
-> **Important Notice**: v0.7.0-alpha-preview breaks save compatibility with previous versions due to significant model relationship changes.
+> **Important Notice**: v0.7.0-alpha-preview-2 introduces early implementation of the Analytics GUI. Some UI elements may not function as expected, but the core structure is in place.
 
 ## Project Overview
 The AnimalCrossingGCN-Tracker is a comprehensive companion app for tracking Animal Crossing GameCube museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
 
-Version v0.7.0-alpha-preview (previously v0.6.5-alpha) has completed all three phases of architectural improvements, significantly enhancing code modularity, data relationships, and donation tracking capabilities.
+Version v0.7.0-alpha-preview-2 builds upon v0.7.0-alpha-preview by introducing an early implementation of Analytics GUI with visualization components and improved UI layout.
 
 ## Features
 
@@ -25,6 +25,15 @@ Version v0.7.0-alpha-preview (previously v0.6.5-alpha) has completed all three p
 * Enhanced search functionality
 * SwiftData integration for persistence
 
+### Analytics Features (v0.7.0-alpha-preview-2)
+* Donation timeline visualization
+* Category completion charts
+* Seasonal availability analysis
+* Progress tracking dashboard
+* Time period filtering options
+* Interactive chart components
+* Enhanced UI layout with improved component spacing
+
 ### Technical Improvements
 * Architectural enhancements (v0.7.0-alpha-preview):
   * ✅ Phase 1: Complete separation of models from views
@@ -35,15 +44,16 @@ Version v0.7.0-alpha-preview (previously v0.6.5-alpha) has completed all three p
   * Progress statistics by category
   * Service layer for donation management
   * Data Transfer Objects for clean presentation
-* Backend preparation for future multi-game support:
-  * ACGame enum system implementation
-  * Version-specific data structures
-  * Cross-game item availability framework
-* Enhanced data models with expanded town properties:
-  * Player name tracking
-  * Game version association
-  * Creation date logging
-  * ID-based relationship system
+* Analytics service implementation (v0.7.0-alpha-preview-2):
+  * Timeline data processing
+  * Category completion calculations
+  * Seasonal data analysis
+  * Chart data transformations
+* UI layout enhancements (v0.7.0-alpha-preview-2):
+  * Improved FloatingCategorySwitcher with scrollable containers
+  * Enhanced component spacing and alignment
+  * Fixed overlap issues in nested views
+  * Better cross-platform layout compatibility
 
 ### UI Components
 * DetailMoreInfoView for donation timestamps
@@ -52,6 +62,8 @@ Version v0.7.0-alpha-preview (previously v0.6.5-alpha) has completed all three p
 * Streamlined navigation system
 * Refined search functionality
 * Platform-specific optimizations
+* Analytics dashboard with chart visualizations
+* Interactive timeline and category charts
 
 ## File Structure
 ```
@@ -78,10 +90,13 @@ AnimalCrossingGCN-Tracker/
 │       └── Various view models
 ├── Views/
 │   ├── ContentView.swift
+│   ├── ContentView+Analytics.swift
 │   ├── MainListView.swift
 │   ├── DetailMoreInfoView.swift
 │   ├── EditTownView.swift
 │   ├── FloatingCategorySwitcher.swift
+│   ├── Analytics/
+│   │   └── AnalyticsDashboardView.swift
 │   └── DetailViews/
 │       ├── FossilDetailView.swift
 │       ├── BugDetailView.swift
@@ -98,7 +113,8 @@ AnimalCrossingGCN-Tracker/
 │   ├── ArtRepository.swift
 │   └── TownRepository.swift
 ├── Services/
-│   └── DonationService.swift
+│   ├── DonationService.swift
+│   └── AnalyticsService.swift
 └── Utilities/
     └── Various utility files
 ```
@@ -106,6 +122,18 @@ AnimalCrossingGCN-Tracker/
 ## Development Status
 
 ### Current Build Progress
+* **v0.7.0-alpha-preview-2 (February 27, 2025)**
+  * ✅ Initial Analytics GUI implementation
+    * ✅ Created AnalyticsService for data processing
+    * ✅ Implemented chart visualizations with Swift Charts
+    * ✅ Added timeline, category, and seasonal analysis
+    * ✅ Enhanced FloatingCategorySwitcher UI layout
+    * ✅ Improved component spacing and alignment
+    * ✅ Fixed UI overlap issues
+  * ⬜ Test analytics with real donation data
+  * ⬜ Implement caching for performance optimization
+  * ⬜ Add export functionality for analytics data
+
 * **v0.7.0-alpha-preview (February 26, 2025)**
   * ✅ Completed Phase 1: Model-View Separation
   * ✅ Completed Phase 2: Repository Pattern Implementation
@@ -118,18 +146,19 @@ AnimalCrossingGCN-Tracker/
     * ✅ Verified with successful compilation and testing
 
 ### Breaking Changes
-This version introduces several breaking changes that impact save compatibility:
+Version v0.7.0-alpha-preview introduced breaking changes that impact save compatibility:
 1. Enhanced Town model with additional properties
 2. ID-based relationship system instead of direct references
 3. Modified data structure for all collectible items
 
 ### Next Development Phase
 * v0.7.0-alpha full release plans:
-  * GUI for analytics and statistics
-  * Enhanced visualization of donation data
-  * Optimized performance for larger datasets
+  * Complete analytics implementation with real data integration
+  * New Home Screen design with user choice-driven navigation
+  * Global search functionality with cross-category search
+  * Villager support with GameCube villagers database
   * Unit tests for services and repositories
-  * UI updates to leverage new data relationships
+  * Performance optimizations for analytics calculations
 
 ### Long-term Roadmap
 * v0.7.x: Multi-game support beyond GameCube version
@@ -144,18 +173,27 @@ This version introduces several breaking changes that impact save compatibility:
 * Optimized floating UI elements
 * Native platform interactions
 * Responsive layouts for all screen sizes
+* SwiftCharts visualizations for analytics
 
 ### macOS
 * Complete feature parity with iOS
 * Enhanced keyboard navigation
 * Native menu bar integration
 * Platform-specific UI refinements
+* Optimized chart layouts for desktop use
 
 ## Technical Requirements
 * Xcode 15.5+
 * iOS 17.0+
 * macOS 14.0+
 * SwiftUI and SwiftData knowledge for contributions
+* Swift Charts for analytics visualizations
+
+## Known Issues in v0.7.0-alpha-preview-2
+* Some UI elements in the analytics dashboard may overlap or appear improperly positioned
+* Analytics charts may not display real data correctly in all scenarios
+* The analytics dashboard sheet may have positioning issues on smaller screens
+* Not all analytics features are fully functional yet
 
 ## Contributing
 This project welcomes community contributions. If anyone happens to see this, please report any issues or submit pull requests through the project's GitHub repository.
