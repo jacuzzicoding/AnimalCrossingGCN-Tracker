@@ -688,4 +688,70 @@ class DataManager: ObservableObject {
             print("DEBUG: Current town ID: \(town.id.uuidString)")
         }
     }
+    
+    /// Ensures all items are properly linked to the current town
+    func ensureItemsAreLinkedToCurrentTown() {
+        guard let town = currentTown else {
+            print("DEBUG: No current town to link items to")
+            return
+        }
+        
+        // Get all items from repositories
+        let allFossils = fossilRepository.getAll()
+        let allBugs = bugRepository.getAll()
+        let allFish = fishRepository.getAll()
+        let allArt = artRepository.getAll()
+        
+        // Get items already linked to town
+        let townFossils = donationService.getFossilsForTown(town: town)
+        let townBugs = donationService.getBugsForTown(town: town)
+        let townFish = donationService.getFishForTown(town: town)
+        let townArt = donationService.getArtForTown(town: town)
+        
+        // Create sets of IDs for fast lookup
+        let townFossilIds = Set(townFossils.map { $0.id })
+        let townBugIds = Set(townBugs.map { $0.id })
+        let townFishIds = Set(townFish.map { $0.id })
+        let townArtIds = Set(townArt.map { $0.id })
+        
+        var fossilsLinked = 0, bugsLinked = 0, fishLinked = 0, artLinked = 0
+        
+        // Link fossils that aren't already linked
+        for fossil in allFossils.filter({ !townFossilIds.contains($0.id) }) {
+            // Only link if compatible with town's game
+            if fossil.games.contains(town.game) {
+                donationService.linkFossilToTown(fossil: fossil, town: town)
+                fossilsLinked += 1
+            }
+        }
+        
+        // Link bugs that aren't already linked
+        for bug in allBugs.filter({ !townBugIds.contains($0.id) }) {
+            if bug.games.contains(town.game) {
+                donationService.linkBugToTown(bug: bug, town: town)
+                bugsLinked += 1
+            }
+        }
+        
+        // Link fish that aren't already linked
+        for fish in allFish.filter({ !townFishIds.contains($0.id) }) {
+            if fish.games.contains(town.game) {
+                donationService.linkFishToTown(fish: fish, town: town)
+                fishLinked += 1
+            }
+        }
+        
+        // Link art that isn't already linked
+        for art in allArt.filter({ !townArtIds.contains($0.id) }) {
+            if art.games.contains(town.game) {
+                donationService.linkArtToTown(art: art, town: town)
+                artLinked += 1
+            }
+        }
+        
+        print("DEBUG: Items linked to town \"\(town.name)\": Fossils: \(fossilsLinked), Bugs: \(bugsLinked), Fish: \(fishLinked), Art: \(artLinked)")
+        
+        // Update town DTO with new progress
+        updateTownDTO(town)
+    }
 }
