@@ -80,20 +80,23 @@ enum Category: String, CaseIterable {
 // Custom SearchBar view for improved UI
 struct SearchBar: View {
     @Binding var text: String
+    @Binding var isGlobalSearch: Bool
     
     var body: some View {
         HStack {
             HStack {
-                Image(systemName: "magnifyingglass") //new magnifying glass icon
+                Image(systemName: "magnifyingglass")
                     .foregroundColor(.gray)
+                    
                 TextField("Search...", text: $text)
                     .foregroundColor(.primary)
-                    .disableAutocorrection(false) //now allows autocorrection
+                    .disableAutocorrection(false)
+                
                 if !text.isEmpty { 
-                    Button(action: { //new button to clear the text
+                    Button(action: {
                         text = ""
                     }) {
-                        Image(systemName: "xmark.circle.fill") //if text is not empty, show the xmark to clear the text
+                        Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.gray)
                     }
                 }
@@ -101,8 +104,17 @@ struct SearchBar: View {
             .padding(8)
             .background(Color.gray.opacity(0.1))
             .cornerRadius(10)
-            .padding(.horizontal)
+            
+            // Toggle between local and global search
+            Button(action: {
+                isGlobalSearch.toggle()
+            }) {
+                Image(systemName: isGlobalSearch ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                    .foregroundColor(.blue)
+            }
+            .help(isGlobalSearch ? "Search current category only" : "Search all categories")
         }
+        .padding(.horizontal)
     }
 }
 
@@ -220,6 +232,7 @@ struct ContentView: View { // Updated ContentView
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @StateObject private var categoryManager = CategoryManager()
     @State private var searchText = ""
+    @State private var isGlobalSearch = false
 
     private var mainContent: some View {
         ZStack(alignment: .bottom) { //align the floating category switcher to the bottom
@@ -440,7 +453,13 @@ struct ContentView: View { // Updated ContentView
                     }
                 } else {
                     // Existing search and main list content
-                    SearchBar(text: $searchText)
+                    SearchBar(text: $searchText, isGlobalSearch: $isGlobalSearch)
+                        .onChange(of: isGlobalSearch) { _, newValue in
+                            if newValue {
+                                showingGlobalSearch = true
+                            }
+                        }
+                    
                     MainListView(
                         searchText: $searchText,
                         fossilsQuery: fossilsQuery,
@@ -509,6 +528,7 @@ struct ContentView: View { // Updated ContentView
                     addNavigationDestinations(mainContent)
                         .navigationTitle("Museum Tracker")
                         .toolbar {
+                            #if os(iOS)
                             ToolbarItem(placement: .navigationBarTrailing) {
                                 Button(action: {
                                     showingGlobalSearch = true
@@ -516,6 +536,15 @@ struct ContentView: View { // Updated ContentView
                                     Image(systemName: "magnifyingglass")
                                 }
                             }
+                            #else
+                            ToolbarItem {
+                                Button(action: {
+                                    showingGlobalSearch = true
+                                }) {
+                                    Image(systemName: "magnifyingglass")
+                                }
+                            }
+                            #endif
                         }
                 }
             } else {
@@ -535,6 +564,7 @@ struct ContentView: View { // Updated ContentView
                 }
                 .navigationTitle("Museum Tracker")
                 .toolbar {
+                    #if os(iOS)
                     ToolbarItem(placement: .primaryAction) {
                         Button(action: {
                             showingGlobalSearch = true
@@ -542,6 +572,15 @@ struct ContentView: View { // Updated ContentView
                             Image(systemName: "magnifyingglass")
                         }
                     }
+                    #else
+                    ToolbarItem {
+                        Button(action: {
+                            showingGlobalSearch = true
+                        }) {
+                            Image(systemName: "magnifyingglass")
+                        }
+                    }
+                    #endif
                 }
             }
         }
@@ -576,7 +615,10 @@ struct ContentView: View { // Updated ContentView
             }
             .environmentObject(dataManager)
         }
-        .sheet(isPresented: $showingGlobalSearch) {
+        .sheet(isPresented: $showingGlobalSearch, onDismiss: {
+            // Reset the toggle when the global search sheet is dismissed
+            isGlobalSearch = false
+        }) {
             // Show global search in a sheet
             GlobalSearchView()
                 .environmentObject(dataManager)
