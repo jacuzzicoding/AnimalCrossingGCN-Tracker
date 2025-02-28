@@ -226,7 +226,31 @@ struct CategoryCard: View {
     let color: Color
     let emoji: String
     let category: Category
-    
+
+    // New computed property for donation info
+    private var donationInfo: String? {
+        guard let completion = dataManager.getCategoryCompletionData() else { return nil }
+        let donated: Int
+        let total: Int
+        
+        switch category {
+        case .fossils:
+            donated = completion.fossilDonated
+            total = completion.fossilCount
+        case .bugs:
+            donated = completion.bugDonated
+            total = completion.bugCount
+        case .fish:
+            donated = completion.fishDonated
+            total = completion.fishCount
+        case .art:
+            donated = completion.artDonated
+            total = completion.artCount
+        }
+        
+        return "\(donated)/\(total)"
+    }
+
     var body: some View {
         Button(action: {
             categoryManager.switchCategory(category)
@@ -246,26 +270,8 @@ struct CategoryCard: View {
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                 
-                if let completion = dataManager.getCategoryCompletionData() {
-                    let donated: Int
-                    let total: Int
-                    
-                    switch category {
-                    case .fossils:
-                        donated = completion.fossilDonated
-                        total = completion.fossilCount
-                    case .bugs:
-                        donated = completion.bugDonated
-                        total = completion.bugCount
-                    case .fish:
-                        donated = completion.fishDonated
-                        total = completion.fishCount
-                    case .art:
-                        donated = completion.artDonated
-                        total = completion.artCount
-                    }
-                    
-                    Text("\(donated)/\(total)")
+                if let info = donationInfo {
+                    Text(info)
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.9))
                 }
@@ -382,7 +388,8 @@ struct RecentDonationsCard: View {
                 .frame(maxWidth: .infinity)
                 .padding()
             } else {
-                ForEach(Array(recentDonations.prefix(4).enumerated()), id: \.1.id) { index, donation in
+                ForEach(0 ..< recentDonations.prefix(4).count, id: \.self) { index in
+                    let donation = recentDonations[index]
                     VStack(spacing: 0) {
                         HStack {
                             Text("◆")
