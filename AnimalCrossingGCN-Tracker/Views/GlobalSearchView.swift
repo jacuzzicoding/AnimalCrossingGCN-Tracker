@@ -179,7 +179,11 @@ struct GlobalSearchView: View {
                                 }
                             }
                         }
+                        #if os(iOS)
                         .listStyle(.insetGrouped)
+                        #else
+                        .listStyle(.inset)
+                        #endif
                     }
                 } else if isSearching {
                     // Loading indicator
