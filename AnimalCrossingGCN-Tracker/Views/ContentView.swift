@@ -187,9 +187,9 @@ struct ContentView: View { // Updated ContentView
     @State private var isEditingTown = false
     @State private var newTownName: String = ""
     
-    // Sheets
+    // Navigation state
     @State private var showingFullAnalytics = false
-    @State private var showingGlobalSearch = false
+    @State private var selectedHomeTab: HomeTab = .home
 
     // Category manager
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -483,23 +483,93 @@ struct ContentView: View { // Updated ContentView
         Group {
             if horizontalSizeClass == .compact {
                 // iPhone section
-                NavigationStack {
-                    addNavigationDestinations(mainContent)
-                        .navigationTitle("Museum Tracker")
+                ZStack {
+                    TabView(selection: $selectedHomeTab) {
+                        HomeView()
+                            .tag(HomeTab.home)
+                        
+                        NavigationStack {
+                            addNavigationDestinations(mainContent)
+                                .navigationTitle("Museum Tracker")
+                        }
+                        .tag(HomeTab.museum)
+                        
+                        // Other tabs would go here
+                        Text("Donate View")
+                            .tag(HomeTab.donate)
+                        
+                        AnalyticsDashboardView()
+                            .tag(HomeTab.analytics)
+                        
+                        Text("Search View")
+                            .tag(HomeTab.search)
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                    .edgesIgnoringSafeArea(.bottom)
+                    
+                    VStack {
+                        Spacer()
+                        HomeTabBar(selectedTab: $selectedHomeTab, isGlobalSearch: $isGlobalSearch)
+                    }
+                    .edgesIgnoringSafeArea(.bottom)
+                }
+                .onChange(of: selectedHomeTab) { oldValue, newValue in
+                    // Handle tab changes
+                    if newValue == .search {
+                        isGlobalSearch = true
+                    } else if newValue == .analytics {
+                        categoryManager.showingAnalytics = true
+                    } else if newValue == .museum {
+                        categoryManager.showingAnalytics = false
+                    }
                 }
             } else {
                 // iPad/Mac section
                 NavigationSplitView {
-                    addNavigationDestinations(mainContent)
+                    List {
+                        NavigationLink(value: HomeTab.home) {
+                            Label("Home", systemImage: "house.fill")
+                        }
+                        
+                        NavigationLink(value: HomeTab.museum) {
+                            Label("Museum", systemImage: "building.columns.fill")
+                        }
+                        
+                        NavigationLink(value: HomeTab.donate) {
+                            Label("Donate", systemImage: "gift.fill")
+                        }
+                        
+                        NavigationLink(value: HomeTab.analytics) {
+                            Label("Analytics", systemImage: "chart.pie.fill")
+                        }
+                        
+                        NavigationLink(value: HomeTab.search) {
+                            Label("Search", systemImage: "magnifyingglass")
+                        }
+                    }
+                    .navigationDestination(for: HomeTab.self) { tab in
+                        switch tab {
+                        case .home:
+                            HomeView()
+                        case .museum:
+                            mainContent
+                        case .analytics:
+                            AnalyticsDashboardView()
+                        case .donate:
+                            Text("Donate View")
+                        case .search:
+                            Text("Search View")
+                        }
+                    }
 #if os(macOS)
-                        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+                    .navigationSplitViewColumnWidth(min: 180, ideal: 200)
 #endif
                 } detail: {
+                    // This is a placeholder, actual content comes from navigationDestination
+                    Text("Select an option from the sidebar")
+                        .foregroundColor(.secondary)
 #if os(macOS)
-                    Text("Select an item")
                         .frame(minWidth: 300)
-#else
-                    Text("Select an item")
 #endif
                 }
                 .navigationTitle("Museum Tracker")
