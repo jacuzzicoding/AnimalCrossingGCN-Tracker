@@ -632,14 +632,5 @@ struct ContentView: View { // Updated ContentView
             }
             .environmentObject(dataManager)
         }
-        .sheet(isPresented: $showingGlobalSearch, onDismiss: {
-            // Reset the toggle when the global search sheet is dismissed
-            isGlobalSearch = false
-        }) {
-            // Show global search in a sheet
-            GlobalSearchView()
-                .environmentObject(dataManager)
-                .environmentObject(categoryManager)
-        }
     }
 }
