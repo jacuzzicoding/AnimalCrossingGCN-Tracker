@@ -6,6 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
+
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Main home screen view for the Animal Crossing GCN Tracker app
 struct HomeView: View {
@@ -348,6 +353,13 @@ struct SeasonalItemView: View {
     }
 }
 
+struct DonationItem: Identifiable {
+    let id = UUID()
+    let title: String
+    let time: String
+    let color: Color
+}
+
 /// Card showing recent donations
 struct RecentDonationsCard: View {
     @EnvironmentObject var dataManager: DataManager
@@ -370,24 +382,26 @@ struct RecentDonationsCard: View {
                 .frame(maxWidth: .infinity)
                 .padding()
             } else {
-                ForEach(recentDonations.prefix(4), id: \.title) { donation in
-                    HStack {
-                        Text("◆")
-                            .foregroundColor(donation.color)
+                ForEach(Array(recentDonations.prefix(4).enumerated()), id: \.1.id) { index, donation in
+                    VStack(spacing: 0) {
+                        HStack {
+                            Text("◆")
+                                .foregroundColor(donation.color)
+                            
+                            Text(donation.title)
+                                .font(.subheadline)
+                            
+                            Spacer()
+                            
+                            Text(donation.time)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 4)
                         
-                        Text(donation.title)
-                            .font(.subheadline)
-                        
-                        Spacer()
-                        
-                        Text(donation.time)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.vertical, 4)
-                    
-                    if donation != recentDonations.last {
-                        Divider()
+                        if index < recentDonations.prefix(4).count - 1 {
+                            Divider()
+                        }
                     }
                 }
                 
@@ -417,13 +431,13 @@ struct RecentDonationsCard: View {
         .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
     }
     
-    private var recentDonations: [(title: String, time: String, color: Color)] {
+    private var recentDonations: [DonationItem] {
         // In a real app, this would come from actual data
         [
-            ("Saber-Tooth Tiger Skull", "3 hours ago", .acMuseumBrown),
-            ("Emperor Butterfly", "Yesterday", .green),
-            ("Sea Bass", "Yesterday", .acOceanBlue),
-            ("T-Rex Tail", "2 days ago", .acMuseumBrown)
+            DonationItem(title: "Saber-Tooth Tiger Skull", time: "3 hours ago", color: .acMuseumBrown),
+            DonationItem(title: "Emperor Butterfly", time: "Yesterday", color: .green),
+            DonationItem(title: "Sea Bass", time: "Yesterday", color: .acOceanBlue),
+            DonationItem(title: "T-Rex Tail", time: "2 days ago", color: .acMuseumBrown)
         ]
     }
 }
