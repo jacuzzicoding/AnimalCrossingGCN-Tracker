@@ -251,6 +251,12 @@ struct CategoryCard: View {
         return "\(donated)/\(total)"
     }
 
+    // Add this computed property to determine if text should be dark
+    private var shouldUseDarkText: Bool {
+        // Simple check for known light colors, or implement a brightness check
+        return color == .acBellYellow || color.brightness > 0.7
+    }
+
     var body: some View {
         Button(action: {
             categoryManager.switchCategory(category)
@@ -258,7 +264,7 @@ struct CategoryCard: View {
             VStack(spacing: 8) {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(shouldUseDarkText ? .black : .white)
                 
                 Spacer()
                 
@@ -268,12 +274,12 @@ struct CategoryCard: View {
                 Text("\(Int(progress * 100))%")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundColor(shouldUseDarkText ? .black : .white)
                 
                 if let info = donationInfo {
                     Text(info)
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(shouldUseDarkText ? .black.opacity(0.8) : .white.opacity(0.9))
                 }
                 
                 Spacer()
@@ -281,11 +287,11 @@ struct CategoryCard: View {
                 HStack {
                     Text("View All")
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(shouldUseDarkText ? .black.opacity(0.8) : .white.opacity(0.9))
                     
                     Image(systemName: "chevron.right")
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(shouldUseDarkText ? .black.opacity(0.8) : .white.opacity(0.9))
                 }
                 .padding(.top, 4)
             }
@@ -295,6 +301,24 @@ struct CategoryCard: View {
             .cornerRadius(10)
             .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
         }
+    }
+}
+
+// Add this extension to calculate color brightness
+extension Color {
+    var brightness: CGFloat {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        
+        #if canImport(UIKit)
+        UIColor(self).getRed(&red, green: &green, blue: &blue, alpha: nil)
+        #else
+        NSColor(self).getRed(&red, green: &green, blue: &blue, alpha: nil)
+        #endif
+        
+        // Formula to determine perceived brightness
+        return (0.299 * red + 0.587 * green + 0.114 * blue)
     }
 }
 
