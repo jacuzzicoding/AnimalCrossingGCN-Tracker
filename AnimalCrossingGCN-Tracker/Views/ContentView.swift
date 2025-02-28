@@ -483,46 +483,7 @@ struct ContentView: View { // Updated ContentView
         Group {
             if horizontalSizeClass == .compact {
                 // iPhone section
-                ZStack {
-                    TabView(selection: $selectedHomeTab) {
-                        HomeView()
-                            .tag(HomeTab.home)
-                        
-                        NavigationStack {
-                            addNavigationDestinations(mainContent)
-                                .navigationTitle("Museum Tracker")
-                        }
-                        .tag(HomeTab.museum)
-                        
-                        // Other tabs would go here
-                        Text("Donate View")
-                            .tag(HomeTab.donate)
-                        
-                        AnalyticsDashboardView()
-                            .tag(HomeTab.analytics)
-                        
-                        Text("Search View")
-                            .tag(HomeTab.search)
-                    }
-                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                    .edgesIgnoringSafeArea(.bottom)
-                    
-                    VStack {
-                        Spacer()
-                        HomeTabBar(selectedTab: $selectedHomeTab, isGlobalSearch: $isGlobalSearch)
-                    }
-                    .edgesIgnoringSafeArea(.bottom)
-                }
-                .onChange(of: selectedHomeTab) { oldValue, newValue in
-                    // Handle tab changes
-                    if newValue == .search {
-                        isGlobalSearch = true
-                    } else if newValue == .analytics {
-                        categoryManager.showingAnalytics = true
-                    } else if newValue == .museum {
-                        categoryManager.showingAnalytics = false
-                    }
-                }
+                MainTabView(selectedTab: $selectedHomeTab, isGlobalSearch: $isGlobalSearch)
             } else {
                 // iPad/Mac section
                 NavigationSplitView {
