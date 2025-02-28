@@ -7,66 +7,11 @@
 
 import SwiftUI
 import Charts
-import SwiftData // Add this import for UIColor
+import SwiftData
 
 #if canImport(UIKit)
 import UIKit
 #endif
-
-// Define Animal Crossing color extension
-extension Color {
-    static let acLeafGreen = Color(red: 107/255, green: 211/255, blue: 139/255) // #6BD38B
-    static let acMuseumBrown = Color(red: 184/255, green: 125/255, blue: 75/255) // #B87D4B
-    static let acOceanBlue = Color(red: 122/255, green: 205/255, blue: 244/255) // #7ACDF4
-    static let acBellYellow = Color(red: 250/255, green: 216/255, blue: 123/255) // #FAD87B
-    static let acBlathersPurple = Color(red: 161/255, green: 122/255, blue: 196/255) // #A17AC4
-    static let acPumpkinOrange = Color(red: 237/255, green: 138/255, blue: 51/255) // #ED8A33
-    static let acWinterBlue = Color(red: 138/255, green: 189/255, blue: 222/255) // #8ABDDE
-}
-
-// Define BackgroundLevel enum outside the extension
-enum BackgroundLevel {
-    case secondary
-    case tertiary
-}
-
-// Extension to handle hierarchical backgrounds across iOS versions and platforms
-extension View {
-    @ViewBuilder
-    func hierarchicalBackground(level: BackgroundLevel = .secondary, cornerRadius: CGFloat = 10) -> some View {
-        if #available(iOS 17.0, macOS 14.0, *) {
-            switch level {
-            case .secondary:
-                self.background(.background.secondary)
-                    .cornerRadius(cornerRadius)
-            case .tertiary:
-                self.background(.background.tertiary)
-                    .cornerRadius(cornerRadius)
-            }
-        } else {
-            #if os(iOS)
-            switch level {
-            case .secondary:
-                self.background(Color(uiColor: UIColor.secondarySystemBackground))
-                    .cornerRadius(cornerRadius)
-            case .tertiary:
-                self.background(Color(uiColor: UIColor.tertiarySystemBackground))
-                    .cornerRadius(cornerRadius)
-            }
-            #else
-            // For macOS or other platforms
-            switch level {
-            case .secondary:
-                self.background(Color.secondary.opacity(0.2))
-                    .cornerRadius(cornerRadius)
-            case .tertiary:
-                self.background(Color.secondary.opacity(0.1))
-                    .cornerRadius(cornerRadius)
-            }
-            #endif
-        }
-    }
-}
 
 #if DEBUG
 // Debug view to show analytics data metrics
