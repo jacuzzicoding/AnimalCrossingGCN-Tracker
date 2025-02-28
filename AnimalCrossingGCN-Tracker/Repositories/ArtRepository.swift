@@ -91,4 +91,18 @@ class ArtRepository: BaseRepository<Art>, CollectibleRepository {
         let descriptor = createFetchDescriptor(predicate: predicate)
         return executeFetch(descriptor)
     }
+    
+    /// Retrieves art pieces by town ID
+    /// - Parameter townId: The town ID to filter by
+    /// - Returns: Array of art pieces for the specified town
+    func getByTownId(townId: UUID) -> [Art] {
+        let descriptor = FetchDescriptor<Art>()
+        do {
+            let allArt = try modelContext.fetch(descriptor)
+            return allArt.filter { $0.townId == townId }
+        } catch {
+            print("Error fetching art by town ID: \(error)")
+            return []
+        }
+    }
 }
