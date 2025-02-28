@@ -475,14 +475,10 @@ struct ContentView: View { // Updated ContentView
                 } else {
                     // Existing search and main list content
                     SearchBar(text: $searchText, isGlobalSearch: $isGlobalSearch)
-                        .onChange(of: isGlobalSearch) { _, newValue in
-                            if newValue {
-                                showingGlobalSearch = true
-                            }
-                        }
                     
                     MainListView(
                         searchText: $searchText,
+                        isGlobalSearch: $isGlobalSearch,
                         fossilsQuery: fossilsQuery,
                         bugsQuery: bugsQuery,
                         fishQuery: fishQuery,
