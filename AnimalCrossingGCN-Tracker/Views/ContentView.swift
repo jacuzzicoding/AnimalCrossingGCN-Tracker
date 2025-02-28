@@ -105,14 +105,35 @@ struct SearchBar: View {
             .background(Color.gray.opacity(0.1))
             .cornerRadius(10)
             
-            // Toggle between local and global search
+            // Enhanced global search toggle button with platform-specific styling
+            #if os(iOS)
             Button(action: {
                 isGlobalSearch.toggle()
             }) {
-                Image(systemName: isGlobalSearch ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
-                    .foregroundColor(.blue)
+                HStack {
+                    Image(systemName: isGlobalSearch ? "rectangle.and.text.magnifyingglass.rtl" : "rectangle.and.text.magnifyingglass")
+                    Text(isGlobalSearch ? "Current" : "All")
+                        .font(.caption)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(isGlobalSearch ? Color.acLeafGreen.opacity(0.2) : Color.acBlathersPurple.opacity(0.2))
+                .cornerRadius(8)
             }
-            .help(isGlobalSearch ? "Search current category only" : "Search all categories")
+            .help(isGlobalSearch ? "Search current category only" : "Search across all categories")
+            #else
+            Button(action: {
+                isGlobalSearch.toggle()
+            }) {
+                HStack {
+                    Image(systemName: isGlobalSearch ? "rectangle.and.text.magnifyingglass.rtl" : "rectangle.and.text.magnifyingglass")
+                    Text(isGlobalSearch ? "Current Category" : "All Categories")
+                        .font(.caption)
+                }
+            }
+            .buttonStyle(LinkButtonStyle())
+            .help(isGlobalSearch ? "Search only in the current category" : "Search across all categories")
+            #endif
         }
         .padding(.horizontal)
     }
