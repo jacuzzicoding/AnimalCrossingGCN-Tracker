@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 /// Main tab view that contains all primary app screens
 struct MainTabView: View {
@@ -39,7 +40,7 @@ struct MainTabView: View {
                 Text("")
                     .tag(HomeTab.search)
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            .tabViewStyle(.automatic)
             .edgesIgnoringSafeArea(.bottom)
             
             VStack {
