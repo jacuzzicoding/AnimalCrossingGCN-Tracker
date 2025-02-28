@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+#if canImport(UIKit)
+import UIKit
+#endif
+
 /// Enhanced search bar with global search toggle
 struct SearchBar: View {
     @Binding var text: String
