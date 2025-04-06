@@ -7,6 +7,10 @@ import SwiftUI
 import SwiftData
 import Charts
 
+#if canImport(UIKit)
+import UIKit
+#endif
+
 // Protocol conformance is now handled directly in each model file
 
 class CategoryManager: ObservableObject {
@@ -73,35 +77,6 @@ enum Category: String, CaseIterable {
             if let art = item as? Art {
                 ArtDetailView(art: art)
             }
-        }
-    }
-}
-
-// Custom SearchBar view for improved UI
-struct SearchBar: View {
-    @Binding var text: String
-    
-    var body: some View {
-        HStack {
-            HStack {
-                Image(systemName: "magnifyingglass") //new magnifying glass icon
-                    .foregroundColor(.gray)
-                TextField("Search...", text: $text)
-                    .foregroundColor(.primary)
-                    .disableAutocorrection(false) //now allows autocorrection
-                if !text.isEmpty { 
-                    Button(action: { //new button to clear the text
-                        text = ""
-                    }) {
-                        Image(systemName: "xmark.circle.fill") //if text is not empty, show the xmark to clear the text
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-            .padding(8)
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(10)
-            .padding(.horizontal)
         }
     }
 }
@@ -212,13 +187,15 @@ struct ContentView: View { // Updated ContentView
     @State private var isEditingTown = false
     @State private var newTownName: String = ""
     
-    // Analytics sheet
+    // Navigation state
     @State private var showingFullAnalytics = false
+    @State private var selectedHomeTab: HomeTab = .home
 
     // Category manager
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @StateObject private var categoryManager = CategoryManager()
     @State private var searchText = ""
+    @State private var isGlobalSearch = false
 
     private var mainContent: some View {
         ZStack(alignment: .bottom) { //align the floating category switcher to the bottom
@@ -439,9 +416,11 @@ struct ContentView: View { // Updated ContentView
                     }
                 } else {
                     // Existing search and main list content
-                    SearchBar(text: $searchText)
+                    SearchBar(text: $searchText, isGlobalSearch: $isGlobalSearch)
+                    
                     MainListView(
                         searchText: $searchText,
+                        isGlobalSearch: $isGlobalSearch,
                         fossilsQuery: fossilsQuery,
                         bugsQuery: bugsQuery,
                         fishQuery: fishQuery,
@@ -504,23 +483,54 @@ struct ContentView: View { // Updated ContentView
         Group {
             if horizontalSizeClass == .compact {
                 // iPhone section
-                NavigationStack {
-                    addNavigationDestinations(mainContent)
-                        .navigationTitle("Museum Tracker")
-                }
+                MainTabView(selectedTab: $selectedHomeTab, isGlobalSearch: $isGlobalSearch)
             } else {
                 // iPad/Mac section
                 NavigationSplitView {
-                    addNavigationDestinations(mainContent)
+                    List {
+                        NavigationLink(value: HomeTab.home) {
+                            Label("Home", systemImage: "house.fill")
+                        }
+                        
+                        NavigationLink(value: HomeTab.museum) {
+                            Label("Museum", systemImage: "building.columns.fill")
+                        }
+                        
+                        NavigationLink(value: HomeTab.donate) {
+                            Label("Donate", systemImage: "gift.fill")
+                        }
+                        
+                        NavigationLink(value: HomeTab.analytics) {
+                            Label("Analytics", systemImage: "chart.pie.fill")
+                        }
+                        
+                        NavigationLink(value: HomeTab.search) {
+                            Label("Search", systemImage: "magnifyingglass")
+                        }
+                    }
+                    .navigationDestination(for: HomeTab.self) { tab in
+                        switch tab {
+                        case .home:
+                            HomeView()
+                        case .museum:
+                            mainContent
+                        case .analytics:
+                            AnalyticsDashboardView()
+                        case .donate:
+                            Text("Donate View")
+                        case .search:
+                            Text("Search View")
+                        }
+                    }
 #if os(macOS)
-                        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+                    .navigationSplitViewColumnWidth(min: 180, ideal: 200)
 #endif
                 } detail: {
+                    // This is a placeholder, actual content comes from navigationDestination
+                    Text("Select an option from the sidebar")
+                        .foregroundColor(.secondary)
 #if os(macOS)
-                    Text("Select an item")
                         .frame(minWidth: 300)
-#else
-                    Text("Select an item")
 #endif
                 }
                 .navigationTitle("Museum Tracker")

@@ -7,66 +7,12 @@
 
 import SwiftUI
 import Charts
-import SwiftData // Add this import for UIColor
+import SwiftData
+import UniformTypeIdentifiers
 
 #if canImport(UIKit)
 import UIKit
 #endif
-
-// Define Animal Crossing color extension
-extension Color {
-    static let acLeafGreen = Color(red: 107/255, green: 211/255, blue: 139/255) // #6BD38B
-    static let acMuseumBrown = Color(red: 184/255, green: 125/255, blue: 75/255) // #B87D4B
-    static let acOceanBlue = Color(red: 122/255, green: 205/255, blue: 244/255) // #7ACDF4
-    static let acBellYellow = Color(red: 250/255, green: 216/255, blue: 123/255) // #FAD87B
-    static let acBlathersPurple = Color(red: 161/255, green: 122/255, blue: 196/255) // #A17AC4
-    static let acPumpkinOrange = Color(red: 237/255, green: 138/255, blue: 51/255) // #ED8A33
-    static let acWinterBlue = Color(red: 138/255, green: 189/255, blue: 222/255) // #8ABDDE
-}
-
-// Define BackgroundLevel enum outside the extension
-enum BackgroundLevel {
-    case secondary
-    case tertiary
-}
-
-// Extension to handle hierarchical backgrounds across iOS versions and platforms
-extension View {
-    @ViewBuilder
-    func hierarchicalBackground(level: BackgroundLevel = .secondary, cornerRadius: CGFloat = 10) -> some View {
-        if #available(iOS 17.0, macOS 14.0, *) {
-            switch level {
-            case .secondary:
-                self.background(.background.secondary)
-                    .cornerRadius(cornerRadius)
-            case .tertiary:
-                self.background(.background.tertiary)
-                    .cornerRadius(cornerRadius)
-            }
-        } else {
-            #if os(iOS)
-            switch level {
-            case .secondary:
-                self.background(Color(uiColor: UIColor.secondarySystemBackground))
-                    .cornerRadius(cornerRadius)
-            case .tertiary:
-                self.background(Color(uiColor: UIColor.tertiarySystemBackground))
-                    .cornerRadius(cornerRadius)
-            }
-            #else
-            // For macOS or other platforms
-            switch level {
-            case .secondary:
-                self.background(Color.secondary.opacity(0.2))
-                    .cornerRadius(cornerRadius)
-            case .tertiary:
-                self.background(Color.secondary.opacity(0.1))
-                    .cornerRadius(cornerRadius)
-            }
-            #endif
-        }
-    }
-}
 
 #if DEBUG
 // Debug view to show analytics data metrics
@@ -134,6 +80,11 @@ struct AnalyticsDashboardView: View {
     @State private var artWithDates: Int = 0
     
     @State private var selectedTab: Int = 0
+    
+    // Export-related state variables
+    @State private var showingExportSheet = false
+    @State private var exportResult: URL?
+    @State private var showingShareSheet = false
     
     var body: some View {
         VStack(spacing: 16) {
@@ -222,7 +173,6 @@ struct AnalyticsDashboardView: View {
                     default:
                         EmptyView()
                     }
-                    
                 }
                 .padding()
             } else {
@@ -237,8 +187,17 @@ struct AnalyticsDashboardView: View {
         .onChange(of: dataManager.currentTown) { _, _ in
             loadData()
         }
-        #if DEBUG
         .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingExportSheet = true
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+                .disabled(dataManager.currentTown == nil) // Disable if no town is selected
+            }
+            
+            #if DEBUG
             ToolbarItem {
                 Button("Generate Test Data") {
                     dataManager.generateTestDonationData()
@@ -247,8 +206,26 @@ struct AnalyticsDashboardView: View {
                 .buttonStyle(.bordered)
                 .tint(.blue)
             }
+            #endif
         }
-        #endif
+        // Export options sheet
+        .sheet(isPresented: $showingExportSheet) {
+            ExportOptionsView(
+                analyticsData: createAnalyticsExportData(),
+                onExport: { url in
+                    exportResult = url
+                    showingShareSheet = true
+                    showingExportSheet = false
+                }
+            )
+            .environmentObject(dataManager)
+        }
+        // Share sheet
+        .sheet(isPresented: $showingShareSheet) {
+            if let url = exportResult {
+                ShareSheet(items: [url])
+            }
+        }
     }
     
     private func loadData() {
@@ -275,6 +252,14 @@ struct AnalyticsDashboardView: View {
         
         print("Analytics data loaded: \(timelineData.count) months, \(fossilsWithDates + bugsWithDates + fishWithDates + artWithDates) items with dates")
     }
+    
+    /// Creates the AnalyticsExportData structure needed by the ExportService
+    private func createAnalyticsExportData() -> AnalyticsExportData {
+        return AnalyticsExportData(
+            donationActivity: timelineData.isEmpty ? nil : timelineData,
+            categoryCompletion: completionData,
+            seasonalData: seasonalData
+        )
     }
     
     // MARK: - Dashboard card views
@@ -441,7 +426,7 @@ struct AnalyticsDashboardView: View {
         .hierarchicalBackground()
         .animation(.easeIn, value: completion.totalProgress)
     }
-
+}
 
 // Helper view for mini progress indicators
 struct CategoryMiniProgress: View {

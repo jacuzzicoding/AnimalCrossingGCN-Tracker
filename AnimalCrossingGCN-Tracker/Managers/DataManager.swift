@@ -19,6 +19,8 @@ class DataManager: ObservableObject {
     // Services
     private var donationService: DonationService
     var analyticsService: AnalyticsService // Now public for direct access
+    private var globalSearchService: GlobalSearchService
+    let exportService: ExportService // Public export service
 
     // Published properties to notify views of changes
     @Published var currentTown: Town?
@@ -38,6 +40,8 @@ class DataManager: ObservableObject {
         // Initialize services
         self.donationService = DonationService(modelContext: modelContext)
         self.analyticsService = AnalyticsService(modelContext: modelContext, donationService: donationService)
+        self.globalSearchService = GlobalSearchService(modelContext: modelContext)
+        self.exportService = ExportServiceImpl()
         
         // Fetch current town
         fetchCurrentTown()
@@ -689,6 +693,28 @@ class DataManager: ObservableObject {
             }
             print("DEBUG: Current town ID: \(town.id.uuidString)")
         }
+    }
+    
+    // MARK: - Global Search
+    
+    /// Searches across all categories
+    /// - Parameters:
+    ///   - query: The search text to use
+    ///   - townId: Optional town ID to filter results
+    /// - Returns: Global search results containing items from all categories
+    func searchAllCategories(query: String, townId: UUID? = nil) -> GlobalSearchResults {
+        return globalSearchService.searchAllCategories(query: query, townId: townId)
+    }
+    
+    /// Gets the search history
+    /// - Returns: Array of recent search strings
+    func getSearchHistory() -> [String] {
+        return globalSearchService.getSearchHistory()
+    }
+    
+    /// Clears the search history
+    func clearSearchHistory() {
+        globalSearchService.clearSearchHistory()
     }
     
     /// Ensures all items are properly linked to the current town
