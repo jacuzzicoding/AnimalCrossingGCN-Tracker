@@ -8,6 +8,7 @@
 import SwiftUI
 import Charts
 import SwiftData
+import UniformTypeIdentifiers
 
 #if canImport(UIKit)
 import UIKit
@@ -79,6 +80,11 @@ struct AnalyticsDashboardView: View {
     @State private var artWithDates: Int = 0
     
     @State private var selectedTab: Int = 0
+    
+    // Export-related state variables
+    @State private var showingExportSheet = false
+    @State private var exportResult: URL?
+    @State private var showingShareSheet = false
     
     var body: some View {
         VStack(spacing: 16) {
@@ -167,7 +173,6 @@ struct AnalyticsDashboardView: View {
                     default:
                         EmptyView()
                     }
-                    
                 }
                 .padding()
             } else {
@@ -182,8 +187,17 @@ struct AnalyticsDashboardView: View {
         .onChange(of: dataManager.currentTown) { _, _ in
             loadData()
         }
-        #if DEBUG
         .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingExportSheet = true
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+                .disabled(dataManager.currentTown == nil) // Disable if no town is selected
+            }
+            
+            #if DEBUG
             ToolbarItem {
                 Button("Generate Test Data") {
                     dataManager.generateTestDonationData()
@@ -192,8 +206,26 @@ struct AnalyticsDashboardView: View {
                 .buttonStyle(.bordered)
                 .tint(.blue)
             }
+            #endif
         }
-        #endif
+        // Export options sheet
+        .sheet(isPresented: $showingExportSheet) {
+            ExportOptionsView(
+                analyticsData: createAnalyticsExportData(),
+                onExport: { url in
+                    exportResult = url
+                    showingShareSheet = true
+                    showingExportSheet = false
+                }
+            )
+            .environmentObject(dataManager)
+        }
+        // Share sheet
+        .sheet(isPresented: $showingShareSheet) {
+            if let url = exportResult {
+                ShareSheet(items: [url])
+            }
+        }
     }
     
     private func loadData() {
@@ -220,6 +252,14 @@ struct AnalyticsDashboardView: View {
         
         print("Analytics data loaded: \(timelineData.count) months, \(fossilsWithDates + bugsWithDates + fishWithDates + artWithDates) items with dates")
     }
+    
+    /// Creates the AnalyticsExportData structure needed by the ExportService
+    private func createAnalyticsExportData() -> AnalyticsExportData {
+        return AnalyticsExportData(
+            donationActivity: timelineData.isEmpty ? nil : timelineData,
+            categoryCompletion: completionData,
+            seasonalData: seasonalData
+        )
     }
     
     // MARK: - Dashboard card views
@@ -386,7 +426,7 @@ struct AnalyticsDashboardView: View {
         .hierarchicalBackground()
         .animation(.easeIn, value: completion.totalProgress)
     }
-
+}
 
 // Helper view for mini progress indicators
 struct CategoryMiniProgress: View {
