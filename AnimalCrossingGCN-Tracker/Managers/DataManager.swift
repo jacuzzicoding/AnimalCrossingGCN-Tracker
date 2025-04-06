@@ -20,6 +20,7 @@ class DataManager: ObservableObject {
     private var donationService: DonationService
     var analyticsService: AnalyticsService // Now public for direct access
     private var globalSearchService: GlobalSearchService
+    let exportService: ExportService // Public export service
 
     // Published properties to notify views of changes
     @Published var currentTown: Town?
@@ -40,6 +41,7 @@ class DataManager: ObservableObject {
         self.donationService = DonationService(modelContext: modelContext)
         self.analyticsService = AnalyticsService(modelContext: modelContext, donationService: donationService)
         self.globalSearchService = GlobalSearchService(modelContext: modelContext)
+        self.exportService = ExportServiceImpl()
         
         // Fetch current town
         fetchCurrentTown()
