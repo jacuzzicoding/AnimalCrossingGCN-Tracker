@@ -1,14 +1,14 @@
 # AnimalCrossingGCN-Tracker
-* Version: v0.7.0-alpha-preview-3
-* Last Updated: February 28th, 2025
+* Version: v0.7.0-alpha-preview-4
+* Last Updated: April 6, 2025
 * Author: Brock Jenkinson (@jacuzzicoding)
 
-> **Important Update**: v0.7.0-alpha-preview-3 fixes the critical analytics functionality issue. Charts and statistics now properly display donation data and collection progress!
+> **Important Update**: v0.7.0-alpha-preview-4 adds CSV export functionality to the analytics system, allowing you to export your museum collection data!
 
 ## Project Overview
 The AnimalCrossingGCN-Tracker is a comprehensive companion app for tracking Animal Crossing GameCube museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
 
-Version v0.7.0-alpha-preview-3 resolves the core issue that prevented analytics from displaying data correctly in previous versions. The application now properly shows donation timelines, category completion charts, and seasonal analysis with your actual museum data.
+Version v0.7.0-alpha-preview-4 builds upon the fixed analytics functionality from v0.7.0-alpha-preview-3 by adding CSV export capabilities, allowing users to share their collection data and analytics with external applications.
 
 ## Features
 
@@ -25,14 +25,16 @@ Version v0.7.0-alpha-preview-3 resolves the core issue that prevented analytics 
 * Enhanced search functionality
 * SwiftData integration for persistence
 
-### Analytics Features (NEW: Now Fully Functional!)
-* **Fixed**: Working donation timeline visualization
-* **Fixed**: Accurate category completion charts
-* **Fixed**: Seasonal availability analysis with real data
-* **Fixed**: Progress tracking dashboard showing correct percentages
+### Analytics Features (Now with Export!)
+* **NEW**: CSV export of analytics data (monthly activities, category completion, seasonal data)
+* **NEW**: Platform-specific sharing options (iOS share sheet, macOS Finder integration)
+* **NEW**: Custom filename options for exports
+* Working donation timeline visualization
+* Accurate category completion charts
+* Seasonal availability analysis with real data
+* Progress tracking dashboard showing correct percentages
 * Time period filtering options
 * Interactive chart components
-* Enhanced UI layout with improved component spacing
 
 ### Technical Improvements
 * Architectural enhancements:
@@ -40,7 +42,13 @@ Version v0.7.0-alpha-preview-3 resolves the core issue that prevented analytics 
   * ✅ Phase 2: Repository pattern implementation
   * ✅ Phase 3: Enhanced model relationships and service layer
   * ✅ Phase 4: Functional analytics with proper data visualization
-* **New Town-Item Linking System**:
+  * ✅ Phase 5: Data export capabilities with service architecture
+* **New Export Service System**:
+  * Protocol-based design for extensibility
+  * Standardized CSV formatting with proper headers and delimiters
+  * Platform-specific sharing implementations
+  * Background thread processing for better performance
+* **Town-Item Linking System**:
   * Ensures proper relationships between collectibles and towns
   * Uses efficient lookup sets for performance
   * Maintains game compatibility
@@ -51,11 +59,6 @@ Version v0.7.0-alpha-preview-3 resolves the core issue that prevented analytics 
   * Better seasonal data calculations
   * Improved filtering for timeline data
   * Added caching for better performance
-* UI layout enhancements:
-  * Improved FloatingCategorySwitcher with scrollable containers
-  * Enhanced component spacing and alignment
-  * Fixed overlap issues in nested views
-  * Better cross-platform layout compatibility
 
 ### UI Components
 * DetailMoreInfoView for donation timestamps
@@ -64,8 +67,10 @@ Version v0.7.0-alpha-preview-3 resolves the core issue that prevented analytics 
 * Streamlined navigation system
 * Refined search functionality
 * Platform-specific optimizations
-* **Working** analytics dashboard with functional chart visualizations
+* Working analytics dashboard with functional chart visualizations
 * Interactive timeline and category charts
+* **NEW**: Export options interface with format selection
+* **NEW**: Platform-specific sharing sheets
 
 ## File Structure
 ```
@@ -98,7 +103,10 @@ AnimalCrossingGCN-Tracker/
 │   ├── EditTownView.swift
 │   ├── FloatingCategorySwitcher.swift
 │   ├── Analytics/
-│   │   └── AnalyticsDashboardView.swift
+│   │   ├── AnalyticsDashboardView.swift
+│   │   └── ExportOptionsView.swift
+│   ├── Utilities/
+│   │   └── ShareSheet.swift
 │   └── DetailViews/
 │       ├── FossilDetailView.swift
 │       ├── BugDetailView.swift
@@ -116,7 +124,8 @@ AnimalCrossingGCN-Tracker/
 │   └── TownRepository.swift
 ├── Services/
 │   ├── DonationService.swift
-│   └── AnalyticsService.swift
+│   ├── AnalyticsService.swift
+│   └── ExportService.swift
 └── Utilities/
     └── Various utility files
 ```
@@ -124,6 +133,19 @@ AnimalCrossingGCN-Tracker/
 ## Development Status
 
 ### Current Build Progress
+* **v0.7.0-alpha-preview-4 (April 6, 2025)**
+  * ✅ **Added Analytics Export Functionality**
+    * ✅ Implemented flexible `ExportService` architecture
+    * ✅ Created CSV export with proper formatting
+    * ✅ Added platform-specific sharing options
+    * ✅ Implemented user-friendly export options UI
+  * ✅ Cross-platform compatibility
+    * ✅ iOS-specific share sheet implementation
+    * ✅ macOS file handling and Finder integration
+    * ✅ Responsive design for all screen sizes
+  * ⬜ PNG/PDF export for charts and visualizations
+  * ⬜ Advanced filtering options
+
 * **v0.7.0-alpha-preview-3 (February 28, 2025)**
   * ✅ **Fixed Analytics Functionality**
     * ✅ Implemented town-item linking system
@@ -136,8 +158,6 @@ AnimalCrossingGCN-Tracker/
     * ✅ Fixed chart data display
     * ✅ Improved empty states with helpful messages
     * ✅ Added better error handling
-  * ⬜ Add export functionality for analytics data
-  * ⬜ Implement more advanced filtering options
 
 * **v0.7.0-alpha-preview-2 (February 27, 2025)**
   * ✅ Initial Analytics GUI implementation
@@ -154,7 +174,7 @@ Version v0.7.0-alpha-preview introduced breaking changes that impact save compat
 
 ### Next Development Phase
 * v0.7.0-alpha full release plans:
-  * Add analytics export functionality
+  * Complete PNG/PDF export functionality
   * New Home Screen design with user choice-driven navigation
   * Global search functionality with cross-category search
   * Villager support with GameCube villagers database
@@ -175,6 +195,7 @@ Version v0.7.0-alpha-preview introduced breaking changes that impact save compat
 * Native platform interactions
 * Responsive layouts for all screen sizes
 * Functional SwiftCharts visualizations for analytics
+* Share sheet integration for exporting data
 
 ### macOS
 * Complete feature parity with iOS
@@ -182,6 +203,7 @@ Version v0.7.0-alpha-preview introduced breaking changes that impact save compat
 * Native menu bar integration
 * Platform-specific UI refinements
 * Optimized chart layouts for desktop use
+* Finder integration for exported files
 
 ## Technical Requirements
 * Xcode 15.5+
@@ -191,10 +213,13 @@ Version v0.7.0-alpha-preview introduced breaking changes that impact save compat
 * Swift Charts for analytics visualizations
 
 ## Known Issues
-* Minor UI alignment issues may exist on smaller iPhone screens
-* Chart labels may overlap with many data points
-* Export functionality for analytics data is not yet implemented
-* Advanced filtering options are still in development
+* PNG/PDF export of charts is not yet implemented (only CSV export is available)
+* Large datasets may take longer to export without detailed progress indication
+* Export UI is functional but will be enhanced in future updates
+* No caching mechanism for exported data, requiring re-processing for each export
+* Minor UI alignment issues on smaller iPhone screens
+* Chart labels may overlap with many data points in timeline view
+* Seasonal analysis doesn't account for hemisphere differences (Northern only)
 
 ## Contributing
 This project welcomes community contributions. If anyone happens to see this, please report any issues or submit pull requests through the project's GitHub repository.
