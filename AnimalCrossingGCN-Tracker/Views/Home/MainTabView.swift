@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import Combine
 
 /// Main tab view that contains all primary app screens
 struct MainTabView: View {
@@ -15,13 +16,27 @@ struct MainTabView: View {
     @EnvironmentObject var categoryManager: CategoryManager
     @EnvironmentObject var dataManager: DataManager
     
+    // Create HomeViewModel as StateObject
+    @StateObject private var homeViewModel: HomeViewModel
+    
     // Navigation state
     @State private var showSearchSheet: Bool = false
+    
+    /// Initialize the MainTabView with dependencies
+    init(selectedTab: Binding<HomeTab>, isGlobalSearch: Binding<Bool>) {
+        self._selectedTab = selectedTab
+        self._isGlobalSearch = isGlobalSearch
+        
+        // Initialize HomeViewModel
+        // Note: This uses a ModelContainer that will be replaced by the real one via environment
+        _homeViewModel = StateObject(wrappedValue: HomeViewModel(dataManager: DataManager(modelContext: ModelContext(ModelContainer(for: Town.self).mainContext))))
+    }
     
     var body: some View {
         ZStack {
             TabView(selection: $selectedTab) {
                 HomeView()
+                    .environmentObject(homeViewModel)
                     .tag(HomeTab.home)
                 
                 NavigationStack {
@@ -48,6 +63,16 @@ struct MainTabView: View {
                 HomeTabBar(selectedTab: $selectedTab, isGlobalSearch: $isGlobalSearch)
             }
             .edgesIgnoringSafeArea(.bottom)
+        }
+        .onAppear {
+            // Update HomeViewModel with the real DataManager
+            DispatchQueue.main.async {
+                homeViewModel.refreshData()
+            }
+        }
+        .onChange(of: dataManager) { _, _ in
+            // When DataManager changes, update HomeViewModel
+            homeViewModel.refreshData()
         }
         .onChange(of: selectedTab) { oldValue, newValue in
             // Handle tab changes
