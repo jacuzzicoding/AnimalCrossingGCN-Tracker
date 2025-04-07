@@ -20,33 +20,91 @@ import UIKit
 struct HomeView: View {
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var categoryManager: CategoryManager
+    @StateObject private var viewModel: HomeViewModel
     @State private var isEditingTown: Bool = false
     
+    init() {
+        // Create the view model with data manager - will be injected later
+        _viewModel = StateObject(wrappedValue: HomeViewModel(dataManager: DataManager(modelContext: ModelContext(ModelContainer(for: Town.self).mainContext))))
+    }
+    
     var body: some View {
-        ScrollView {
+        ZStack {
+            // Main content
+            ScrollView {
             VStack(spacing: 16) {
                 // Header with town info
                 HomeHeaderView(isEditingTown: $isEditingTown)
                     .padding(.bottom, 4)
                 
                 // Collection status card
-                CollectionStatusCard()
+                CollectionStatusCard(viewModel: viewModel)
                 
                 // Category grid
-                CategoryGridView()
+                CategoryGridView(viewModel: viewModel)
                     .padding(.vertical, 8)
                 
                 // Seasonal highlights
-                SeasonalHighlightsCard()
+                SeasonalHighlightsCard(viewModel: viewModel)
                 
                 // Recent donations
-                RecentDonationsCard()
+                RecentDonationsCard(viewModel: viewModel)
                 
                 // Spacer for bottom tab bar
                 Spacer().frame(height: 20)
             }
             .padding()
             .multilineTextAlignment(.center)
+            
+            // Loading overlay
+            if viewModel.isLoading {
+                VStack {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .scaleEffect(1.5)
+                        .padding()
+                    
+                    Text("Loading...")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black.opacity(0.1))
+            }
+            
+            // Error message
+            if let errorMessage = viewModel.errorMessage {
+                VStack(spacing: 16) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 50))
+                        .foregroundColor(.red)
+                    
+                    Text(errorMessage)
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                    
+                    Button("Retry") {
+                        viewModel.refreshData()
+                    }
+                    .padding()
+                    .background(Color.acLeafGreen)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+                .shadow(radius: 5)
+                .padding()
+            }
+        }
+        .onAppear {
+            viewModel.loadInitialData()
+        }
+        .onChange(of: dataManager) { _, _ in
+            // When dataManager changes, update viewModel
+            viewModel.loadInitialData()
         }
         .background(Color(hex: "F9F5E9")) // Parchment background
         .edgesIgnoringSafeArea(.bottom)
@@ -119,6 +177,7 @@ struct HomeHeaderView: View {
 struct CollectionStatusCard: View {
     @EnvironmentObject var dataManager: DataManager
     @Environment(\.colorScheme) private var colorScheme
+    @ObservedObject var viewModel: HomeViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -141,14 +200,14 @@ struct CollectionStatusCard: View {
                         .cornerRadius(10)
                     
                     Rectangle()
-                        .frame(width: min(CGFloat(dataManager.getCurrentTownProgress()) * geometry.size.width, geometry.size.width), height: 20)
+                        .frame(width: min(CGFloat(viewModel.collectionStatus.completionPercentage) * geometry.size.width, geometry.size.width), height: 20)
                         .foregroundColor(Color.acLeafGreen)
                         .cornerRadius(10)
-                        .animation(.easeInOut, value: dataManager.getCurrentTownProgress())
+                        .animation(.easeInOut, value: viewModel.collectionStatus.completionPercentage)
                     
                     HStack {
                         Spacer()
-                        Text("\(Int(dataManager.getCurrentTownProgress() * 100))%")
+                        Text("\(Int(viewModel.collectionStatus.completionPercentage * 100))%")
                             .font(.caption)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
@@ -160,15 +219,9 @@ struct CollectionStatusCard: View {
             
             // Total count
             HStack {
-                if let completion = dataManager.getCategoryCompletionData() {
-                    Text("\(completion.totalDonated) of \(completion.totalCount) Items Donated")
-                        .font(.subheadline)
-                        .foregroundColor(.black)
-                } else {
-                    Text("0 of 0 Items Donated")
-                        .font(.subheadline)
-                        .foregroundColor(.black)
-                }
+                Text("\(viewModel.collectionStatus.totalCollected) of \(viewModel.collectionStatus.totalAvailable) Items Donated")
+                    .font(.subheadline)
+                    .foregroundColor(.black)
                 
                 Spacer()
             }
@@ -177,8 +230,8 @@ struct CollectionStatusCard: View {
         .background(Color.white.opacity(0.8))
         .cornerRadius(10)
         .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Museum Collection Status: \(Int(dataManager.getCurrentTownProgress() * 100))% complete")
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Museum Collection Status: \(Int(viewModel.collectionStatus.completionPercentage * 100))% complete")
     }
 }
 
@@ -186,6 +239,7 @@ struct CollectionStatusCard: View {
 struct CategoryGridView: View {
 	@EnvironmentObject var dataManager: DataManager
 	@EnvironmentObject var categoryManager: CategoryManager
+	@ObservedObject var viewModel: HomeViewModel
 	
 	var body: some View {
 		VStack(alignment: .leading, spacing: 8) {
@@ -203,45 +257,12 @@ struct CategoryGridView: View {
 				GridItem(.flexible()),
 				GridItem(.flexible())
 			], spacing: 16) {
-				// Fossils card
-				CategoryCard(
-					title: "FOSSILS",
-					icon: "leaf.arrow.circlepath",
-					progress: dataManager.getCurrentTownFossilProgress(),
-					color: .acMuseumBrown,
-					emoji: "🦴",
-					category: .fossils
+				ForEach(viewModel.categoryProgress) { category in
+				    CategoryCard(
+				    categoryData: category,
+				    viewModel: viewModel
 				)
-				
-				// Bugs card
-				CategoryCard(
-					title: "BUGS",
-					icon: "ant.fill",
-					progress: dataManager.getCurrentTownBugProgress(),
-					color: .green,
-					emoji: "🐛",
-					category: .bugs
-				)
-				
-				// Fish card
-				CategoryCard(
-					title: "FISH",
-					icon: "fish.fill",
-					progress: dataManager.getCurrentTownFishProgress(),
-					color: .acOceanBlue,
-					emoji: "🐟",
-					category: .fish
-				)
-				
-				// Art card
-				CategoryCard(
-					title: "ART",
-					icon: "paintpalette.fill",
-					progress: dataManager.getCurrentTownArtProgress(),
-					color: .acBlathersPurple,
-					emoji: "🎨",
-					category: .art
-				)
+				}
 			}
 		}
 	}
@@ -249,53 +270,22 @@ struct CategoryGridView: View {
 	/// Individual category card component
 	struct CategoryCard: View {
 		@EnvironmentObject var categoryManager: CategoryManager
-		@EnvironmentObject var dataManager: DataManager
+		@ObservedObject var viewModel: HomeViewModel
 		
-		let title: String
-		let icon: String
-		let progress: Double
-		let color: Color
-		let emoji: String
-		let category: Category
-		
-		// Computed property for donation info
-		private var donationInfo: String? {
-			guard let completion = dataManager.getCategoryCompletionData() else { return nil }
-			let donated: Int
-			let total: Int
-			
-			switch category {
-			case .fossils:
-				donated = completion.fossilDonated
-				total = completion.fossilCount
-			case .bugs:
-				donated = completion.bugDonated
-				total = completion.bugCount
-			case .fish:
-				donated = completion.fishDonated
-				total = completion.fishCount
-			case .art:
-				donated = completion.artDonated
-				total = completion.artCount
-			}
-			
-			return "\(donated)/\(total)"
-		}
+		let categoryData: CategoryProgressData
 		
 		var body: some View {
 			Button(action: {
-				// Handle category selection and navigation
-				categoryManager.selectedItem = nil
-				categoryManager.selectedCategory = category
-				categoryManager.showingAnalytics = false
+				// Handle category selection and navigation through ViewModel
+				viewModel.navigateToCategory(categoryData.category, categoryManager: categoryManager)
 			}) {
 				VStack(spacing: 12) {
 					HStack {
-						Image(systemName: category.symbolName)
+						Image(systemName: categoryData.category.symbolName)
 							.font(.system(size: 18))
 							.foregroundColor(.white)
 						
-						Text(title)
+						Text(categoryData.name)
 							.font(.headline)
 							.foregroundColor(.white)
 						
@@ -310,16 +300,14 @@ struct CategoryGridView: View {
 							.frame(width: 60, height: 60)
 						
 						VStack(spacing: 4) {
-							Text("\(Int(progress * 100))%")
+							Text("\(categoryData.progressPercentage)%")
 								.font(.headline)
 								.fontWeight(.bold)
 								.foregroundColor(.white)
 							
-							if let info = donationInfo {
-								Text(info)
-									.font(.caption)
-									.foregroundColor(.white.opacity(0.9))
-							}
+							Text("\(categoryData.collected)/\(categoryData.total)")
+								.font(.caption)
+								.foregroundColor(.white.opacity(0.9))
 						}
 					}
 					
@@ -350,11 +338,11 @@ struct CategoryGridView: View {
 				}
 				.padding()
 				.frame(height: 130)
-				.background(color)
+				.background(categoryData.color)
 				.cornerRadius(10)
-				.shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
+				.shadow(color: categoryData.color.opacity(0.3), radius: 4, x: 0, y: 2)
 				.accessibilityElement(children: .combine)
-				.accessibilityLabel("\(title): \(Int(progress * 100))% complete")
+				.accessibilityLabel("\(categoryData.name): \(categoryData.progressPercentage)% complete")
 			}
 		}
 	}
@@ -364,6 +352,7 @@ struct CategoryGridView: View {
 struct SeasonalHighlightsCard: View {
     @EnvironmentObject var dataManager: DataManager
     @Environment(\.colorScheme) private var colorScheme
+    @ObservedObject var viewModel: HomeViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -378,8 +367,8 @@ struct SeasonalHighlightsCard: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
-                    if let seasonalItems = getCurrentSeasonalItems() {
-                        ForEach(seasonalItems) { item in
+                    if !viewModel.seasonalHighlights.isEmpty {
+                        ForEach(viewModel.seasonalHighlights, id: \.id) { item in
                             SeasonalItemView(
                                 title: item.name,
                                 description: item.description,
@@ -400,76 +389,7 @@ struct SeasonalHighlightsCard: View {
         .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
     }
     
-    // Real implementation to get current seasonal items
-    private func getCurrentSeasonalItems() -> [SeasonalItem]? {
-        // Get current month
-        let calendar = Calendar.current
-        let currentMonth = calendar.component(.month, from: Date())
-        
-        // Get current season abbreviation
-        let monthAbbreviations = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        let currentMonthAbbr = monthAbbreviations[currentMonth - 1]
-        
-        // Get bugs from current town
-        var availableBugs: [Bug] = []
-        for bug in dataManager.getBugsForCurrentTown() {
-            if let season = bug.season, season.contains(currentMonthAbbr) {
-                availableBugs.append(bug)
-            }
-        }
-        
-        // Get fish from current town
-        var availableFish: [Fish] = []
-        for fish in dataManager.getFishForCurrentTown() {
-            if fish.season.contains(currentMonthAbbr) {
-                availableFish.append(fish)
-            }
-        }
-        
-        // Create seasonal items
-        var seasonalItems: [SeasonalItem] = []
-        
-        // Add up to 3 bugs
-        for bug in availableBugs.prefix(2) {
-            let isLeaving = isLeavingSoon(season: bug.season ?? "", currentMonth: currentMonthAbbr)
-            let description = isLeaving ? "Leaving soon!" : "Available now!"
-            seasonalItems.append(SeasonalItem(id: bug.id.uuidString, name: bug.name, description: description, isLeaving: isLeaving))
-        }
-        
-        // Add up to 3 fish
-        for fish in availableFish.prefix(2) {
-            let isLeaving = isLeavingSoon(season: fish.season, currentMonth: currentMonthAbbr)
-            let description = isLeaving ? "Leaving soon!" : "Available now!"
-            seasonalItems.append(SeasonalItem(id: fish.id.uuidString, name: fish.name, description: description, isLeaving: isLeaving))
-        }
-        
-        // If we don't have enough seasonal items, add placeholders
-        if seasonalItems.isEmpty {
-            // Fallback to placeholder data
-            seasonalItems = [
-                SeasonalItem(id: "1", name: "Common Butterfly", description: "Available Now!", isLeaving: false),
-                SeasonalItem(id: "2", name: "Mole Cricket", description: "Leaving soon!", isLeaving: true),
-                SeasonalItem(id: "3", name: "Emperor Butterfly", description: "Coming next month!", isLeaving: false)
-            ]
-        }
-        
-        return seasonalItems
-    }
-    
-    // Helper to determine if an item is leaving soon
-    private func isLeavingSoon(season: String, currentMonth: String) -> Bool {
-        let monthAbbreviations = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        
-        guard let currentIndex = monthAbbreviations.firstIndex(of: currentMonth) else {
-            return false
-        }
-        
-        // Check if item is available in current month but not in next month
-        let nextMonthIndex = (currentIndex + 1) % 12
-        let nextMonth = monthAbbreviations[nextMonthIndex]
-        
-        return season.contains(currentMonth) && !season.contains(nextMonth)
-    }
+    // No longer need these methods, handled by the ViewModel now
 }
 
 // Seasonal item model
@@ -521,6 +441,7 @@ struct RecentDonationsCard: View {
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var categoryManager: CategoryManager
     @Environment(\.colorScheme) private var colorScheme
+    @ObservedObject var viewModel: HomeViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -533,9 +454,9 @@ struct RecentDonationsCard: View {
                     .foregroundColor(.black)
             }
             
-            if let recentDonations = getRecentDonations(), !recentDonations.isEmpty {
-                ForEach(0 ..< recentDonations.prefix(4).count, id: \.self) { index in
-                    let donation = recentDonations[index]
+            if !viewModel.recentDonations.isEmpty {
+                ForEach(0 ..< viewModel.recentDonations.prefix(4).count, id: \.self) { index in
+                    let donation = viewModel.recentDonations[index]
                     VStack(spacing: 0) {
                         HStack {
                             Text("◆")
@@ -553,7 +474,7 @@ struct RecentDonationsCard: View {
                         }
                         .padding(.vertical, 4)
                         
-                        if index < recentDonations.prefix(4).count - 1 {
+                        if index < viewModel.recentDonations.prefix(4).count - 1 {
                             Divider()
                         }
                     }
@@ -563,8 +484,8 @@ struct RecentDonationsCard: View {
                     Spacer()
                     
                     Button(action: {
-                        // Switch to analytics view
-                        categoryManager.showAnalytics()
+                        // Navigate to analytics view through ViewModel
+                        viewModel.navigateToAnalytics(categoryManager: categoryManager)
                     }) {
                         HStack {
                             Text("See Activity")
@@ -605,69 +526,7 @@ struct RecentDonationsCard: View {
         .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
     }
     
-    // Real implementation to get recent donations
-    private func getRecentDonations() -> [DonationItem]? {
-        // Get all donated items with timestamp
-        var donatedItems: [(name: String, date: Date, color: Color)] = []
-        
-        // Add fossils
-        for fossil in dataManager.getFossilsForCurrentTown().filter({ $0.isDonated && $0.donationDate != nil }) {
-            if let date = fossil.donationDate {
-                let name = fossil.part != nil ? "\(fossil.name) \(fossil.part!)" : fossil.name
-                donatedItems.append((name: name, date: date, color: .acMuseumBrown))
-            }
-        }
-        
-        // Add bugs
-        for bug in dataManager.getBugsForCurrentTown().filter({ $0.isDonated && $0.donationDate != nil }) {
-            if let date = bug.donationDate {
-                donatedItems.append((name: bug.name, date: date, color: .green))
-            }
-        }
-        
-        // Add fish
-        for fish in dataManager.getFishForCurrentTown().filter({ $0.isDonated && $0.donationDate != nil }) {
-            if let date = fish.donationDate {
-                donatedItems.append((name: fish.name, date: date, color: .acOceanBlue))
-            }
-        }
-        
-        // Add art
-        for art in dataManager.getArtForCurrentTown().filter({ $0.isDonated && $0.donationDate != nil }) {
-            if let date = art.donationDate {
-                donatedItems.append((name: art.name, date: date, color: .acBlathersPurple))
-            }
-        }
-        
-        // Sort by date (most recent first)
-        donatedItems.sort { $0.date > $1.date }
-        
-        // Convert to DonationItem objects with relative time
-        return donatedItems.prefix(4).map { item in
-            DonationItem(
-                title: item.name,
-                time: relativeTimeString(from: item.date),
-                color: item.color
-            )
-        }
-    }
-    
-    // Helper to format relative time
-    private func relativeTimeString(from date: Date) -> String {
-        let calendar = Calendar.current
-        let now = Date()
-        let components = calendar.dateComponents([.day, .hour, .minute], from: date, to: now)
-        
-        if let day = components.day, day > 0 {
-            return day == 1 ? "Yesterday" : "\(day) days ago"
-        } else if let hour = components.hour, hour > 0 {
-            return "\(hour) hour\(hour == 1 ? "" : "s") ago"
-        } else if let minute = components.minute, minute > 0 {
-            return "\(minute) minute\(minute == 1 ? "" : "s") ago"
-        } else {
-            return "Just now"
-        }
-    }
+    // No longer need these methods, handled by the ViewModel now
 }
 
 // Helper extension for hex colors
@@ -714,5 +573,6 @@ struct HomeView_Previews: PreviewProvider {
         return HomeView()
             .environmentObject(dataManager)
             .environmentObject(categoryManager)
+            .environmentObject(HomeViewModel(dataManager: dataManager))
     }
 }
