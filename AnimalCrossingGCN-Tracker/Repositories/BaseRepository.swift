@@ -66,3 +66,17 @@ class BaseRepository<T: PersistentModel> {
         }
     }
 }
+
+// Extension for TownLinkable items
+extension BaseRepository where T: TownLinkable {
+    /// Retrieves items by town ID using a SwiftData predicate
+    /// - Parameter townId: The town ID to filter by
+    /// - Returns: Array of items for the specified town
+    func getByTownId(townId: UUID) -> [T] {
+        let predicate = #Predicate<T> { item in
+            item.townId == townId
+        }
+        let descriptor = createFetchDescriptor(predicate: predicate)
+        return executeFetch(descriptor)
+    }
+}
