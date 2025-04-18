@@ -92,17 +92,5 @@ class BugRepository: BaseRepository<Bug>, CollectibleRepository {
         return executeFetch(descriptor)
     }
     
-    /// Retrieves bugs by town ID
-    /// - Parameter townId: The town ID to filter by
-    /// - Returns: Array of bugs for the specified town
-    func getByTownId(townId: UUID) -> [Bug] {
-        let descriptor = FetchDescriptor<Bug>()
-        do {
-            let allBugs = try modelContext.fetch(descriptor)
-            return allBugs.filter { $0.townId == townId }
-        } catch {
-            print("Error fetching bugs by town ID: \(error)")
-            return []
-        }
-    }
+    // getByTownId method is now provided by BaseRepository<T> where T: TownLinkable extension
 }

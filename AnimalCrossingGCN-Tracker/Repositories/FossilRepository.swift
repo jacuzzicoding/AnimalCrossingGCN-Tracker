@@ -92,17 +92,5 @@ class FossilRepository: BaseRepository<Fossil>, CollectibleRepository {
         return executeFetch(descriptor)
     }
     
-    /// Retrieves fossils by town ID
-    /// - Parameter townId: The town ID to filter by
-    /// - Returns: Array of fossils for the specified town
-    func getByTownId(townId: UUID) -> [Fossil] {
-        let descriptor = FetchDescriptor<Fossil>()
-        do {
-            let allFossils = try modelContext.fetch(descriptor)
-            return allFossils.filter { $0.townId == townId }
-        } catch {
-            print("Error fetching fossils by town ID: \(error)")
-            return []
-        }
-    }
+    // getByTownId method is now provided by BaseRepository<T> where T: TownLinkable extension
 }

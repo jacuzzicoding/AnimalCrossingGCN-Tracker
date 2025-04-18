@@ -103,17 +103,5 @@ class FishRepository: BaseRepository<Fish>, CollectibleRepository {
         return executeFetch(descriptor)
     }
     
-    /// Retrieves fish by town ID
-    /// - Parameter townId: The town ID to filter by
-    /// - Returns: Array of fish for the specified town
-    func getByTownId(townId: UUID) -> [Fish] {
-        let descriptor = FetchDescriptor<Fish>()
-        do {
-            let allFish = try modelContext.fetch(descriptor)
-            return allFish.filter { $0.townId == townId }
-        } catch {
-            print("Error fetching fish by town ID: \(error)")
-            return []
-        }
-    }
+    // getByTownId method is now provided by BaseRepository<T> where T: TownLinkable extension
 }
