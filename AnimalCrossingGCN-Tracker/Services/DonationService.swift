@@ -30,85 +30,209 @@ class DonationService {
 	
 	// MARK: - Linking Items to Town
 	
-	func linkFossilToTown(fossil: Fossil, town: Town) {
+	func linkFossilToTown(fossil: Fossil, town: Town) throws {
 		fossil.townId = town.id
-		fossilRepository.save(fossil)
+		do {
+			try fossilRepository.save(fossil)
+		} catch let error as RepositoryError {
+			throw ServiceError.repositoryError(error)
+		} catch {
+			throw ServiceError.itemLinkingFailed(
+				itemType: "Fossil",
+				townName: town.name,
+				operation: .link,
+				underlyingError: error
+			)
+		}
 	}
 	
-	func linkBugToTown(bug: Bug, town: Town) {
+	func linkBugToTown(bug: Bug, town: Town) throws {
 		bug.townId = town.id
-		bugRepository.save(bug)
+		do {
+			try bugRepository.save(bug)
+		} catch let error as RepositoryError {
+			throw ServiceError.repositoryError(error)
+		} catch {
+			throw ServiceError.itemLinkingFailed(
+				itemType: "Bug",
+				townName: town.name,
+				operation: .link,
+				underlyingError: error
+			)
+		}
 	}
 	
-	func linkFishToTown(fish: Fish, town: Town) {
+	func linkFishToTown(fish: Fish, town: Town) throws {
 		fish.townId = town.id
-		fishRepository.save(fish)
+		do {
+			try fishRepository.save(fish)
+		} catch let error as RepositoryError {
+			throw ServiceError.repositoryError(error)
+		} catch {
+			throw ServiceError.itemLinkingFailed(
+				itemType: "Fish",
+				townName: town.name,
+				operation: .link,
+				underlyingError: error
+			)
+		}
 	}
 	
-	func linkArtToTown(art: Art, town: Town) {
+	func linkArtToTown(art: Art, town: Town) throws {
 		art.townId = town.id
-		artRepository.save(art)
+		do {
+			try artRepository.save(art)
+		} catch let error as RepositoryError {
+			throw ServiceError.repositoryError(error)
+		} catch {
+			throw ServiceError.itemLinkingFailed(
+				itemType: "Art",
+				townName: town.name,
+				operation: .link,
+				underlyingError: error
+			)
+		}
 	}
 	
 	// MARK: - Unlinking Items from Town
 	
-	func unlinkFossilFromTown(fossil: Fossil) {
+	func unlinkFossilFromTown(fossil: Fossil) throws {
 		fossil.townId = nil
-		fossilRepository.save(fossil)
+		do {
+			try fossilRepository.save(fossil)
+		} catch let error as RepositoryError {
+			throw ServiceError.repositoryError(error)
+		} catch {
+			throw ServiceError.itemLinkingFailed(
+				itemType: "Fossil",
+				townName: "any", // Since we're unlinking, we don't have a specific town name
+				operation: .unlink,
+				underlyingError: error
+			)
+		}
 	}
 	
-	func unlinkBugFromTown(bug: Bug) {
+	func unlinkBugFromTown(bug: Bug) throws {
 		bug.townId = nil
-		bugRepository.save(bug)
+		do {
+			try bugRepository.save(bug)
+		} catch let error as RepositoryError {
+			throw ServiceError.repositoryError(error)
+		} catch {
+			throw ServiceError.itemLinkingFailed(
+				itemType: "Bug",
+				townName: "any",
+				operation: .unlink,
+				underlyingError: error
+			)
+		}
 	}
 	
-	func unlinkFishFromTown(fish: Fish) {
+	func unlinkFishFromTown(fish: Fish) throws {
 		fish.townId = nil
-		fishRepository.save(fish)
+		do {
+			try fishRepository.save(fish)
+		} catch let error as RepositoryError {
+			throw ServiceError.repositoryError(error)
+		} catch {
+			throw ServiceError.itemLinkingFailed(
+				itemType: "Fish",
+				townName: "any",
+				operation: .unlink,
+				underlyingError: error
+			)
+		}
 	}
 	
-	func unlinkArtFromTown(art: Art) {
+	func unlinkArtFromTown(art: Art) throws {
 		art.townId = nil
-		artRepository.save(art)
+		do {
+			try artRepository.save(art)
+		} catch let error as RepositoryError {
+			throw ServiceError.repositoryError(error)
+		} catch {
+			throw ServiceError.itemLinkingFailed(
+				itemType: "Art",
+				townName: "any",
+				operation: .unlink,
+				underlyingError: error
+			)
+		}
 	}
 	
 	// MARK: - Donation Management
 	
 	/// Marks an item as donated and timestamps it
-	func markItemAsDonated<T: CollectibleItem & PersistentModel>(_ item: T) {
-		if let fossil = item as? Fossil {
-			// Fetch all fossils and find by ID (more reliable than predicates)
-			let descriptor = FetchDescriptor<Fossil>()
-			if let fossils = try? modelContext.fetch(descriptor),
-			   let fossilToUpdate = fossils.first(where: { $0.id == fossil.id }) {
-				fossilToUpdate.isDonated = true
-				fossilToUpdate.donationDate = Date()
-				try? modelContext.save()
+	/// - Parameter item: The item to mark as donated
+	/// - Throws: ServiceError if the operation fails
+	func markItemAsDonated<T: CollectibleItem & PersistentModel>(_ item: T) throws {
+		do {
+			if let fossil = item as? Fossil {
+				// Fetch all fossils and find by ID (more reliable than predicates)
+				let descriptor = FetchDescriptor<Fossil>()
+				if let fossils = try modelContext.fetch(descriptor),
+				   let fossilToUpdate = fossils.first(where: { $0.id == fossil.id }) {
+					fossilToUpdate.isDonated = true
+					fossilToUpdate.donationDate = Date()
+					try modelContext.save()
+				} else {
+					throw ServiceError.donationOperationFailed(
+						itemName: fossil.name,
+						operation: .mark,
+						underlyingError: nil
+					)
+				}
+			} else if let bug = item as? Bug {
+				let descriptor = FetchDescriptor<Bug>()
+				if let bugs = try modelContext.fetch(descriptor),
+				   let bugToUpdate = bugs.first(where: { $0.id == bug.id }) {
+					bugToUpdate.isDonated = true
+					bugToUpdate.donationDate = Date()
+					try modelContext.save()
+				} else {
+					throw ServiceError.donationOperationFailed(
+						itemName: bug.name,
+						operation: .mark,
+						underlyingError: nil
+					)
+				}
+			} else if let fish = item as? Fish {
+				let descriptor = FetchDescriptor<Fish>()
+				if let allFish = try modelContext.fetch(descriptor),
+				   let fishToUpdate = allFish.first(where: { $0.id == fish.id }) {
+					fishToUpdate.isDonated = true
+					fishToUpdate.donationDate = Date()
+					try modelContext.save()
+				} else {
+					throw ServiceError.donationOperationFailed(
+						itemName: fish.name,
+						operation: .mark,
+						underlyingError: nil
+					)
+				}
+			} else if let art = item as? Art {
+				let descriptor = FetchDescriptor<Art>()
+				if let artPieces = try modelContext.fetch(descriptor),
+				   let artToUpdate = artPieces.first(where: { $0.id == art.id }) {
+					artToUpdate.isDonated = true
+					artToUpdate.donationDate = Date()
+					try modelContext.save()
+				} else {
+					throw ServiceError.donationOperationFailed(
+						itemName: art.name,
+						operation: .mark,
+						underlyingError: nil
+					)
+				}
 			}
-		} else if let bug = item as? Bug {
-			let descriptor = FetchDescriptor<Bug>()
-			if let bugs = try? modelContext.fetch(descriptor),
-			   let bugToUpdate = bugs.first(where: { $0.id == bug.id }) {
-				bugToUpdate.isDonated = true
-				bugToUpdate.donationDate = Date()
-				try? modelContext.save()
-			}
-		} else if let fish = item as? Fish {
-			let descriptor = FetchDescriptor<Fish>()
-			if let allFish = try? modelContext.fetch(descriptor),
-			   let fishToUpdate = allFish.first(where: { $0.id == fish.id }) {
-				fishToUpdate.isDonated = true
-				fishToUpdate.donationDate = Date()
-				try? modelContext.save()
-			}
-		} else if let art = item as? Art {
-			let descriptor = FetchDescriptor<Art>()
-			if let artPieces = try? modelContext.fetch(descriptor),
-			   let artToUpdate = artPieces.first(where: { $0.id == art.id }) {
-				artToUpdate.isDonated = true
-				artToUpdate.donationDate = Date()
-				try? modelContext.save()
-			}
+		} catch let error as ServiceError {
+			throw error
+		} catch {
+			throw ServiceError.donationOperationFailed(
+				itemName: item.name,
+				operation: .mark,
+				underlyingError: error
+			)
 		}
 	}
     
@@ -151,55 +275,91 @@ class DonationService {
     }
 	
 	/// Unmarks an item as donated and removes the timestamp
-	func unmarkItemAsDonated<T: CollectibleItem & PersistentModel>(_ item: T) {
-		if let fossil = item as? Fossil {
-			let descriptor = FetchDescriptor<Fossil>()
-			if let fossils = try? modelContext.fetch(descriptor),
-			   let fossilToUpdate = fossils.first(where: { $0.id == fossil.id }) {
-				fossilToUpdate.isDonated = false
-				fossilToUpdate.donationDate = nil
-				try? modelContext.save()
+	/// - Parameter item: The item to unmark as donated
+	/// - Throws: ServiceError if the operation fails
+	func unmarkItemAsDonated<T: CollectibleItem & PersistentModel>(_ item: T) throws {
+		do {
+			if let fossil = item as? Fossil {
+				let descriptor = FetchDescriptor<Fossil>()
+				if let fossils = try modelContext.fetch(descriptor),
+				   let fossilToUpdate = fossils.first(where: { $0.id == fossil.id }) {
+					fossilToUpdate.isDonated = false
+					fossilToUpdate.donationDate = nil
+					try modelContext.save()
+				} else {
+					throw ServiceError.donationOperationFailed(
+						itemName: fossil.name,
+						operation: .unmark,
+						underlyingError: nil
+					)
+				}
+			} else if let bug = item as? Bug {
+				let descriptor = FetchDescriptor<Bug>()
+				if let bugs = try modelContext.fetch(descriptor),
+				   let bugToUpdate = bugs.first(where: { $0.id == bug.id }) {
+					bugToUpdate.isDonated = false
+					bugToUpdate.donationDate = nil
+					try modelContext.save()
+				} else {
+					throw ServiceError.donationOperationFailed(
+						itemName: bug.name,
+						operation: .unmark,
+						underlyingError: nil
+					)
+				}
+			} else if let fish = item as? Fish {
+				let descriptor = FetchDescriptor<Fish>()
+				if let allFish = try modelContext.fetch(descriptor),
+				   let fishToUpdate = allFish.first(where: { $0.id == fish.id }) {
+					fishToUpdate.isDonated = false
+					fishToUpdate.donationDate = nil
+					try modelContext.save()
+				} else {
+					throw ServiceError.donationOperationFailed(
+						itemName: fish.name,
+						operation: .unmark,
+						underlyingError: nil
+					)
+				}
+			} else if let art = item as? Art {
+				let descriptor = FetchDescriptor<Art>()
+				if let artPieces = try modelContext.fetch(descriptor),
+				   let artToUpdate = artPieces.first(where: { $0.id == art.id }) {
+					artToUpdate.isDonated = false
+					artToUpdate.donationDate = nil
+					try modelContext.save()
+				} else {
+					throw ServiceError.donationOperationFailed(
+						itemName: art.name,
+						operation: .unmark,
+						underlyingError: nil
+					)
+				}
 			}
-		} else if let bug = item as? Bug {
-			let descriptor = FetchDescriptor<Bug>()
-			if let bugs = try? modelContext.fetch(descriptor),
-			   let bugToUpdate = bugs.first(where: { $0.id == bug.id }) {
-				bugToUpdate.isDonated = false
-				bugToUpdate.donationDate = nil
-				try? modelContext.save()
-			}
-		} else if let fish = item as? Fish {
-			let descriptor = FetchDescriptor<Fish>()
-			if let allFish = try? modelContext.fetch(descriptor),
-			   let fishToUpdate = allFish.first(where: { $0.id == fish.id }) {
-				fishToUpdate.isDonated = false
-				fishToUpdate.donationDate = nil
-				try? modelContext.save()
-			}
-		} else if let art = item as? Art {
-			let descriptor = FetchDescriptor<Art>()
-			if let artPieces = try? modelContext.fetch(descriptor),
-			   let artToUpdate = artPieces.first(where: { $0.id == art.id }) {
-				artToUpdate.isDonated = false
-				artToUpdate.donationDate = nil
-				try? modelContext.save()
-			}
+		} catch let error as ServiceError {
+			throw error
+		} catch {
+			throw ServiceError.donationOperationFailed(
+				itemName: item.name,
+				operation: .unmark,
+				underlyingError: error
+			)
 		}
 	}
 	
 	// MARK: - Fetching Items by Town
 	
 	/// Gets all fossils for a specific town
-	func getFossilsForTown(town: Town) -> [Fossil] {
+	/// - Parameter town: The town to get fossils for
+	/// - Returns: Array of fossils linked to the town
+	/// - Throws: ServiceError if the fetch operation fails
+	func getFossilsForTown(town: Town) throws -> [Fossil] {
 		// Fetch all fossils and filter by town ID in memory
 		let descriptor = FetchDescriptor<Fossil>()
 		do {
 			let allFossils = try modelContext.fetch(descriptor)
 			return allFossils.filter { $0.townId == town.id }
 		} catch {
-			print("Error fetching fossils: \(error)")
-			return []
-		}
 	}
 	
 	/// Gets all bugs for a specific town

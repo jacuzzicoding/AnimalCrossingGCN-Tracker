@@ -34,20 +34,16 @@ class FossilRepository: BaseRepository<Fossil>, CollectibleRepository {
     
     /// Saves a fossil to the database
     /// - Parameter item: The fossil to save
-	override func save(_ item: Fossil) {
-        // Check if this is a new item or an existing one
-        if getById(id: item.id) == nil {
-            modelContext.insert(item)
-        }
-        
-        saveContext()
+    /// - Throws: RepositoryError if the save operation fails.
+	override func save(_ item: Fossil) throws {
+        try super.save(item)
     }
     
     /// Deletes a fossil from the database
     /// - Parameter item: The fossil to delete
-	override func delete(_ item: Fossil) {
-        modelContext.delete(item)
-        saveContext()
+    /// - Throws: RepositoryError if the delete operation fails.
+	override func delete(_ item: Fossil) throws {
+        try super.delete(item)
     }
     
     // MARK: - CollectibleRepository Protocol Implementation

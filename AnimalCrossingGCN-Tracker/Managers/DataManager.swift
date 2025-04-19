@@ -457,11 +457,11 @@ class DataManager: ObservableObject {
     /// - Parameters:
     ///   - town: The town to initialize
     ///   - game: The game to use for initializing collectibles
-    func initializeTownWithDefaultItems(_ town: Town, game: ACGame) {
+    func initializeTownWithDefaultItems(_ town: Town, game: ACGame) throws {
         // Create and link default fossils
         for fossil in getDefaultFossils().filter({ $0.games.contains(game) }) {
             fossil.townId = town.id
-            fossilRepository.save(fossil)
+            try fossilRepository.save(fossil)
         }
         
         // Create and link default bugs
