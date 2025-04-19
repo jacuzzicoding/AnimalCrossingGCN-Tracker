@@ -45,7 +45,7 @@ class FossilRepository: BaseRepository<Fossil>, CollectibleRepository {
     
     /// Deletes a fossil from the database
     /// - Parameter item: The fossil to delete
-    func delete(_ item: Fossil) {
+	override func delete(_ item: Fossil) {
         modelContext.delete(item)
         saveContext()
     }

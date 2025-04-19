@@ -45,7 +45,7 @@ class ArtRepository: BaseRepository<Art>, CollectibleRepository {
     
     /// Deletes an art piece from the database
     /// - Parameter item: The art piece to delete
-    func delete(_ item: Art) {
+	override func delete(_ item: Art) {
         modelContext.delete(item)
         saveContext()
     }

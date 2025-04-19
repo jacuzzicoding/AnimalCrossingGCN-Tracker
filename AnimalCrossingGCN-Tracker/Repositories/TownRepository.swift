@@ -53,7 +53,7 @@ class TownRepository: BaseRepository<Town> {
     
     /// Deletes a town from the database
     /// - Parameter item: The town to delete
-    func delete(_ item: Town) {
+	override func delete(_ item: Town) {
         modelContext.delete(item)
         saveContext()
     }

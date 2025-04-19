@@ -10,5 +10,7 @@ import Foundation
 public enum RepositoryError: Error {
     /// Thrown when saving an entity fails
     case saveFailed(entityName: String, underlyingError: Error)
-    // Future error cases (e.g., deleteFailed, fetchFailed) can be added here
+    /// Thrown when deleting an entity fails
+    case deleteFailed(entityName: String, underlyingError: Error)
+    // Future error cases (e.g., fetchFailed) can be added here
 }

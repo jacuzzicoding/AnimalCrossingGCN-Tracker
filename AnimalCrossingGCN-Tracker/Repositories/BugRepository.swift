@@ -45,7 +45,7 @@ class BugRepository: BaseRepository<Bug>, CollectibleRepository {
     
     /// Deletes a bug from the database
     /// - Parameter item: The bug to delete
-    func delete(_ item: Bug) {
+	override func delete(_ item: Bug) {
         modelContext.delete(item)
         saveContext()
     }

@@ -83,6 +83,23 @@ class BaseRepository<T: PersistentModel> {
             )
         }
     }
+    
+    /// Deletes an item from the repository.
+    /// - Parameter item: The item to delete.
+    /// - Throws: RepositoryError if the delete operation fails.
+    func delete(_ item: T) throws {
+        modelContext.delete(item)
+        // Only attempt to save if there are actual changes
+        guard modelContext.hasChanges else { return }
+        do {
+            try modelContext.save()
+        } catch {
+            throw RepositoryError.deleteFailed(
+                entityName: String(describing: T.self),
+                underlyingError: error
+            )
+        }
+    }
 }
 
 // Extension for TownLinkable items

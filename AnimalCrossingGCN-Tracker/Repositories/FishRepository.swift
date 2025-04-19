@@ -45,7 +45,7 @@ class FishRepository: BaseRepository<Fish>, CollectibleRepository {
     
     /// Deletes a fish from the database
     /// - Parameter item: The fish to delete
-    func delete(_ item: Fish) {
+	override func delete(_ item: Fish) {
         modelContext.delete(item)
         saveContext()
     }
