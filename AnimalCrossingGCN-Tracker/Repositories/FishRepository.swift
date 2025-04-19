@@ -34,7 +34,7 @@ class FishRepository: BaseRepository<Fish>, CollectibleRepository {
     
     /// Saves a fish to the database
     /// - Parameter item: The fish to save
-    func save(_ item: Fish) {
+	override func save(_ item: Fish) {
         // Check if this is a new item or an existing one
         if getById(id: item.id) == nil {
             modelContext.insert(item)

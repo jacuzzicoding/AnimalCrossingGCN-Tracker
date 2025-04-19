@@ -34,7 +34,7 @@ class FossilRepository: BaseRepository<Fossil>, CollectibleRepository {
     
     /// Saves a fossil to the database
     /// - Parameter item: The fossil to save
-    func save(_ item: Fossil) {
+	override func save(_ item: Fossil) {
         // Check if this is a new item or an existing one
         if getById(id: item.id) == nil {
             modelContext.insert(item)

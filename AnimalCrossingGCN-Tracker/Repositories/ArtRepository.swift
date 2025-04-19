@@ -34,7 +34,7 @@ class ArtRepository: BaseRepository<Art>, CollectibleRepository {
     
     /// Saves an art piece to the database
     /// - Parameter item: The art piece to save
-    func save(_ item: Art) {
+	override func save(_ item: Art) {
         // Check if this is a new item or an existing one
         if getById(id: item.id) == nil {
             modelContext.insert(item)

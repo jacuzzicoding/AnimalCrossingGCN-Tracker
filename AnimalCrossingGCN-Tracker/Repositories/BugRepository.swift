@@ -34,7 +34,7 @@ class BugRepository: BaseRepository<Bug>, CollectibleRepository {
     
     /// Saves a bug to the database
     /// - Parameter item: The bug to save
-    func save(_ item: Bug) {
+	override func save(_ item: Bug) {
         // Check if this is a new item or an existing one
         if getById(id: item.id) == nil {
             modelContext.insert(item)
