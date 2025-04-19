@@ -69,11 +69,31 @@ class AnalyticsService {
             return cachedData
         }
         
-        // Get all donated items for the town
-        let fossils = donationService.getFossilsForTown(town: town).filter { $0.isDonated }
-        let bugs = donationService.getBugsForTown(town: town).filter { $0.isDonated }
-        let fish = donationService.getFishForTown(town: town).filter { $0.isDonated }
-        let artPieces = donationService.getArtForTown(town: town).filter { $0.isDonated }
+        // Get all donated items for the town (handle errors)
+        let fossils: [Fossil]
+        let bugs: [Bug]
+        let fish: [Fish]
+        let artPieces: [Art]
+        do {
+            fossils = try donationService.getFossilsForTown(town: town).filter { $0.isDonated }
+        } catch {
+            fossils = []
+        }
+        do {
+            bugs = try donationService.getBugsForTown(town: town).filter { $0.isDonated }
+        } catch {
+            bugs = []
+        }
+        do {
+            fish = try donationService.getFishForTown(town: town).filter { $0.isDonated }
+        } catch {
+            fish = []
+        }
+        do {
+            artPieces = try donationService.getArtForTown(town: town).filter { $0.isDonated }
+        } catch {
+            artPieces = []
+        }
         
         // Group by month
         var monthlyActivity: [String: MonthlyDonationActivity] = [:]
@@ -219,15 +239,60 @@ class AnalyticsService {
             return cachedData
         }
         
-        let fossilProgress = donationService.getFossilProgressForTown(town: town)
-        let bugProgress = donationService.getBugProgressForTown(town: town)
-        let fishProgress = donationService.getFishProgressForTown(town: town)
-        let artProgress = donationService.getArtProgressForTown(town: town)
-        
-        let fossils = donationService.getFossilsForTown(town: town)
-        let bugs = donationService.getBugsForTown(town: town)
-        let fish = donationService.getFishForTown(town: town)
-        let artPieces = donationService.getArtForTown(town: town)
+        let fossilProgress: Double
+        let bugProgress: Double
+        let fishProgress: Double
+        let artProgress: Double
+        let fossils: [Fossil]
+        let bugs: [Bug]
+        let fish: [Fish]
+        let artPieces: [Art]
+        do {
+            fossilProgress = try donationService.getFossilProgressForTown(town: town)
+        } catch {
+            fossilProgress = 0.0
+        }
+        do {
+            bugProgress = try donationService.getBugProgressForTown(town: town)
+        } catch {
+            bugProgress = 0.0
+        }
+        do {
+            fishProgress = try donationService.getFishProgressForTown(town: town)
+        } catch {
+            fishProgress = 0.0
+        }
+        do {
+            artProgress = try donationService.getArtProgressForTown(town: town)
+        } catch {
+            artProgress = 0.0
+        }
+        do {
+            fossils = try donationService.getFossilsForTown(town: town)
+        } catch {
+            fossils = []
+        }
+        do {
+            bugs = try donationService.getBugsForTown(town: town)
+        } catch {
+            bugs = []
+        }
+        do {
+            fish = try donationService.getFishForTown(town: town)
+        } catch {
+            fish = []
+        }
+        do {
+            artPieces = try donationService.getArtForTown(town: town)
+        } catch {
+            artPieces = []
+        }
+        let totalProgress: Double
+        do {
+            totalProgress = try donationService.getTotalProgressForTown(town: town)
+        } catch {
+            totalProgress = 0.0
+        }
         
         let result = CategoryCompletionData(
             fossilCount: fossils.count,
@@ -242,7 +307,7 @@ class AnalyticsService {
             artCount: artPieces.count,
             artDonated: artPieces.filter { $0.isDonated }.count,
             artProgress: artProgress,
-            totalProgress: donationService.getTotalProgressForTown(town: town)
+            totalProgress: totalProgress
         )
         
         // Cache the result
@@ -265,8 +330,18 @@ class AnalyticsService {
             return cachedData
         }
         
-        let bugs = donationService.getBugsForTown(town: town)
-        let fish = donationService.getFishForTown(town: town)
+        let bugs: [Bug]
+        let fish: [Fish]
+        do {
+            bugs = try donationService.getBugsForTown(town: town)
+        } catch {
+            bugs = []
+        }
+        do {
+            fish = try donationService.getFishForTown(town: town)
+        } catch {
+            fish = []
+        }
         
         var seasonalBugs: [String: [Bug]] = [:]
         var seasonalFish: [String: [Fish]] = [:]
