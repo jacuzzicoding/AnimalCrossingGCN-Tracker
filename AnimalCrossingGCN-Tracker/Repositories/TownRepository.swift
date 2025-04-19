@@ -42,7 +42,7 @@ class TownRepository: BaseRepository<Town> {
     
     /// Saves a town to the database
     /// - Parameter item: The town to save
-    func save(_ item: Town) {
+	override func save(_ item: Town) {
         // Since Town doesn't have an ID yet, check by name
         if getByName(name: item.name) == nil {
             modelContext.insert(item)
