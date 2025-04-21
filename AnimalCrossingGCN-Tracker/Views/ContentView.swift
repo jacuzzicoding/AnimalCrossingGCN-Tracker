@@ -228,9 +228,13 @@ struct ContentView: View { // Updated ContentView
                 Text("Analytics Dashboard")
                     .font(.headline)
                     .padding(.top)
-                        
-                    // Create a simplified preview of the analytics dashboard
-                if let completionData = dataManager.getCategoryCompletionData() {
+                
+                // Move data loading outside of ViewBuilder
+                let completionDataResult = Result { try dataManager.getCategoryCompletionData() }
+                let timelineDataResult = Result { try dataManager.getDonationActivityByMonth() }
+                
+                switch completionDataResult {
+                case .success(let completionData) where completionData != nil:
                 // Museum progress card
                 VStack(alignment: .leading) {
                 HStack {
@@ -241,7 +245,7 @@ struct ContentView: View { // Updated ContentView
                 }
                 
                 HStack {
-                Text("\(completionData.totalDonated) of \(completionData.totalCount) items donated")
+					Text("\(completionData!.totalDonated) of \(completionData?.totalCount) items donated")
                     Spacer()
                     Text("\(Int(completionData.totalProgress * 100))%")
                         .bold()
@@ -335,8 +339,8 @@ struct ContentView: View { // Updated ContentView
                                 .padding(.horizontal)
                                 
                                 // Timeline preview
-                                let timelineData = dataManager.getDonationActivityByMonth()
-                                if !timelineData.isEmpty {
+                                switch timelineDataResult {
+                                case .success(let timelineData) where !timelineData.isEmpty:
                                     VStack(alignment: .leading) {
                                         HStack {
                                             Image(systemName: "clock.arrow.circlepath")
@@ -364,6 +368,12 @@ struct ContentView: View { // Updated ContentView
                                     #endif
                                     .cornerRadius(10)
                                     .padding(.horizontal)
+                                case .failure:
+                                    Text("Error loading timeline data")
+                                        .foregroundColor(.red)
+                                        .padding()
+                                default:
+                                    EmptyView()
                                 }
                                 
                                 // Button to show full analytics
@@ -382,38 +392,46 @@ struct ContentView: View { // Updated ContentView
                                 }
                                 .padding(.horizontal)
                                 .padding(.top, 5)
-                            } else {
-                                VStack(spacing: 20) {
-                                    Image(systemName: "chart.line.uptrend.xyaxis")
-                                        .font(.system(size: 40))
-                                        .foregroundColor(.secondary)
-                                    
-                                    Text("No analytics data available")
-                                        .foregroundColor(.secondary)
-                                    
-                                    Text("Add donations to see detailed analytics")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        
-                                    // Generate test data button in debug mode
-                                    #if DEBUG
-                                    Button(action: {
-                                        dataManager.generateTestDonationData()
-                                    }) {
-                                        Text("Generate Test Data")
-                                            .padding()
-                                            .background(Color.blue)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
-                                    }
-                                    #endif
-                                }
-                                .frame(maxWidth: .infinity, minHeight: 300)
+                            
+                case .success:
+                    VStack(spacing: 20) {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .font(.system(size: 40))
+                            .foregroundColor(.secondary)
+                        Text("No analytics data available")
+                            .foregroundColor(.secondary)
+                        Text("Add donations to see detailed analytics")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        #if DEBUG
+                        Button(action: {
+                            dataManager.generateTestDonationData()
+                        }) {
+                            Text("Generate Test Data")
                                 .padding()
-                            }
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
                         }
-                        .padding(.bottom, 120) // Add extra bottom padding to prevent overlap with FloatingCategorySwitcher
+                        #endif
                     }
+                    .frame(maxWidth: .infinity, minHeight: 300)
+                    .padding()
+                case .failure:
+                    VStack(spacing: 20) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 40))
+                            .foregroundColor(.orange)
+                        Text("Error loading analytics data")
+                            .foregroundColor(.secondary)
+                            .padding()
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 300)
+                    .padding()
+                }
+                }
+                .padding(.bottom, 120) // Add extra bottom padding to prevent overlap with FloatingCategorySwitcher
+            }
                 } else {
                     // Existing search and main list content
                     SearchBar(text: $searchText, isGlobalSearch: $isGlobalSearch)
