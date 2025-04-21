@@ -439,23 +439,25 @@ class DataManager: ObservableObject {
     ///   - startDate: Optional start date for filtering
     ///   - endDate: Optional end date for filtering
     /// - Returns: Array of monthly donation activity data
-    func getDonationActivityByMonth(startDate: Date? = nil, endDate: Date? = nil) -> [MonthlyDonationActivity] {
-        guard let town = currentTown else { return [] }
-        return analyticsService.getDonationActivityByMonth(town: town, startDate: startDate, endDate: endDate)
+    func getDonationActivityByMonth(startDate: Date? = nil, endDate: Date? = nil) throws -> [MonthlyDonationActivity] {
+        guard let town = currentTown else {
+            throw ServiceError.noTownSelected(operation: "getDonationActivityByMonth")
+        }
+        return try analyticsService.getDonationActivityByMonth(town: town, startDate: startDate, endDate: endDate)
     }
-    
+
     /// Gets category completion data for the current town
     /// - Returns: Category completion data
-    func getCategoryCompletionData() -> CategoryCompletionData? {
+    func getCategoryCompletionData() throws -> CategoryCompletionData? {
         guard let town = currentTown else { return nil }
-        return analyticsService.getCategoryCompletionData(town: town)
+        return try analyticsService.getCategoryCompletionData(town: town)
     }
-    
+
     /// Gets seasonal data for the current town
     /// - Returns: Seasonal data
-    func getSeasonalData() -> SeasonalData? {
+    func getSeasonalData() throws -> SeasonalData? {
         guard let town = currentTown else { return nil }
-        return analyticsService.getSeasonalData(town: town)
+        return try analyticsService.getSeasonalData(town: town)
     }
     
     // MARK: - Progress Tracking
@@ -684,12 +686,14 @@ class DataManager: ObservableObject {
         print("Art with dates: \(artWithDates.count)")
         
         // Check if analytics service is getting data
-        let timelineData = analyticsService.getDonationActivityByMonth(town: town)
-        print("\nAnalytics timeline data: \(timelineData.count) months")
-        if !timelineData.isEmpty {
-            for activity in timelineData {
+        let timelineData = try? analyticsService.getDonationActivityByMonth(town: town)
+        print("\nAnalytics timeline data: \(timelineData?.count ?? 0) months")
+        if let data = timelineData, !data.isEmpty {
+            for activity in data {
                 print("Month: \(activity.formattedMonth), Total: \(activity.totalCount), Fossils: \(activity.fossilCount), Bugs: \(activity.bugCount), Fish: \(activity.fishCount), Art: \(activity.artCount)")
             }
+        } else if timelineData == nil {
+            print("Analytics timeline data: Error fetching data")
         }
         
         // Let's also check if the problem might be related to the gameRawValues array
