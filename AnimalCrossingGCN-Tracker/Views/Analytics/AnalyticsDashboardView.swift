@@ -274,7 +274,7 @@ struct AnalyticsDashboardView: View {
     private func overallProgressCard(completion: CategoryCompletionData) -> some View {
         VStack(alignment: .leading) {
             HStack {
-                Image(systemName: "museum.fill")
+                Image(systemName: "building.columns.fill")
                     .foregroundColor(.acLeafGreen)
                 Text("Museum Progress")
                     .font(.headline)
@@ -587,7 +587,7 @@ struct DonationTimelineView: View {
                                 if filteredData.count > 6 && filteredData.firstIndex(where: { $0.formattedMonth == month })! % 2 != 0 {
                                     AxisValueLabel {
                                         Text(" ")
-                                    }
+                                    }  
                                 } else {
                                     let components = month.components(separatedBy: " ")
                                     AxisValueLabel {

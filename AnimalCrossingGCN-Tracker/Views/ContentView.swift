@@ -443,7 +443,7 @@ struct MuseumProgressCard: View {
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
-                Image(systemName: "museum.fill")
+                Image(systemName: "building.columns.fill")
                     .foregroundColor(Color(red: 107/255, green: 211/255, blue: 139/255)) // .acLeafGreen
                 Text("Museum Progress")
                     .font(.headline)

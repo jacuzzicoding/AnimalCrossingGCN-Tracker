@@ -123,7 +123,7 @@ struct CollectionStatusCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Image(systemName: "museum.fill")
+                Image(systemName: "building.columns.fill")
                     .foregroundColor(.acLeafGreen)
                     .font(.headline)
                 Text("Museum Collection Status")
