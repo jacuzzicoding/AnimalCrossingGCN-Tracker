@@ -61,7 +61,7 @@ class AnalyticsService {
     ///   - startDate: Optional start date for filtering
     ///   - endDate: Optional end date for filtering
     /// - Returns: Array of monthly donation activity data
-    func getDonationActivityByMonth(town: Town, startDate: Date? = nil, endDate: Date? = nil) -> [MonthlyDonationActivity] {
+    func getDonationActivityByMonth(town: Town, startDate: Date? = nil, endDate: Date? = nil) throws -> [MonthlyDonationActivity] {
         let cacheKey = "\(town.id)_\(startDate?.description ?? "nil")_\(endDate?.description ?? "nil")"
         
         // Check cache first
@@ -69,53 +69,47 @@ class AnalyticsService {
             return cachedData
         }
         
-        // Get all donated items for the town
-        let fossils = donationService.getFossilsForTown(town: town).filter { $0.isDonated }
-        let bugs = donationService.getBugsForTown(town: town).filter { $0.isDonated }
-        let fish = donationService.getFishForTown(town: town).filter { $0.isDonated }
-        let artPieces = donationService.getArtForTown(town: town).filter { $0.isDonated }
-        
-        // Group by month
-        var monthlyActivity: [String: MonthlyDonationActivity] = [:]
-        
-        // Process each donation type
-        processMonthlyDonations(fossils, category: .fossil, into: &monthlyActivity, startDate: startDate, endDate: endDate)
-        processMonthlyDonations(bugs, category: .bug, into: &monthlyActivity, startDate: startDate, endDate: endDate)
-        processMonthlyDonations(fish, category: .fish, into: &monthlyActivity, startDate: startDate, endDate: endDate)
-        processMonthlyDonations(artPieces, category: .art, into: &monthlyActivity, startDate: startDate, endDate: endDate)
-        
-        // If no months were created but we have donations, create an entry for the current month
-        if monthlyActivity.isEmpty && (fossils.count + bugs.count + fish.count + artPieces.count > 0) {
-            let today = Date()
-            let calendar = Calendar.current
-            let month = calendar.startOfDay(for: calendar.date(from: DateComponents(
-                year: calendar.component(.year, from: today),
-                month: calendar.component(.month, from: today),
-                day: 1
-            ))!)
+        do {
+            let fossils = try donationService.getFossilsForTown(town: town).filter { $0.isDonated }
+            let bugs = try donationService.getBugsForTown(town: town).filter { $0.isDonated }
+            let fish = try donationService.getFishForTown(town: town).filter { $0.isDonated }
+            let artPieces = try donationService.getArtForTown(town: town).filter { $0.isDonated }
             
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM"
-            let monthStr = dateFormatter.string(from: month)
+            var monthlyActivity: [String: MonthlyDonationActivity] = [:]
+            processMonthlyDonations(fossils, category: .fossil, into: &monthlyActivity, startDate: startDate, endDate: endDate)
+            processMonthlyDonations(bugs, category: .bug, into: &monthlyActivity, startDate: startDate, endDate: endDate)
+            processMonthlyDonations(fish, category: .fish, into: &monthlyActivity, startDate: startDate, endDate: endDate)
+            processMonthlyDonations(artPieces, category: .art, into: &monthlyActivity, startDate: startDate, endDate: endDate)
             
-            monthlyActivity[monthStr] = MonthlyDonationActivity(
-                month: month,
-                fossilCount: fossils.count,
-                bugCount: bugs.count,
-                fishCount: fish.count,
-                artCount: artPieces.count,
-                totalCount: fossils.count + bugs.count + fish.count + artPieces.count
-            )
+            if monthlyActivity.isEmpty && (fossils.count + bugs.count + fish.count + artPieces.count > 0) {
+                let today = Date()
+                let calendar = Calendar.current
+                let month = calendar.startOfDay(for: calendar.date(from: DateComponents(
+                    year: calendar.component(.year, from: today),
+                    month: calendar.component(.month, from: today),
+                    day: 1
+                ))!)
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM"
+                let monthStr = dateFormatter.string(from: month)
+                monthlyActivity[monthStr] = MonthlyDonationActivity(
+                    month: month,
+                    fossilCount: fossils.count,
+                    bugCount: bugs.count,
+                    fishCount: fish.count,
+                    artCount: artPieces.count,
+                    totalCount: fossils.count + bugs.count + fish.count + artPieces.count
+                )
+            }
+            let result = monthlyActivity.values.sorted { $0.month < $1.month }
+            cachedTimelineData[cacheKey] = result
+            lastCacheTime = Date()
+            return result
+        } catch let error as ServiceError {
+            throw ServiceError.analyticsProcessingFailed(operationType: "getDonationActivityByMonth", reason: "Service error", underlyingError: error)
+        } catch {
+            throw ServiceError.analyticsProcessingFailed(operationType: "getDonationActivityByMonth", reason: "Unknown error", underlyingError: error)
         }
-        
-        // Convert to array and sort by date
-        let result = monthlyActivity.values.sorted { $0.month < $1.month }
-        
-        // Cache the result
-        cachedTimelineData[cacheKey] = result
-        lastCacheTime = Date()
-        
-        return result
     }
     
     /// Process donations into monthly activity, handling items that may not have dates
@@ -211,7 +205,7 @@ class AnalyticsService {
     /// Get category completion data for a town
     /// - Parameter town: The town to analyze
     /// - Returns: Category completion data
-    func getCategoryCompletionData(town: Town) -> CategoryCompletionData {
+    func getCategoryCompletionData(town: Town) throws -> CategoryCompletionData {
         let cacheKey = "\(town.id)_completion"
         
         // Check cache first
@@ -219,37 +213,39 @@ class AnalyticsService {
             return cachedData
         }
         
-        let fossilProgress = donationService.getFossilProgressForTown(town: town)
-        let bugProgress = donationService.getBugProgressForTown(town: town)
-        let fishProgress = donationService.getFishProgressForTown(town: town)
-        let artProgress = donationService.getArtProgressForTown(town: town)
-        
-        let fossils = donationService.getFossilsForTown(town: town)
-        let bugs = donationService.getBugsForTown(town: town)
-        let fish = donationService.getFishForTown(town: town)
-        let artPieces = donationService.getArtForTown(town: town)
-        
-        let result = CategoryCompletionData(
-            fossilCount: fossils.count,
-            fossilDonated: fossils.filter { $0.isDonated }.count,
-            fossilProgress: fossilProgress,
-            bugCount: bugs.count,
-            bugDonated: bugs.filter { $0.isDonated }.count,
-            bugProgress: bugProgress,
-            fishCount: fish.count,
-            fishDonated: fish.filter { $0.isDonated }.count,
-            fishProgress: fishProgress,
-            artCount: artPieces.count,
-            artDonated: artPieces.filter { $0.isDonated }.count,
-            artProgress: artProgress,
-            totalProgress: donationService.getTotalProgressForTown(town: town)
-        )
-        
-        // Cache the result
-        cachedCompletionData[cacheKey] = result
-        lastCacheTime = Date()
-        
-        return result
+        do {
+            let fossilProgress = try donationService.getFossilProgressForTown(town: town)
+            let bugProgress = try donationService.getBugProgressForTown(town: town)
+            let fishProgress = try donationService.getFishProgressForTown(town: town)
+            let artProgress = try donationService.getArtProgressForTown(town: town)
+            let fossils = try donationService.getFossilsForTown(town: town)
+            let bugs = try donationService.getBugsForTown(town: town)
+            let fish = try donationService.getFishForTown(town: town)
+            let artPieces = try donationService.getArtForTown(town: town)
+            let totalProgress = try donationService.getTotalProgressForTown(town: town)
+            let result = CategoryCompletionData(
+                fossilCount: fossils.count,
+                fossilDonated: fossils.filter { $0.isDonated }.count,
+                fossilProgress: fossilProgress,
+                bugCount: bugs.count,
+                bugDonated: bugs.filter { $0.isDonated }.count,
+                bugProgress: bugProgress,
+                fishCount: fish.count,
+                fishDonated: fish.filter { $0.isDonated }.count,
+                fishProgress: fishProgress,
+                artCount: artPieces.count,
+                artDonated: artPieces.filter { $0.isDonated }.count,
+                artProgress: artProgress,
+                totalProgress: totalProgress
+            )
+            cachedCompletionData[cacheKey] = result
+            lastCacheTime = Date()
+            return result
+        } catch let error as ServiceError {
+            throw ServiceError.analyticsProcessingFailed(operationType: "getCategoryCompletionData", reason: "Service error", underlyingError: error)
+        } catch {
+            throw ServiceError.analyticsProcessingFailed(operationType: "getCategoryCompletionData", reason: "Unknown error", underlyingError: error)
+        }
     }
     
     // MARK: - Seasonal Analysis
@@ -257,7 +253,7 @@ class AnalyticsService {
     /// Get seasonal data for bugs and fish
     /// - Parameter town: The town to analyze
     /// - Returns: Seasonal data
-    func getSeasonalData(town: Town) -> SeasonalData {
+    func getSeasonalData(town: Town) throws -> SeasonalData {
         let cacheKey = "\(town.id)_seasonal"
         
         // Check cache first
@@ -265,107 +261,113 @@ class AnalyticsService {
             return cachedData
         }
         
-        let bugs = donationService.getBugsForTown(town: town)
-        let fish = donationService.getFishForTown(town: town)
-        
-        var seasonalBugs: [String: [Bug]] = [:]
-        var seasonalFish: [String: [Fish]] = [:]
-        
-        // Initialize all months to ensure we have complete data
-        let monthAbbreviations = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        for month in monthAbbreviations {
-            seasonalBugs[month] = []
-            seasonalFish[month] = []
-        }
-        
-        // Map bugs to seasons
-        for bug in bugs {
-            if let season = bug.season {
-                let seasons = parseSeasons(season)
-                for s in seasons {
-                    if seasonalBugs[s] != nil {
-                        seasonalBugs[s]!.append(bug)
-                    } else {
-                        seasonalBugs[s] = [bug]
+        do {
+            let bugs = try donationService.getBugsForTown(town: town)
+            let fish = try donationService.getFishForTown(town: town)
+            
+            var seasonalBugs: [String: [Bug]] = [:]
+            var seasonalFish: [String: [Fish]] = [:]
+            
+            // Initialize all months to ensure we have complete data
+            let monthAbbreviations = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            for month in monthAbbreviations {
+                seasonalBugs[month] = []
+                seasonalFish[month] = []
+            }
+            
+            // Map bugs to seasons
+            for bug in bugs {
+                if let season = bug.season {
+                    let seasons = parseSeasons(season)
+                    for s in seasons {
+                        if seasonalBugs[s] != nil {
+                            seasonalBugs[s]!.append(bug)
+                        } else {
+                            seasonalBugs[s] = [bug]
+                        }
                     }
                 }
             }
-        }
-        
-        // Map fish to seasons
-        for fish in fish {
-            let seasons = parseSeasons(fish.season)
-            for s in seasons {
-                if seasonalFish[s] != nil {
-                    seasonalFish[s]!.append(fish)
-                } else {
-                    seasonalFish[s] = [fish]
+            
+            // Map fish to seasons
+            for fish in fish {
+                let seasons = parseSeasons(fish.season)
+                for s in seasons {
+                    if seasonalFish[s] != nil {
+                        seasonalFish[s]!.append(fish)
+                    } else {
+                        seasonalFish[s] = [fish]
+                    }
                 }
             }
-        }
-        
-        // Calculate completion rates by season
-        var seasonalCompletion: [String: SeasonalCompletion] = [:]
-        
-        for (season, bugs) in seasonalBugs {
-            let totalBugs = bugs.count
-            let donatedBugs = bugs.filter { $0.isDonated }.count
-            let bugProgress = totalBugs > 0 ? Double(donatedBugs) / Double(totalBugs) : 0.0
             
-            if seasonalCompletion[season] != nil {
-                seasonalCompletion[season]!.bugCount = totalBugs
-                seasonalCompletion[season]!.bugDonated = donatedBugs
-                seasonalCompletion[season]!.bugProgress = bugProgress
-            } else {
-                seasonalCompletion[season] = SeasonalCompletion(
-                    season: season,
-                    bugCount: totalBugs,
-                    bugDonated: donatedBugs,
-                    bugProgress: bugProgress,
-                    fishCount: 0,
-                    fishDonated: 0,
-                    fishProgress: 0.0
-                )
-            }
-        }
-        
-        for (season, fishArray) in seasonalFish {
-            let totalFish = fishArray.count
-            let donatedFish = fishArray.filter { $0.isDonated }.count
-            let fishProgress = totalFish > 0 ? Double(donatedFish) / Double(totalFish) : 0.0
+            // Calculate completion rates by season
+            var seasonalCompletion: [String: SeasonalCompletion] = [:]
             
-            if seasonalCompletion[season] != nil {
-                seasonalCompletion[season]!.fishCount = totalFish
-                seasonalCompletion[season]!.fishDonated = donatedFish
-                seasonalCompletion[season]!.fishProgress = fishProgress
-            } else {
-                seasonalCompletion[season] = SeasonalCompletion(
-                    season: season,
-                    bugCount: 0,
-                    bugDonated: 0,
-                    bugProgress: 0.0,
-                    fishCount: totalFish,
-                    fishDonated: donatedFish,
-                    fishProgress: fishProgress
-                )
+            for (season, bugs) in seasonalBugs {
+                let totalBugs = bugs.count
+                let donatedBugs = bugs.filter { $0.isDonated }.count
+                let bugProgress = totalBugs > 0 ? Double(donatedBugs) / Double(totalBugs) : 0.0
+                
+                if seasonalCompletion[season] != nil {
+                    seasonalCompletion[season]!.bugCount = totalBugs
+                    seasonalCompletion[season]!.bugDonated = donatedBugs
+                    seasonalCompletion[season]!.bugProgress = bugProgress
+                } else {
+                    seasonalCompletion[season] = SeasonalCompletion(
+                        season: season,
+                        bugCount: totalBugs,
+                        bugDonated: donatedBugs,
+                        bugProgress: bugProgress,
+                        fishCount: 0,
+                        fishDonated: 0,
+                        fishProgress: 0.0
+                    )
+                }
             }
+            
+            for (season, fishArray) in seasonalFish {
+                let totalFish = fishArray.count
+                let donatedFish = fishArray.filter { $0.isDonated }.count
+                let fishProgress = totalFish > 0 ? Double(donatedFish) / Double(totalFish) : 0.0
+                
+                if seasonalCompletion[season] != nil {
+                    seasonalCompletion[season]!.fishCount = totalFish
+                    seasonalCompletion[season]!.fishDonated = donatedFish
+                    seasonalCompletion[season]!.fishProgress = fishProgress
+                } else {
+                    seasonalCompletion[season] = SeasonalCompletion(
+                        season: season,
+                        bugCount: 0,
+                        bugDonated: 0,
+                        bugProgress: 0.0,
+                        fishCount: totalFish,
+                        fishDonated: donatedFish,
+                        fishProgress: fishProgress
+                    )
+                }
+            }
+            
+            // Convert seasonalCompletion to array, sorted by month
+            let monthOrder = Dictionary(uniqueKeysWithValues: monthAbbreviations.enumerated().map { ($1, $0) })
+            let seasonalCompletionArray = seasonalCompletion.values.sorted { 
+                let order1 = monthOrder[$0.season] ?? 0
+                let order2 = monthOrder[$1.season] ?? 0
+                return order1 < order2
+            }
+            
+            let result = SeasonalData(seasonalCompletion: seasonalCompletionArray)
+            
+            // Cache the result
+            cachedSeasonalData[cacheKey] = result
+            lastCacheTime = Date()
+            
+            return result
+        } catch let error as ServiceError {
+            throw ServiceError.analyticsProcessingFailed(operationType: "getSeasonalData", reason: "Service error", underlyingError: error)
+        } catch {
+            throw ServiceError.analyticsProcessingFailed(operationType: "getSeasonalData", reason: "Unknown error", underlyingError: error)
         }
-        
-        // Convert seasonalCompletion to array, sorted by month
-        let monthOrder = Dictionary(uniqueKeysWithValues: monthAbbreviations.enumerated().map { ($1, $0) })
-        let seasonalCompletionArray = seasonalCompletion.values.sorted { 
-            let order1 = monthOrder[$0.season] ?? 0
-            let order2 = monthOrder[$1.season] ?? 0
-            return order1 < order2
-        }
-        
-        let result = SeasonalData(seasonalCompletion: seasonalCompletionArray)
-        
-        // Cache the result
-        cachedSeasonalData[cacheKey] = result
-        lastCacheTime = Date()
-        
-        return result
     }
     
     // Helper method to parse season strings into individual months

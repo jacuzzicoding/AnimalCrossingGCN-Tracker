@@ -64,11 +64,22 @@ class DataManager: ObservableObject {
     /// Updates the town DTO with current progress information
     /// - Parameter town: The town to update the DTO for
     private func updateTownDTO(_ town: Town) {
-        let fossilProgress = donationService.getFossilProgressForTown(town: town)
-        let bugProgress = donationService.getBugProgressForTown(town: town)
-        let fishProgress = donationService.getFishProgressForTown(town: town)
-        let artProgress = donationService.getArtProgressForTown(town: town)
-        let totalProgress = donationService.getTotalProgressForTown(town: town)
+        // Safely fetch progress values
+        let fossilProgress: Double
+        do { fossilProgress = try donationService.getFossilProgressForTown(town: town) }
+        catch { print("Error calculating fossil progress: \(error)"); fossilProgress = 0.0 }
+        let bugProgress: Double
+        do { bugProgress = try donationService.getBugProgressForTown(town: town) }
+        catch { print("Error calculating bug progress: \(error)"); bugProgress = 0.0 }
+        let fishProgress: Double
+        do { fishProgress = try donationService.getFishProgressForTown(town: town) }
+        catch { print("Error calculating fish progress: \(error)"); fishProgress = 0.0 }
+        let artProgress: Double
+        do { artProgress = try donationService.getArtProgressForTown(town: town) }
+        catch { print("Error calculating art progress: \(error)"); artProgress = 0.0 }
+        let totalProgress: Double
+        do { totalProgress = try donationService.getTotalProgressForTown(town: town) }
+        catch { print("Error calculating total progress: \(error)"); totalProgress = 0.0 }
         
         self.currentTownDTO = TownDTO(
             from: town,
@@ -127,22 +138,39 @@ class DataManager: ObservableObject {
     func deleteCurrentTown() {
         guard let town = currentTown else { return }
         
-        // Unlink all collectibles from this town
-        donationService.getFossilsForTown(town: town).forEach { fossil in
-            donationService.unlinkFossilFromTown(fossil: fossil)
-        }
-        
-        donationService.getBugsForTown(town: town).forEach { bug in
-            donationService.unlinkBugFromTown(bug: bug)
-        }
-        
-        donationService.getFishForTown(town: town).forEach { fish in
-            donationService.unlinkFishFromTown(fish: fish)
-        }
-        
-        donationService.getArtForTown(town: town).forEach { art in
-            donationService.unlinkArtFromTown(art: art)
-        }
+        // Unlink all collectibles with error handling
+        do {
+            let fossils = try donationService.getFossilsForTown(town: town)
+            fossils.forEach { fossil in
+                do { try donationService.unlinkFossilFromTown(fossil: fossil) }
+                catch { print("Error unlinking fossil: \(error)") }
+            }
+        } catch {
+            print("Error fetching fossils for unlink: \(error)") }
+        do {
+            let bugs = try donationService.getBugsForTown(town: town)
+            bugs.forEach { bug in
+                do { try donationService.unlinkBugFromTown(bug: bug) }
+                catch { print("Error unlinking bug: \(error)") }
+            }
+        } catch {
+            print("Error fetching bugs for unlink: \(error)") }
+        do {
+            let fish = try donationService.getFishForTown(town: town)
+            fish.forEach { fish in
+                do { try donationService.unlinkFishFromTown(fish: fish) }
+                catch { print("Error unlinking fish: \(error)") }
+            }
+        } catch {
+            print("Error fetching fish for unlink: \(error)") }
+        do {
+            let art = try donationService.getArtForTown(town: town)
+            art.forEach { art in
+                do { try donationService.unlinkArtFromTown(art: art) }
+                catch { print("Error unlinking art: \(error)") }
+            }
+        } catch {
+            print("Error fetching art for unlink: \(error)") }
         
         // Delete the town
         townRepository.delete(town)
@@ -161,7 +189,8 @@ class DataManager: ObservableObject {
     /// - Returns: Array of fossils linked to the current town
     func getFossilsForCurrentTown() -> [Fossil] {
         guard let town = currentTown else { return [] }
-        return donationService.getFossilsForTown(town: town)
+        do { return try donationService.getFossilsForTown(town: town) }
+        catch { print("Error fetching fossils for town: \(error)"); return [] }
     }
     
     /// Gets DTOs for fossils in the current town
@@ -183,15 +212,17 @@ class DataManager: ObservableObject {
     ///   - fossil: The fossil to update
     ///   - isDonated: The new donation status
     func updateFossilDonationStatus(_ fossil: Fossil, isDonated: Bool) {
-        if isDonated {
-            donationService.markItemAsDonated(fossil)
-            // Invalidate analytics cache when donation status changes
-            analyticsService.invalidateCache()
-        } else {
-            donationService.unmarkItemAsDonated(fossil)
-            analyticsService.invalidateCache()
+        do {
+            if isDonated {
+                try donationService.markItemAsDonated(fossil)
+                analyticsService.invalidateCache()
+            } else {
+                try donationService.unmarkItemAsDonated(fossil)
+                analyticsService.invalidateCache()
+            }
+        } catch {
+            print("Error updating fossil donation status: \(error)")
         }
-        
         // Update the town progress
         if let town = currentTown {
             updateTownDTO(town)
@@ -202,7 +233,8 @@ class DataManager: ObservableObject {
     /// - Parameter fossil: The fossil to link
     func linkFossilToCurrentTown(_ fossil: Fossil) {
         guard let town = currentTown else { return }
-        donationService.linkFossilToTown(fossil: fossil, town: town)
+        do { try donationService.linkFossilToTown(fossil: fossil, town: town) }
+        catch { print("Error linking fossil to town: \(error)") }
         updateTownDTO(town)
     }
     
@@ -218,7 +250,8 @@ class DataManager: ObservableObject {
     /// - Returns: Array of bugs linked to the current town
     func getBugsForCurrentTown() -> [Bug] {
         guard let town = currentTown else { return [] }
-        return donationService.getBugsForTown(town: town)
+        do { return try donationService.getBugsForTown(town: town) }
+        catch { print("Error fetching bugs for town: \(error)"); return [] }
     }
     
     /// Gets DTOs for bugs in the current town
@@ -240,15 +273,17 @@ class DataManager: ObservableObject {
     ///   - bug: The bug to update
     ///   - isDonated: The new donation status
     func updateBugDonationStatus(_ bug: Bug, isDonated: Bool) {
-        if isDonated {
-            donationService.markItemAsDonated(bug)
-            analyticsService.invalidateCache()
-        } else {
-            donationService.unmarkItemAsDonated(bug)
-            analyticsService.invalidateCache()
+        do {
+            if isDonated {
+                try donationService.markItemAsDonated(bug)
+                analyticsService.invalidateCache()
+            } else {
+                try donationService.unmarkItemAsDonated(bug)
+                analyticsService.invalidateCache()
+            }
+        } catch {
+            print("Error updating bug donation status: \(error)")
         }
-        
-        // Update the town progress
         if let town = currentTown {
             updateTownDTO(town)
         }
@@ -258,7 +293,8 @@ class DataManager: ObservableObject {
     /// - Parameter bug: The bug to link
     func linkBugToCurrentTown(_ bug: Bug) {
         guard let town = currentTown else { return }
-        donationService.linkBugToTown(bug: bug, town: town)
+        do { try donationService.linkBugToTown(bug: bug, town: town) }
+        catch { print("Error linking bug to town: \(error)") }
         updateTownDTO(town)
     }
     
@@ -274,7 +310,8 @@ class DataManager: ObservableObject {
     /// - Returns: Array of fish linked to the current town
     func getFishForCurrentTown() -> [Fish] {
         guard let town = currentTown else { return [] }
-        return donationService.getFishForTown(town: town)
+        do { return try donationService.getFishForTown(town: town) }
+        catch { print("Error fetching fish for town: \(error)"); return [] }
     }
     
     /// Gets DTOs for fish in the current town
@@ -296,15 +333,17 @@ class DataManager: ObservableObject {
     ///   - fish: The fish to update
     ///   - isDonated: The new donation status
     func updateFishDonationStatus(_ fish: Fish, isDonated: Bool) {
-        if isDonated {
-            donationService.markItemAsDonated(fish)
-            analyticsService.invalidateCache()
-        } else {
-            donationService.unmarkItemAsDonated(fish)
-            analyticsService.invalidateCache()
+        do {
+            if isDonated {
+                try donationService.markItemAsDonated(fish)
+                analyticsService.invalidateCache()
+            } else {
+                try donationService.unmarkItemAsDonated(fish)
+                analyticsService.invalidateCache()
+            }
+        } catch {
+            print("Error updating fish donation status: \(error)")
         }
-        
-        // Update the town progress
         if let town = currentTown {
             updateTownDTO(town)
         }
@@ -314,7 +353,8 @@ class DataManager: ObservableObject {
     /// - Parameter fish: The fish to link
     func linkFishToCurrentTown(_ fish: Fish) {
         guard let town = currentTown else { return }
-        donationService.linkFishToTown(fish: fish, town: town)
+        do { try donationService.linkFishToTown(fish: fish, town: town) }
+        catch { print("Error linking fish to town: \(error)") }
         updateTownDTO(town)
     }
     
@@ -330,7 +370,8 @@ class DataManager: ObservableObject {
     /// - Returns: Array of art pieces linked to the current town
     func getArtForCurrentTown() -> [Art] {
         guard let town = currentTown else { return [] }
-        return donationService.getArtForTown(town: town)
+        do { return try donationService.getArtForTown(town: town) }
+        catch { print("Error fetching art for town: \(error)"); return [] }
     }
     
     /// Gets DTOs for art pieces in the current town
@@ -352,15 +393,17 @@ class DataManager: ObservableObject {
     ///   - art: The art piece to update
     ///   - isDonated: The new donation status
     func updateArtDonationStatus(_ art: Art, isDonated: Bool) {
-        if isDonated {
-            donationService.markItemAsDonated(art)
-            analyticsService.invalidateCache()
-        } else {
-            donationService.unmarkItemAsDonated(art)
-            analyticsService.invalidateCache()
+        do {
+            if isDonated {
+                try donationService.markItemAsDonated(art)
+                analyticsService.invalidateCache()
+            } else {
+                try donationService.unmarkItemAsDonated(art)
+                analyticsService.invalidateCache()
+            }
+        } catch {
+            print("Error updating art donation status: \(error)")
         }
-        
-        // Update the town progress
         if let town = currentTown {
             updateTownDTO(town)
         }
@@ -370,7 +413,8 @@ class DataManager: ObservableObject {
     /// - Parameter art: The art piece to link
     func linkArtToCurrentTown(_ art: Art) {
         guard let town = currentTown else { return }
-        donationService.linkArtToTown(art: art, town: town)
+        do { try donationService.linkArtToTown(art: art, town: town) }
+        catch { print("Error linking art to town: \(error)") }
         updateTownDTO(town)
     }
     
@@ -395,23 +439,25 @@ class DataManager: ObservableObject {
     ///   - startDate: Optional start date for filtering
     ///   - endDate: Optional end date for filtering
     /// - Returns: Array of monthly donation activity data
-    func getDonationActivityByMonth(startDate: Date? = nil, endDate: Date? = nil) -> [MonthlyDonationActivity] {
-        guard let town = currentTown else { return [] }
-        return analyticsService.getDonationActivityByMonth(town: town, startDate: startDate, endDate: endDate)
+    func getDonationActivityByMonth(startDate: Date? = nil, endDate: Date? = nil) throws -> [MonthlyDonationActivity] {
+        guard let town = currentTown else {
+            throw ServiceError.noTownSelected(operation: "getDonationActivityByMonth")
+        }
+        return try analyticsService.getDonationActivityByMonth(town: town, startDate: startDate, endDate: endDate)
     }
-    
+
     /// Gets category completion data for the current town
     /// - Returns: Category completion data
-    func getCategoryCompletionData() -> CategoryCompletionData? {
+    func getCategoryCompletionData() throws -> CategoryCompletionData? {
         guard let town = currentTown else { return nil }
-        return analyticsService.getCategoryCompletionData(town: town)
+        return try analyticsService.getCategoryCompletionData(town: town)
     }
-    
+
     /// Gets seasonal data for the current town
     /// - Returns: Seasonal data
-    func getSeasonalData() -> SeasonalData? {
+    func getSeasonalData() throws -> SeasonalData? {
         guard let town = currentTown else { return nil }
-        return analyticsService.getSeasonalData(town: town)
+        return try analyticsService.getSeasonalData(town: town)
     }
     
     // MARK: - Progress Tracking
@@ -420,35 +466,40 @@ class DataManager: ObservableObject {
     /// - Returns: A percentage value between 0 and 1
     func getCurrentTownProgress() -> Double {
         guard let town = currentTown else { return 0.0 }
-        return donationService.getTotalProgressForTown(town: town)
+        do { return try donationService.getTotalProgressForTown(town: town) }
+        catch { print("Error fetching total progress: \(error)"); return 0.0 }
     }
     
     /// Gets fossil donation progress for the current town
     /// - Returns: A percentage value between 0 and 1
     func getCurrentTownFossilProgress() -> Double {
         guard let town = currentTown else { return 0.0 }
-        return donationService.getFossilProgressForTown(town: town)
+        do { return try donationService.getFossilProgressForTown(town: town) }
+        catch { print("Error fetching fossil progress: \(error)"); return 0.0 }
     }
     
     /// Gets bug donation progress for the current town
     /// - Returns: A percentage value between 0 and 1
     func getCurrentTownBugProgress() -> Double {
         guard let town = currentTown else { return 0.0 }
-        return donationService.getBugProgressForTown(town: town)
+        do { return try donationService.getBugProgressForTown(town: town) }
+        catch { print("Error fetching bug progress: \(error)"); return 0.0 }
     }
     
     /// Gets fish donation progress for the current town
     /// - Returns: A percentage value between 0 and 1
     func getCurrentTownFishProgress() -> Double {
         guard let town = currentTown else { return 0.0 }
-        return donationService.getFishProgressForTown(town: town)
+        do { return try donationService.getFishProgressForTown(town: town) }
+        catch { print("Error fetching fish progress: \(error)"); return 0.0 }
     }
     
     /// Gets art donation progress for the current town
     /// - Returns: A percentage value between 0 and 1
     func getCurrentTownArtProgress() -> Double {
         guard let town = currentTown else { return 0.0 }
-        return donationService.getArtProgressForTown(town: town)
+        do { return try donationService.getArtProgressForTown(town: town) }
+        catch { print("Error fetching art progress: \(error)"); return 0.0 }
     }
     
     // MARK: - Data Setup
@@ -457,29 +508,29 @@ class DataManager: ObservableObject {
     /// - Parameters:
     ///   - town: The town to initialize
     ///   - game: The game to use for initializing collectibles
-    func initializeTownWithDefaultItems(_ town: Town, game: ACGame) {
+    func initializeTownWithDefaultItems(_ town: Town, game: ACGame) throws {
         // Create and link default fossils
         for fossil in getDefaultFossils().filter({ $0.games.contains(game) }) {
             fossil.townId = town.id
-            fossilRepository.save(fossil)
+            try fossilRepository.save(fossil)
         }
         
         // Create and link default bugs
         for bug in getDefaultBugs().filter({ $0.games.contains(game) }) {
             bug.townId = town.id
-            bugRepository.save(bug)
+            try bugRepository.save(bug)
         }
         
         // Create and link default fish
         for fish in getDefaultFish().filter({ $0.games.contains(game) }) {
             fish.townId = town.id
-            fishRepository.save(fish)
+            try fishRepository.save(fish)
         }
         
         // Create and link default art
         for art in getDefaultArt().filter({ $0.games.contains(game) }) {
             art.townId = town.id
-            artRepository.save(art)
+            try artRepository.save(art)
         }
         
         // Update town DTO with progress info
@@ -540,7 +591,8 @@ class DataManager: ObservableObject {
                     let randomDonationDate = useSeasonalDates ? seasonalDate() : randomDate(between: oneYearAgo, and: now)
                     
                     // Use DonationService to properly update the model in SwiftData
-                    donationService.markItemAsDonated(item, withDate: randomDonationDate)
+                    do { try donationService.markItemAsDonated(item, withDate: randomDonationDate) }
+                    catch { print("Error randomly donating item: \(error)") }
                 }
             }
         }
@@ -634,12 +686,14 @@ class DataManager: ObservableObject {
         print("Art with dates: \(artWithDates.count)")
         
         // Check if analytics service is getting data
-        let timelineData = analyticsService.getDonationActivityByMonth(town: town)
-        print("\nAnalytics timeline data: \(timelineData.count) months")
-        if !timelineData.isEmpty {
-            for activity in timelineData {
+        let timelineData = try? analyticsService.getDonationActivityByMonth(town: town)
+        print("\nAnalytics timeline data: \(timelineData?.count ?? 0) months")
+        if let data = timelineData, !data.isEmpty {
+            for activity in data {
                 print("Month: \(activity.formattedMonth), Total: \(activity.totalCount), Fossils: \(activity.fossilCount), Bugs: \(activity.bugCount), Fish: \(activity.fishCount), Art: \(activity.artCount)")
             }
+        } else if timelineData == nil {
+            print("Analytics timeline data: Error fetching data")
         }
         
         // Let's also check if the problem might be related to the gameRawValues array
@@ -669,10 +723,14 @@ class DataManager: ObservableObject {
         print("DEBUG: Total items in repositories - Fossils: \(allFossils.count), Bugs: \(allBugs.count), Fish: \(allFish.count), Art: \(allArt.count)")
         
         // Get town-specific items
-        let townFossils = donationService.getFossilsForTown(town: town)
-        let townBugs = donationService.getBugsForTown(town: town)
-        let townFish = donationService.getFishForTown(town: town)
-        let townArt = donationService.getArtForTown(town: town)
+        let townFossils: [Fossil]
+        do { townFossils = try donationService.getFossilsForTown(town: town) } catch { print("Error fetching town fossils: \(error)"); townFossils = [] }
+        let townBugs: [Bug]
+        do { townBugs = try donationService.getBugsForTown(town: town) } catch { print("Error fetching town bugs: \(error)"); townBugs = [] }
+        let townFish: [Fish]
+        do { townFish = try donationService.getFishForTown(town: town) } catch { print("Error fetching town fish: \(error)"); townFish = [] }
+        let townArt: [Art]
+        do { townArt = try donationService.getArtForTown(town: town) } catch { print("Error fetching town art: \(error)"); townArt = [] }
         
         print("DEBUG: Town items - Fossils: \(townFossils.count), Bugs: \(townBugs.count), Fish: \(townFish.count), Art: \(townArt.count)")
         
@@ -731,10 +789,14 @@ class DataManager: ObservableObject {
         let allArt = artRepository.getAll()
         
         // Get items already linked to town
-        let townFossils = donationService.getFossilsForTown(town: town)
-        let townBugs = donationService.getBugsForTown(town: town)
-        let townFish = donationService.getFishForTown(town: town)
-        let townArt = donationService.getArtForTown(town: town)
+        let townFossils: [Fossil]
+        do { townFossils = try donationService.getFossilsForTown(town: town) } catch { print("Error fetching town fossils for linking: \(error)"); townFossils = [] }
+        let townBugs: [Bug]
+        do { townBugs = try donationService.getBugsForTown(town: town) } catch { print("Error fetching town bugs for linking: \(error)"); townBugs = [] }
+        let townFish: [Fish]
+        do { townFish = try donationService.getFishForTown(town: town) } catch { print("Error fetching town fish for linking: \(error)"); townFish = [] }
+        let townArt: [Art]
+        do { townArt = try donationService.getArtForTown(town: town) } catch { print("Error fetching town art for linking: \(error)"); townArt = [] }
         
         // Create sets of IDs for fast lookup
         let townFossilIds = Set(townFossils.map { $0.id })
@@ -748,32 +810,32 @@ class DataManager: ObservableObject {
         for fossil in allFossils.filter({ !townFossilIds.contains($0.id) }) {
             // Only link if compatible with town's game
             if let townGame = town.game, fossil.games.contains(townGame) {
-                donationService.linkFossilToTown(fossil: fossil, town: town)
-                fossilsLinked += 1
+                do { try donationService.linkFossilToTown(fossil: fossil, town: town); fossilsLinked += 1 }
+                catch { print("Error linking fossil: \(error)") }
             }
         }
         
         // Link bugs that aren't already linked
         for bug in allBugs.filter({ !townBugIds.contains($0.id) }) {
             if let townGame = town.game, bug.games.contains(townGame) {
-                donationService.linkBugToTown(bug: bug, town: town)
-                bugsLinked += 1
+                do { try donationService.linkBugToTown(bug: bug, town: town); bugsLinked += 1 }
+                catch { print("Error linking bug: \(error)") }
             }
         }
         
         // Link fish that aren't already linked
         for fish in allFish.filter({ !townFishIds.contains($0.id) }) {
             if let townGame = town.game, fish.games.contains(townGame) {
-                donationService.linkFishToTown(fish: fish, town: town)
-                fishLinked += 1
+                do { try donationService.linkFishToTown(fish: fish, town: town); fishLinked += 1 }
+                catch { print("Error linking fish: \(error)") }
             }
         }
         
         // Link art that isn't already linked
         for art in allArt.filter({ !townArtIds.contains($0.id) }) {
             if let townGame = town.game, art.games.contains(townGame) {
-                donationService.linkArtToTown(art: art, town: town)
-                artLinked += 1
+                do { try donationService.linkArtToTown(art: art, town: town); artLinked += 1 }
+                catch { print("Error linking art: \(error)") }
             }
         }
         

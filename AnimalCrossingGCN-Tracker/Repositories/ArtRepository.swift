@@ -34,7 +34,7 @@ class ArtRepository: BaseRepository<Art>, CollectibleRepository {
     
     /// Saves an art piece to the database
     /// - Parameter item: The art piece to save
-    func save(_ item: Art) {
+	override func save(_ item: Art) {
         // Check if this is a new item or an existing one
         if getById(id: item.id) == nil {
             modelContext.insert(item)
@@ -45,7 +45,7 @@ class ArtRepository: BaseRepository<Art>, CollectibleRepository {
     
     /// Deletes an art piece from the database
     /// - Parameter item: The art piece to delete
-    func delete(_ item: Art) {
+	override func delete(_ item: Art) {
         modelContext.delete(item)
         saveContext()
     }
@@ -92,17 +92,5 @@ class ArtRepository: BaseRepository<Art>, CollectibleRepository {
         return executeFetch(descriptor)
     }
     
-    /// Retrieves art pieces by town ID
-    /// - Parameter townId: The town ID to filter by
-    /// - Returns: Array of art pieces for the specified town
-    func getByTownId(townId: UUID) -> [Art] {
-        let descriptor = FetchDescriptor<Art>()
-        do {
-            let allArt = try modelContext.fetch(descriptor)
-            return allArt.filter { $0.townId == townId }
-        } catch {
-            print("Error fetching art by town ID: \(error)")
-            return []
-        }
-    }
+    // getByTownId method is now provided by BaseRepository<T> where T: TownLinkable extension
 }

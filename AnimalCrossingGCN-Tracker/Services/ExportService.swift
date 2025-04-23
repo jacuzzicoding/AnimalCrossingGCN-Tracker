@@ -48,27 +48,30 @@ protocol ExportService {
     /// - Parameters:
     ///   - data: The analytics data to export
     ///   - fileName: Optional file name (without extension)
-    /// - Returns: URL to the exported file or nil if operation failed
-    func exportToCSV(data: AnalyticsExportData, fileName: String?) -> URL?
+    /// - Throws: ServiceError.exportFailed if export fails
+    /// - Returns: URL to the exported file
+    func exportToCSV(data: AnalyticsExportData, fileName: String?) throws -> URL
     
     /// Exports a SwiftUI view to PNG format
     /// - Parameters:
     ///   - view: The SwiftUI view to export
     ///   - fileName: Optional file name (without extension)
-    /// - Returns: URL to the exported file or nil if operation failed
-    func exportToPNG<T: View>(view: T, fileName: String?) -> URL?
+    /// - Throws: ServiceError.exportFailed if export fails
+    /// - Returns: URL to the exported file
+    func exportToPNG<T: View>(view: T, fileName: String?) throws -> URL
     
     /// Exports a SwiftUI view to PDF format
     /// - Parameters:
     ///   - view: The SwiftUI view to export
     ///   - fileName: Optional file name (without extension)
-    /// - Returns: URL to the exported file or nil if operation failed
-    func exportToPDF<T: View>(view: T, fileName: String?) -> URL?
+    /// - Throws: ServiceError.exportFailed if export fails
+    /// - Returns: URL to the exported file
+    func exportToPDF<T: View>(view: T, fileName: String?) throws -> URL
     
     /// Copies data to clipboard
     /// - Parameter data: The data to copy
-    /// - Returns: Boolean indicating success
-    func copyToClipboard(data: Any) -> Bool
+    /// - Throws: ServiceError.exportFailed if copy fails
+    func copyToClipboard(data: Any) throws
     
     /// Shares exported file using system share sheet
     /// - Parameters:
@@ -88,7 +91,7 @@ class ExportServiceImpl: ExportService {
     
     // MARK: - CSV Export
     
-    func exportToCSV(data: AnalyticsExportData, fileName: String? = nil) -> URL? {
+    func exportToCSV(data: AnalyticsExportData, fileName: String? = nil) throws -> URL {
         var csvSections: [String] = []
 
         // 1. Generate CSV string from analytics data if available
@@ -104,8 +107,7 @@ class ExportServiceImpl: ExportService {
 
         // Check if there's anything to export
         guard !csvSections.isEmpty else {
-            print("No data available to export to CSV.")
-            return nil
+            throw ServiceError.exportFailed(format: "csv", reason: "No data available to export.", underlyingError: nil)
         }
 
         // Combine sections with a blank line separator
@@ -117,36 +119,28 @@ class ExportServiceImpl: ExportService {
         // 3. Save to temporary file
         do {
             try combinedCSVString.write(to: fileURL, atomically: true, encoding: .utf8)
-            print("CSV data successfully written to: \(fileURL.path)")
             return fileURL
         } catch {
-            print("Error writing CSV file: \(error)")
-            return nil
+            throw ServiceError.exportFailed(format: "csv", reason: "Failed to write CSV file.", underlyingError: error)
         }
     }
     
     // MARK: - PNG Export
     
-    func exportToPNG<T: View>(view: T, fileName: String? = nil) -> URL? {
-        // TODO: Implement PNG export
-        print("PNG Export not yet implemented.")
-        return nil
+    func exportToPNG<T: View>(view: T, fileName: String? = nil) throws -> URL {
+        throw ServiceError.exportFailed(format: "png", reason: "PNG export not yet implemented.", underlyingError: nil)
     }
     
     // MARK: - PDF Export
     
-    func exportToPDF<T: View>(view: T, fileName: String? = nil) -> URL? {
-        // TODO: Implement PDF export
-        print("PDF Export not yet implemented.")
-        return nil
+    func exportToPDF<T: View>(view: T, fileName: String? = nil) throws -> URL {
+        throw ServiceError.exportFailed(format: "pdf", reason: "PDF export not yet implemented.", underlyingError: nil)
     }
     
     // MARK: - Clipboard
     
-    func copyToClipboard(data: Any) -> Bool {
-        // TODO: Implement clipboard functionality
-        print("Copy to Clipboard not yet implemented.")
-        return false
+    func copyToClipboard(data: Any) throws {
+        throw ServiceError.exportFailed(format: "clipboard", reason: "Copy to Clipboard not yet implemented.", underlyingError: nil)
     }
     
     // MARK: - Sharing

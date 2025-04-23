@@ -235,22 +235,30 @@ struct AnalyticsDashboardView: View {
         dataManager.analyticsService.invalidateCache()
         
         // Load actual data from the DataManager
-        timelineData = dataManager.getDonationActivityByMonth()
-        completionData = dataManager.getCategoryCompletionData()
-        seasonalData = dataManager.getSeasonalData()
-        
-        // For debug information, count items with donation dates
-        let fossils = dataManager.getFossilsForCurrentTown()
-        let bugs = dataManager.getBugsForCurrentTown()
-        let fish = dataManager.getFishForCurrentTown()
-        let art = dataManager.getArtForCurrentTown()
-        
-        fossilsWithDates = fossils.filter { $0.isDonated && $0.donationDate != nil }.count
-        bugsWithDates = bugs.filter { $0.isDonated && $0.donationDate != nil }.count
-        fishWithDates = fish.filter { $0.isDonated && $0.donationDate != nil }.count
-        artWithDates = art.filter { $0.isDonated && $0.donationDate != nil }.count
-        
-        print("Analytics data loaded: \(timelineData.count) months, \(fossilsWithDates + bugsWithDates + fishWithDates + artWithDates) items with dates")
+        do {
+            timelineData = try dataManager.getDonationActivityByMonth()
+            completionData = try dataManager.getCategoryCompletionData()
+            seasonalData = try dataManager.getSeasonalData()
+            
+            // For debug information, count items with donation dates
+            let fossils = dataManager.getFossilsForCurrentTown()
+            let bugs = dataManager.getBugsForCurrentTown()
+            let fish = dataManager.getFishForCurrentTown()
+            let art = dataManager.getArtForCurrentTown()
+            
+            fossilsWithDates = fossils.filter { $0.isDonated && $0.donationDate != nil }.count
+            bugsWithDates = bugs.filter { $0.isDonated && $0.donationDate != nil }.count
+            fishWithDates = fish.filter { $0.isDonated && $0.donationDate != nil }.count
+            artWithDates = art.filter { $0.isDonated && $0.donationDate != nil }.count
+            
+            print("Analytics data loaded: \(timelineData.count) months, \(fossilsWithDates + bugsWithDates + fishWithDates + artWithDates) items with dates")
+        } catch {
+            print("Error loading analytics data: \(error)")
+            // Initialize with empty data on error
+            timelineData = []
+            completionData = nil
+            seasonalData = nil
+        }
     }
     
     /// Creates the AnalyticsExportData structure needed by the ExportService
@@ -266,7 +274,7 @@ struct AnalyticsDashboardView: View {
     private func overallProgressCard(completion: CategoryCompletionData) -> some View {
         VStack(alignment: .leading) {
             HStack {
-                Image(systemName: "museum.fill")
+                Image(systemName: "building.columns.fill")
                     .foregroundColor(.acLeafGreen)
                 Text("Museum Progress")
                     .font(.headline)
@@ -579,7 +587,7 @@ struct DonationTimelineView: View {
                                 if filteredData.count > 6 && filteredData.firstIndex(where: { $0.formattedMonth == month })! % 2 != 0 {
                                     AxisValueLabel {
                                         Text(" ")
-                                    }
+                                    }  
                                 } else {
                                     let components = month.components(separatedBy: " ")
                                     AxisValueLabel {

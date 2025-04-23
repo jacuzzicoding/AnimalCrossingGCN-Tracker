@@ -34,7 +34,7 @@ class FishRepository: BaseRepository<Fish>, CollectibleRepository {
     
     /// Saves a fish to the database
     /// - Parameter item: The fish to save
-    func save(_ item: Fish) {
+	override func save(_ item: Fish) {
         // Check if this is a new item or an existing one
         if getById(id: item.id) == nil {
             modelContext.insert(item)
@@ -45,7 +45,7 @@ class FishRepository: BaseRepository<Fish>, CollectibleRepository {
     
     /// Deletes a fish from the database
     /// - Parameter item: The fish to delete
-    func delete(_ item: Fish) {
+	override func delete(_ item: Fish) {
         modelContext.delete(item)
         saveContext()
     }
@@ -103,17 +103,5 @@ class FishRepository: BaseRepository<Fish>, CollectibleRepository {
         return executeFetch(descriptor)
     }
     
-    /// Retrieves fish by town ID
-    /// - Parameter townId: The town ID to filter by
-    /// - Returns: Array of fish for the specified town
-    func getByTownId(townId: UUID) -> [Fish] {
-        let descriptor = FetchDescriptor<Fish>()
-        do {
-            let allFish = try modelContext.fetch(descriptor)
-            return allFish.filter { $0.townId == townId }
-        } catch {
-            print("Error fetching fish by town ID: \(error)")
-            return []
-        }
-    }
+    // getByTownId method is now provided by BaseRepository<T> where T: TownLinkable extension
 }

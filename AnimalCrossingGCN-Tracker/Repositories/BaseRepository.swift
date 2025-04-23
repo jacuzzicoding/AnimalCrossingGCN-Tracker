@@ -65,4 +65,53 @@ class BaseRepository<T: PersistentModel> {
             return false
         }
     }
+    
+    /// Saves an item to the repository.
+    /// - Parameter item: The item to save (insert or update).
+    /// - Throws: RepositoryError if the save operation fails.
+    func save(_ item: T) throws {
+        // SwiftData handles both insertion and updates automatically
+        modelContext.insert(item)
+        // Only attempt to save if there are actual changes
+        guard modelContext.hasChanges else { return }
+        do {
+            try modelContext.save()
+        } catch {
+            throw RepositoryError.saveFailed(
+                entityName: String(describing: T.self),
+                underlyingError: error
+            )
+        }
+    }
+    
+    /// Deletes an item from the repository.
+    /// - Parameter item: The item to delete.
+    /// - Throws: RepositoryError if the delete operation fails.
+    func delete(_ item: T) throws {
+        modelContext.delete(item)
+        // Only attempt to save if there are actual changes
+        guard modelContext.hasChanges else { return }
+        do {
+            try modelContext.save()
+        } catch {
+            throw RepositoryError.deleteFailed(
+                entityName: String(describing: T.self),
+                underlyingError: error
+            )
+        }
+    }
+}
+
+// Extension for TownLinkable items
+extension BaseRepository where T: TownLinkable {
+    /// Retrieves items by town ID using a SwiftData predicate
+    /// - Parameter townId: The town ID to filter by
+    /// - Returns: Array of items for the specified town
+    func getByTownId(townId: UUID) -> [T] {
+        let predicate = #Predicate<T> { item in
+            item.townId == townId
+        }
+        let descriptor = createFetchDescriptor(predicate: predicate)
+        return executeFetch(descriptor)
+    }
 }

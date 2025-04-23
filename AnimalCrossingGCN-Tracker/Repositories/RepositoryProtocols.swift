@@ -23,11 +23,13 @@ protocol Repository {
     
     /// Saves an item to the repository
     /// - Parameter item: The item to save
-    func save(_ item: ModelType)
+    /// - Throws: RepositoryError if the save operation fails
+    func save(_ item: ModelType) throws
     
     /// Deletes an item from the repository
     /// - Parameter item: The item to delete
-    func delete(_ item: ModelType)
+    /// - Throws: RepositoryError if the delete operation fails
+    func delete(_ item: ModelType) throws
 }
 
 /// Repository protocol for collectible items with additional query capabilities

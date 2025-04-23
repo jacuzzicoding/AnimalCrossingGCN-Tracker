@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @Model
-class Art: CollectibleItem, DonationTimestampable {
+class Art: CollectibleItem, DonationTimestampable, TownLinkable {
 	//Properties
     @Attribute(.unique) var id: UUID
     var name: String

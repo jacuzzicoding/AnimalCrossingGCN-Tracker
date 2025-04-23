@@ -123,7 +123,7 @@ struct CollectionStatusCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Image(systemName: "museum.fill")
+                Image(systemName: "building.columns.fill")
                     .foregroundColor(.acLeafGreen)
                     .font(.headline)
                 Text("Museum Collection Status")
@@ -159,8 +159,16 @@ struct CollectionStatusCard: View {
             .frame(height: 20)
             
             // Total count
-            HStack {
-                if let completion = dataManager.getCategoryCompletionData() {
+            HStack {                
+                let completion: CategoryCompletionData? = {
+                    do {
+                        return try dataManager.getCategoryCompletionData()
+                    } catch {
+                        print("Error fetching category completion data: \(error)")
+                        return nil
+                    }
+                }()
+                if let completion = completion {
                     Text("\(completion.totalDonated) of \(completion.totalCount) Items Donated")
                         .font(.subheadline)
                         .foregroundColor(.black)
@@ -178,8 +186,8 @@ struct CollectionStatusCard: View {
         .cornerRadius(10)
         .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Museum Collection Status: \(Int(dataManager.getCurrentTownProgress() * 100))% complete")
-    }
+            .accessibilityLabel("Museum Collection Status: \(Int(dataManager.getCurrentTownProgress() * 100))% complete")
+}
 }
 
 /// Grid of category cards with completion status
@@ -260,27 +268,32 @@ struct CategoryGridView: View {
 		
 		// Computed property for donation info
 		private var donationInfo: String? {
-			guard let completion = dataManager.getCategoryCompletionData() else { return nil }
-			let donated: Int
-			let total: Int
-			
-			switch category {
-			case .fossils:
-				donated = completion.fossilDonated
-				total = completion.fossilCount
-			case .bugs:
-				donated = completion.bugDonated
-				total = completion.bugCount
-			case .fish:
-				donated = completion.fishDonated
-				total = completion.fishCount
-			case .art:
-				donated = completion.artDonated
-				total = completion.artCount
-			}
-			
-			return "\(donated)/\(total)"
-		}
+            do {
+                guard let completion = try dataManager.getCategoryCompletionData() else { return nil }
+                let donated: Int
+                let total: Int
+                
+                switch category {
+                case .fossils:
+                    donated = completion.fossilDonated
+                    total = completion.fossilCount
+                case .bugs:
+                    donated = completion.bugDonated
+                    total = completion.bugCount
+                case .fish:
+                    donated = completion.fishDonated
+                    total = completion.fishCount
+                case .art:
+                    donated = completion.artDonated
+                    total = completion.artCount
+                }
+                
+                return "\(donated)/\(total)"
+            } catch {
+                print("Error fetching category completion data in CategoryCard: \(error)")
+                return nil
+            }
+        }
 		
 		var body: some View {
 			Button(action: {
@@ -412,7 +425,15 @@ struct SeasonalHighlightsCard: View {
         
         // Get bugs from current town
         var availableBugs: [Bug] = []
-        for bug in dataManager.getBugsForCurrentTown() {
+        let bugs: [Bug] = {
+            do {
+                return try dataManager.getBugsForCurrentTown()
+            } catch {
+                print("Error fetching bugs for current town: \(error)")
+                return []
+            }
+        }()
+        for bug in bugs {
             if let season = bug.season, season.contains(currentMonthAbbr) {
                 availableBugs.append(bug)
             }
@@ -420,7 +441,15 @@ struct SeasonalHighlightsCard: View {
         
         // Get fish from current town
         var availableFish: [Fish] = []
-        for fish in dataManager.getFishForCurrentTown() {
+        let fish: [Fish] = {
+            do {
+                return try dataManager.getFishForCurrentTown()
+            } catch {
+                print("Error fetching fish for current town: \(error)")
+                return []
+            }
+        }()
+        for fish in fish {
             if fish.season.contains(currentMonthAbbr) {
                 availableFish.append(fish)
             }
@@ -611,7 +640,15 @@ struct RecentDonationsCard: View {
         var donatedItems: [(name: String, date: Date, color: Color)] = []
         
         // Add fossils
-        for fossil in dataManager.getFossilsForCurrentTown().filter({ $0.isDonated && $0.donationDate != nil }) {
+        let fossils: [Fossil] = {
+            do {
+                return try dataManager.getFossilsForCurrentTown()
+            } catch {
+                print("Error fetching fossils for current town: \(error)")
+                return []
+            }
+        }()
+        for fossil in fossils.filter({ $0.isDonated && $0.donationDate != nil }) {
             if let date = fossil.donationDate {
                 let name = fossil.part != nil ? "\(fossil.name) \(fossil.part!)" : fossil.name
                 donatedItems.append((name: name, date: date, color: .acMuseumBrown))
@@ -619,21 +656,45 @@ struct RecentDonationsCard: View {
         }
         
         // Add bugs
-        for bug in dataManager.getBugsForCurrentTown().filter({ $0.isDonated && $0.donationDate != nil }) {
+        let bugs: [Bug] = {
+            do {
+                return try dataManager.getBugsForCurrentTown()
+            } catch {
+                print("Error fetching bugs for current town: \(error)")
+                return []
+            }
+        }()
+        for bug in bugs.filter({ $0.isDonated && $0.donationDate != nil }) {
             if let date = bug.donationDate {
                 donatedItems.append((name: bug.name, date: date, color: .green))
             }
         }
         
         // Add fish
-        for fish in dataManager.getFishForCurrentTown().filter({ $0.isDonated && $0.donationDate != nil }) {
+        let fish: [Fish] = {
+            do {
+                return try dataManager.getFishForCurrentTown()
+            } catch {
+                print("Error fetching fish for current town: \(error)")
+                return []
+            }
+        }()
+        for fish in fish.filter({ $0.isDonated && $0.donationDate != nil }) {
             if let date = fish.donationDate {
                 donatedItems.append((name: fish.name, date: date, color: .acOceanBlue))
             }
         }
         
         // Add art
-        for art in dataManager.getArtForCurrentTown().filter({ $0.isDonated && $0.donationDate != nil }) {
+        let art: [Art] = {
+            do {
+                return try dataManager.getArtForCurrentTown()
+            } catch {
+                print("Error fetching art for current town: \(error)")
+                return []
+            }
+        }()
+        for art in art.filter({ $0.isDonated && $0.donationDate != nil }) {
             if let date = art.donationDate {
                 donatedItems.append((name: art.name, date: date, color: .acBlathersPurple))
             }

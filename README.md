@@ -1,14 +1,14 @@
 # AnimalCrossingGCN-Tracker
-* Version: v0.7.0-alpha-preview-3
-* Last Updated: February 28th, 2025
+* Version: v0.7.0-alpha-preview-5
+* Last Updated: April 23rd, 2025
 * Author: Brock Jenkinson (@jacuzzicoding)
 
-> **Important Update**: v0.7.0-alpha-preview-3 fixes the critical analytics functionality issue. Charts and statistics now properly display donation data and collection progress!
+> **Important Update**: v0.7.0-alpha-preview-5 implements a comprehensive error handling strategy with standardized error types and presentation components. This release also introduces several reusable UI components that improve code organization, maintainability, and user experience.
 
 ## Project Overview
 The AnimalCrossingGCN-Tracker is a comprehensive companion app for tracking Animal Crossing GameCube museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
 
-Version v0.7.0-alpha-preview-3 resolves the core issue that prevented analytics from displaying data correctly in previous versions. The application now properly shows donation timelines, category completion charts, and seasonal analysis with your actual museum data.
+Version v0.7.0-alpha-preview-5 fully implements the error handling architecture defined in ADR-002 with standardized error types, consistent error propagation patterns, and user-friendly error presentation components. This release also adds several reusable UI components including ProgressBar, ActivityItem, and CategoryIcon to improve code organization and maintainability.
 
 ## Features
 
@@ -25,14 +25,36 @@ Version v0.7.0-alpha-preview-3 resolves the core issue that prevented analytics 
 * Enhanced search functionality
 * SwiftData integration for persistence
 
-### Analytics Features (NEW: Now Fully Functional!)
-* **Fixed**: Working donation timeline visualization
-* **Fixed**: Accurate category completion charts
-* **Fixed**: Seasonal availability analysis with real data
-* **Fixed**: Progress tracking dashboard showing correct percentages
+### Analytics Features
+* Donation timeline visualization
+* Category completion charts
+* Seasonal availability analysis
+* Progress tracking dashboard with accurate percentages
 * Time period filtering options
 * Interactive chart components
 * Enhanced UI layout with improved component spacing
+
+### Error Handling Architecture (NEW!)
+* **Domain-specific error types**:
+  * `RepositoryError` for data access/persistence errors
+  * `ServiceError` for business logic/service layer errors
+* **Standardized error propagation** with Swift's `throws` mechanism:
+  * Repository methods throw `RepositoryError`
+  * Service methods wrap repository errors and throw `ServiceError`
+* **Consistent error handling patterns** across all application layers:
+  * Repository Layer: Throws specific errors with context
+  * Service Layer: Catches repository errors, adds context, and rethrows
+  * View Layer: Catches and presents user-facing error messages
+* **User-friendly error presentation**:
+  * `ErrorState` enum for standardized error representation
+  * `ErrorBanner` component for consistent visual display of errors
+  * Proper recovery suggestions and actions
+
+### Reusable UI Components (NEW!)
+* **ProgressBar**: Customizable progress indicator for completion tracking
+* **ActivityItem**: Consistent display of recent activity entries
+* **CategoryIcon**: Standardized museum category representation
+* **ErrorBanner**: Consistent visual representation for error states
 
 ### Technical Improvements
 * Architectural enhancements:
@@ -40,22 +62,21 @@ Version v0.7.0-alpha-preview-3 resolves the core issue that prevented analytics 
   * ✅ Phase 2: Repository pattern implementation
   * ✅ Phase 3: Enhanced model relationships and service layer
   * ✅ Phase 4: Functional analytics with proper data visualization
-* **New Town-Item Linking System**:
+  * ✅ Phase 5: Comprehensive error handling strategy
+* Town-Item Linking System:
   * Ensures proper relationships between collectibles and towns
   * Uses efficient lookup sets for performance
   * Maintains game compatibility
   * Automatically runs when app starts or town changes
-* Enhanced Analytics Service:
-  * Completely rewritten data processing
-  * Robust handling of items with and without donation dates
-  * Better seasonal data calculations
-  * Improved filtering for timeline data
-  * Added caching for better performance
-* UI layout enhancements:
-  * Improved FloatingCategorySwitcher with scrollable containers
-  * Enhanced component spacing and alignment
-  * Fixed overlap issues in nested views
-  * Better cross-platform layout compatibility
+* Enhanced Services:
+  * Properly handles and propagates errors with specific context
+  * Implements consistent error types and patterns
+  * Uses Swift's native error handling mechanisms
+* UI improvements:
+  * Extracted complex views into smaller components
+  * Improved layout consistency with reusable components
+  * Enhanced accessibility with proper error state descriptions
+  * Fixed compiler performance issues in ContentView
 
 ### UI Components
 * DetailMoreInfoView for donation timestamps
@@ -64,8 +85,10 @@ Version v0.7.0-alpha-preview-3 resolves the core issue that prevented analytics 
 * Streamlined navigation system
 * Refined search functionality
 * Platform-specific optimizations
-* **Working** analytics dashboard with functional chart visualizations
+* Analytics dashboard with functional chart visualizations
 * Interactive timeline and category charts
+* **NEW** Reusable error presentation components
+* **NEW** Progress and activity visualization components
 
 ## File Structure
 ```
@@ -97,17 +120,32 @@ AnimalCrossingGCN-Tracker/
 │   ├── DetailMoreInfoView.swift
 │   ├── EditTownView.swift
 │   ├── FloatingCategorySwitcher.swift
+│   ├── GlobalSearchView.swift
 │   ├── Analytics/
 │   │   └── AnalyticsDashboardView.swift
-│   └── DetailViews/
-│       ├── FossilDetailView.swift
-│       ├── BugDetailView.swift
-│       ├── FishDetailView.swift
-│       └── ArtDetailView.swift
+│   ├── DetailViews/
+│   │   ├── FossilDetailView.swift
+│   │   ├── BugDetailView.swift
+│   │   ├── FishDetailView.swift
+│   │   └── ArtDetailView.swift
+│   ├── Home/
+│   │   ├── HomeView.swift
+│   │   ├── HomeTabBar.swift
+│   │   ├── MainTabView.swift
+│   │   └── Components/
+│   │       ├── ActivityItem.swift
+│   │       ├── CategoryIcon.swift
+│   │       └── ProgressBar.swift
+│   ├── Shared/
+│   │   ├── ErrorState.swift
+│   │   └── ErrorBanner.swift
+│   └── Utilities/
+│       └── ShareSheet.swift
 ├── Managers/
 │   └── DataManager.swift
 ├── Repositories/
 │   ├── BaseRepository.swift
+│   ├── RepositoryError.swift
 │   ├── RepositoryProtocols.swift
 │   ├── FossilRepository.swift
 │   ├── BugRepository.swift
@@ -116,7 +154,9 @@ AnimalCrossingGCN-Tracker/
 │   └── TownRepository.swift
 ├── Services/
 │   ├── DonationService.swift
-│   └── AnalyticsService.swift
+│   ├── AnalyticsService.swift
+│   ├── ExportService.swift
+│   └── ServiceError.swift
 └── Utilities/
     └── Various utility files
 ```
@@ -124,6 +164,29 @@ AnimalCrossingGCN-Tracker/
 ## Development Status
 
 ### Current Build Progress
+* **v0.7.0-alpha-preview-5 (April 23, 2025)**
+  * ✅ **Implemented Error Handling Architecture**
+    * ✅ Added domain-specific error types
+    * ✅ Implemented standardized error propagation
+    * ✅ Created user-friendly error presentation components
+    * ✅ Updated all services with error handling
+  * ✅ **Added Reusable UI Components**
+    * ✅ ErrorState enum for standardized error representation
+    * ✅ ErrorBanner component for consistent error display
+    * ✅ ProgressBar component for completion tracking
+    * ✅ ActivityItem component for displaying recent activity
+    * ✅ CategoryIcon component for consistent category visualization
+  * ✅ **Service Layer Improvements**
+    * ✅ Enhanced ExportService with proper error handling
+    * ✅ Updated AnalyticsService with ServiceError pattern
+    * ✅ Improved error context for better debugging
+  * ✅ **UI Error Handling**
+    * ✅ Fixed AnalyticsDashboardView with proper error handling
+    * ✅ Updated HomeView with consistent error presentation
+    * ✅ Fixed UI compatibility issues with analytics features
+  * ⬜ Complete HomeView modularization
+  * ⬜ Implement Donate Tab
+
 * **v0.7.0-alpha-preview-3 (February 28, 2025)**
   * ✅ **Fixed Analytics Functionality**
     * ✅ Implemented town-item linking system
@@ -131,13 +194,6 @@ AnimalCrossingGCN-Tracker/
     * ✅ Fixed date handling for timeline charts
     * ✅ Corrected category progress calculations
     * ✅ Improved seasonal analysis
-  * ✅ Enhanced UI components
-    * ✅ Simplified timeline view
-    * ✅ Fixed chart data display
-    * ✅ Improved empty states with helpful messages
-    * ✅ Added better error handling
-  * ⬜ Add export functionality for analytics data
-  * ⬜ Implement more advanced filtering options
 
 * **v0.7.0-alpha-preview-2 (February 27, 2025)**
   * ✅ Initial Analytics GUI implementation
@@ -154,8 +210,9 @@ Version v0.7.0-alpha-preview introduced breaking changes that impact save compat
 
 ### Next Development Phase
 * v0.7.0-alpha full release plans:
-  * Add analytics export functionality
-  * New Home Screen design with user choice-driven navigation
+  * HomeView modularization with reusable dashboard components
+  * Donate tab implementation
+  * Dependency injection approach implementation (ADR-003)
   * Global search functionality with cross-category search
   * Villager support with GameCube villagers database
   * Unit tests for services and repositories
@@ -191,10 +248,10 @@ Version v0.7.0-alpha-preview introduced breaking changes that impact save compat
 * Swift Charts for analytics visualizations
 
 ## Known Issues
-* Minor UI alignment issues may exist on smaller iPhone screens
-* Chart labels may overlap with many data points
-* Export functionality for analytics data is not yet implemented
-* Advanced filtering options are still in development
+* HomeView modularization is still in progress
+* Donate Tab implementation is planned for a future release
+* Dependency injection approach (ADR-003) is not yet implemented
+* Minor UI adjustments may be needed on smaller devices
 
 ## Contributing
 This project welcomes community contributions. If anyone happens to see this, please report any issues or submit pull requests through the project's GitHub repository.

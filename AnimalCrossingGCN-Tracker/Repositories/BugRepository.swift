@@ -34,7 +34,7 @@ class BugRepository: BaseRepository<Bug>, CollectibleRepository {
     
     /// Saves a bug to the database
     /// - Parameter item: The bug to save
-    func save(_ item: Bug) {
+	override func save(_ item: Bug) {
         // Check if this is a new item or an existing one
         if getById(id: item.id) == nil {
             modelContext.insert(item)
@@ -45,7 +45,7 @@ class BugRepository: BaseRepository<Bug>, CollectibleRepository {
     
     /// Deletes a bug from the database
     /// - Parameter item: The bug to delete
-    func delete(_ item: Bug) {
+	override func delete(_ item: Bug) {
         modelContext.delete(item)
         saveContext()
     }
@@ -92,17 +92,5 @@ class BugRepository: BaseRepository<Bug>, CollectibleRepository {
         return executeFetch(descriptor)
     }
     
-    /// Retrieves bugs by town ID
-    /// - Parameter townId: The town ID to filter by
-    /// - Returns: Array of bugs for the specified town
-    func getByTownId(townId: UUID) -> [Bug] {
-        let descriptor = FetchDescriptor<Bug>()
-        do {
-            let allBugs = try modelContext.fetch(descriptor)
-            return allBugs.filter { $0.townId == townId }
-        } catch {
-            print("Error fetching bugs by town ID: \(error)")
-            return []
-        }
-    }
+    // getByTownId method is now provided by BaseRepository<T> where T: TownLinkable extension
 }

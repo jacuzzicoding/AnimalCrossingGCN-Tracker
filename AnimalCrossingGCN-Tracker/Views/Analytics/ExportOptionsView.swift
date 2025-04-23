@@ -96,18 +96,27 @@ struct ExportOptionsView: View {
             var resultURL: URL?
             var errorString: String?
 
-            switch exportFormat {
-            case .csv:
-                // Call the export service method
-                resultURL = dataManager.exportService.exportToCSV(data: analyticsData, fileName: exportName)
-                if resultURL == nil {
-                    errorString = "Failed to export CSV data. Check console for details."
+            do {
+                switch exportFormat {
+                case .csv:
+                    // Call the export service method with error handling
+                    resultURL = try dataManager.exportService.exportToCSV(data: analyticsData, fileName: exportName)
+                case .png:
+                    _ = try dataManager.exportService.exportToPNG(view: EmptyView(), fileName: exportName) // Placeholder
+                case .pdf:
+                    _ = try dataManager.exportService.exportToPDF(view: EmptyView(), fileName: exportName) // Placeholder
+                case .clipboard:
+                    try dataManager.exportService.copyToClipboard(data: analyticsData)
                 }
-            case .png, .pdf:
-                // Handle unimplemented formats
-                 errorString = "\(exportFormat) export is not yet implemented."
-             case .clipboard: // Added clipboard case
-                 errorString = "Clipboard export is not yet implemented."
+            } catch let error as ServiceError {
+                switch error {
+                case .exportFailed(let format, let reason, let underlyingError):
+                    errorString = "Export failed (\(format)): \(reason)\(underlyingError != nil ? "\nUnderlying error: \(underlyingError!)" : "")"
+                default:
+                    errorString = error.localizedDescription
+                }
+            } catch {
+                errorString = error.localizedDescription
             }
 
             // Update UI back on the main thread
