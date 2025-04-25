@@ -24,8 +24,12 @@ struct HomeView: View {
     @State private var isEditingTown: Bool = false
     
     init() {
-        // HomeViewModel will be initialized in .onAppear with the environment object
-		_viewModel = StateObject(wrappedValue: HomeViewModel(dataManager: DataManager(modelContext: ModelContext(<#ModelContainer#>))))
+        do {
+            let container = try ModelContainer(for: Town.self, Fossil.self, Bug.self, Fish.self, Art.self)
+            _viewModel = StateObject(wrappedValue: HomeViewModel(dataManager: DataManager(modelContext: container.mainContext)))
+        } catch {
+            fatalError("Failed to initialize ModelContainer: \(error.localizedDescription)")
+        }
     }
     
     var body: some View {
@@ -35,7 +39,7 @@ struct HomeView: View {
                     .padding(.bottom, 4)
                 // Error banner
                 if viewModel.errorState != .none {
-					ErrorBanner(state: <#ErrorState#>, errorState: viewModel.errorState)
+                    ErrorBanner(state: viewModel.errorState)
                 }
                 // Collection status card
                 if let completion = viewModel.categoryCompletion {
