@@ -1,6 +1,13 @@
 import SwiftUI
 import Combine
 
+struct SeasonalItem: Identifiable {
+    let id: String
+    let name: String
+    let description: String
+    let isLeaving: Bool
+}
+
 class HomeViewModel: ObservableObject {
     @Published var categoryCompletion: CategoryCompletionData?
     @Published var seasonalItems: [SeasonalItem] = []
