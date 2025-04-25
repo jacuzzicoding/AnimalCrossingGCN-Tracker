@@ -20,41 +20,49 @@ import UIKit
 struct HomeView: View {
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var categoryManager: CategoryManager
+    @StateObject private var viewModel: HomeViewModel
     @State private var isEditingTown: Bool = false
+    
+    init() {
+        // HomeViewModel will be initialized in .onAppear with the environment object
+        _viewModel = StateObject(wrappedValue: HomeViewModel(dataManager: DataManager(modelContext: ModelContext())))
+    }
     
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                // Header with town info
                 HomeHeaderView(isEditingTown: $isEditingTown)
                     .padding(.bottom, 4)
-                
+                // Error banner
+                if viewModel.errorState != .none {
+                    ErrorBanner(errorState: viewModel.errorState)
+                }
                 // Collection status card
-                CollectionStatusCard()
-                
+                if let completion = viewModel.categoryCompletion {
+                    CollectionStatusCardView(completion: completion)
+                }
                 // Category grid
-                CategoryGridView()
+                CategoryGridSection(viewModel: viewModel, categoryManager: categoryManager)
                     .padding(.vertical, 8)
-                
                 // Seasonal highlights
-                SeasonalHighlightsCard()
-                
+                SeasonalHighlightsSection(seasonalItems: viewModel.seasonalItems)
                 // Recent donations
-                RecentDonationsCard()
-                
-                // Spacer for bottom tab bar
+                RecentDonationsSection(recentDonations: viewModel.recentDonations, categoryManager: categoryManager)
                 Spacer().frame(height: 20)
             }
             .padding()
             .multilineTextAlignment(.center)
         }
-        .background(Color(hex: "F9F5E9")) // Parchment background
+        .background(Color(hex: "F9F5E9"))
         .edgesIgnoringSafeArea(.bottom)
         .sheet(isPresented: $isEditingTown) {
             if let town = dataManager.currentTown {
                 EditTownView(isPresented: $isEditingTown, townName: .constant(town.name))
                     .environmentObject(dataManager)
             }
+        }
+        .onAppear {
+            viewModel.loadAllData()
         }
     }
 }
@@ -112,6 +120,245 @@ struct HomeHeaderView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM d, yyyy"
         return formatter.string(from: Date())
+    }
+}
+
+// MARK: - CollectionStatusCardView
+struct CollectionStatusCardView: View {
+    let completion: CategoryCompletionData
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "building.columns.fill")
+                    .foregroundColor(.acLeafGreen)
+                    .font(.headline)
+                Text("Museum Collection Status")
+                    .font(.headline)
+                    .foregroundColor(.black)
+            }
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .frame(width: geometry.size.width, height: 20)
+                        .opacity(0.2)
+                        .foregroundColor(Color.acLeafGreen)
+                        .cornerRadius(10)
+                    Rectangle()
+                        .frame(width: min(CGFloat(completion.totalProgress) * geometry.size.width, geometry.size.width), height: 20)
+                        .foregroundColor(Color.acLeafGreen)
+                        .cornerRadius(10)
+                        .animation(.easeInOut, value: completion.totalProgress)
+                    HStack {
+                        Spacer()
+                        Text("\(Int(completion.totalProgress * 100))%")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .padding(.trailing, 10)
+                    }
+                }
+            }
+            .frame(height: 20)
+            HStack {
+                Text("\(completion.totalDonated) of \(completion.totalCount) Items Donated")
+                    .font(.subheadline)
+                    .foregroundColor(.black)
+                Spacer()
+            }
+        }
+        .padding()
+        .background(Color.white.opacity(0.8))
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Museum Collection Status: \(Int(completion.totalProgress * 100))% complete")
+    }
+}
+
+// MARK: - CategoryGridSection
+struct CategoryGridSection: View {
+    @ObservedObject var viewModel: HomeViewModel
+    var categoryManager: CategoryManager
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "square.grid.2x2.fill")
+                    .foregroundColor(.acLeafGreen)
+                    .font(.headline)
+                Text("Museum Categories")
+                    .font(.headline)
+                    .foregroundColor(.black)
+            }
+            .padding(.bottom, 6)
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                CategoryCard(
+                    title: "FOSSILS",
+                    icon: "leaf.arrow.circlepath",
+                    progress: viewModel.categoryCompletion?.fossilProgress ?? 0,
+                    color: .acMuseumBrown,
+                    emoji: "🦴",
+                    donationInfo: viewModel.categoryCompletion.map { "\($0.fossilDonated)/\($0.fossilCount)" },
+                    onTap: {
+                        categoryManager.selectedItem = nil
+                        categoryManager.selectedCategory = .fossils
+                        categoryManager.showingAnalytics = false
+                    }
+                )
+                CategoryCard(
+                    title: "BUGS",
+                    icon: "ant.fill",
+                    progress: viewModel.categoryCompletion?.bugProgress ?? 0,
+                    color: .green,
+                    emoji: "🐛",
+                    donationInfo: viewModel.categoryCompletion.map { "\($0.bugDonated)/\($0.bugCount)" },
+                    onTap: {
+                        categoryManager.selectedItem = nil
+                        categoryManager.selectedCategory = .bugs
+                        categoryManager.showingAnalytics = false
+                    }
+                )
+                CategoryCard(
+                    title: "FISH",
+                    icon: "fish.fill",
+                    progress: viewModel.categoryCompletion?.fishProgress ?? 0,
+                    color: .acOceanBlue,
+                    emoji: "🐟",
+                    donationInfo: viewModel.categoryCompletion.map { "\($0.fishDonated)/\($0.fishCount)" },
+                    onTap: {
+                        categoryManager.selectedItem = nil
+                        categoryManager.selectedCategory = .fish
+                        categoryManager.showingAnalytics = false
+                    }
+                )
+                CategoryCard(
+                    title: "ART",
+                    icon: "paintpalette.fill",
+                    progress: viewModel.categoryCompletion?.artProgress ?? 0,
+                    color: .acBlathersPurple,
+                    emoji: "🎨",
+                    donationInfo: viewModel.categoryCompletion.map { "\($0.artDonated)/\($0.artCount)" },
+                    onTap: {
+                        categoryManager.selectedItem = nil
+                        categoryManager.selectedCategory = .art
+                        categoryManager.showingAnalytics = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+// MARK: - SeasonalHighlightsSection
+struct SeasonalHighlightsSection: View {
+    let seasonalItems: [SeasonalItem]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "leaf.fill")
+                    .foregroundColor(.acLeafGreen)
+                    .font(.headline)
+                Text("Seasonal Highlights")
+                    .font(.headline)
+                    .foregroundColor(.black)
+            }
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    if seasonalItems.isEmpty {
+                        Text("No seasonal items available")
+                            .foregroundColor(.secondary)
+                            .padding()
+                    } else {
+                        ForEach(seasonalItems) { item in
+                            SeasonalItemView(
+                                title: item.name,
+                                description: item.description,
+                                color: item.isLeaving ? .acPumpkinOrange : .acLeafGreen
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color.acBellYellow.opacity(0.2))
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
+    }
+}
+
+// MARK: - RecentDonationsSection
+struct RecentDonationsSection: View {
+    let recentDonations: [DonationItem]
+    var categoryManager: CategoryManager
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "clock.fill")
+                    .foregroundColor(.acLeafGreen)
+                    .font(.headline)
+                Text("Recent Donations")
+                    .font(.headline)
+                    .foregroundColor(.black)
+            }
+            if recentDonations.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "tray")
+                        .font(.title)
+                        .foregroundColor(.gray.opacity(0.5))
+                    Text("No recent donations")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+            } else {
+                ForEach(recentDonations) { donation in
+                    VStack(spacing: 0) {
+                        HStack {
+                            Text("◆")
+                                .foregroundColor(donation.color)
+                            Text(donation.title)
+                                .font(.subheadline)
+                                .foregroundColor(.black)
+                            Spacer()
+                            Text(donation.time)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 4)
+                        if donation.id != recentDonations.last?.id {
+                            Divider()
+                        }
+                    }
+                }
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        categoryManager.showAnalytics()
+                    }) {
+                        HStack {
+                            Text("See Activity")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.acLeafGreen)
+                        .cornerRadius(15)
+                    }
+                    Spacer()
+                }
+                .padding(.top, 8)
+            }
+        }
+        .padding()
+        .background(Color.acBellYellow.opacity(0.2))
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
     }
 }
 
