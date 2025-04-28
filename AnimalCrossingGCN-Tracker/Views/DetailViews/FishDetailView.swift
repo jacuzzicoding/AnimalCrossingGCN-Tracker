@@ -11,23 +11,7 @@ import SwiftData
 struct FishDetailView: View {
     var fish: Fish
     
-    // Extract binding as computed property to maintain exact implementation
-    private var donationBinding: Binding<Bool> {
-        Binding(
-            get: { fish.isDonated },
-            set: { newValue in
-                if newValue {
-                    fish.isDonated = true
-                    fish.donationDate = Date()
-                    print("Debug: Setting donation date to \(Date())")
-                } else {
-                    fish.isDonated = false
-                    fish.donationDate = nil
-                    print("Debug: Clearing donation date")
-                }
-            }
-        )
-    }
+    @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -42,8 +26,13 @@ struct FishDetailView: View {
                     .foregroundColor(.secondary)
             }
             
-            Toggle("Donated", isOn: donationBinding)
-                .padding(.top)
+            Toggle("Donated", isOn: Binding(
+                get: { fish.isDonated },
+                set: { newValue in
+                    dataManager.updateFishDonationStatus(fish, isDonated: newValue)
+                }
+            ))
+            .padding(.top)
             
             DetailMoreInfoView(item: fish)
             

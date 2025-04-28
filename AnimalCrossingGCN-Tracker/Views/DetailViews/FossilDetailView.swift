@@ -11,23 +11,7 @@ import SwiftData
 struct FossilDetailView: View {
     var fossil: Fossil
     
-    // Extract binding as computed property to maintain exact implementation
-    private var donationBinding: Binding<Bool> {
-        Binding(
-            get: { fossil.isDonated },
-            set: { newValue in
-                if newValue {
-                    fossil.isDonated = true
-                    fossil.donationDate = Date()
-                    print("Debug: Donation date set to \(Date())")
-                } else {
-                    fossil.isDonated = false
-                    fossil.donationDate = nil
-                    print("Debug: Donation date removed")
-                }
-            }
-        )
-    }
+    @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -42,8 +26,13 @@ struct FossilDetailView: View {
                     .foregroundColor(.secondary)
             }
             
-            Toggle("Donated", isOn: donationBinding)
-                .padding(.top)
+            Toggle("Donated", isOn: Binding(
+                get: { fossil.isDonated },
+                set: { newValue in
+                    dataManager.updateFossilDonationStatus(fossil, isDonated: newValue)
+                }
+            ))
+            .padding(.top)
             
             DetailMoreInfoView(item: fossil)
             

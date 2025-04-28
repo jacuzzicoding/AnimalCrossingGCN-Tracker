@@ -11,23 +11,7 @@ import SwiftData
 struct BugDetailView: View {
     var bug: Bug
     
-    // Extract binding as computed property to maintain exact implementation
-    private var donationBinding: Binding<Bool> {
-        Binding(
-            get: { bug.isDonated },
-            set: { newValue in
-                if newValue {
-                    bug.isDonated = true
-                    bug.donationDate = Date()
-                    print("Debug: Donation date set to \(Date())")
-                } else {
-                    bug.isDonated = false
-                    bug.donationDate = nil
-                    print("Debug: Donation date removed")
-                }
-            }
-        )
-    }
+    @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -40,8 +24,13 @@ struct BugDetailView: View {
                     .foregroundColor(.secondary)
             }
             
-            Toggle("Donated", isOn: donationBinding)
-                .padding(.top)
+            Toggle("Donated", isOn: Binding(
+                get: { bug.isDonated },
+                set: { newValue in
+                    dataManager.updateBugDonationStatus(bug, isDonated: newValue)
+                }
+            ))
+            .padding(.top)
             
             DetailMoreInfoView(item: bug)
             

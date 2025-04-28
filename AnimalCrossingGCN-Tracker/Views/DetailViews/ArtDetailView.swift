@@ -11,23 +11,7 @@ import SwiftData
 struct ArtDetailView: View {
     var art: Art
     
-    // Extract binding as computed property to maintain exact implementation
-    private var donationBinding: Binding<Bool> {
-        Binding(
-            get: { art.isDonated },
-            set: { newValue in
-                if newValue {
-                    art.isDonated = true
-                    art.donationDate = Date()
-                    print("Debug: Donation date set to \(Date())")
-                } else {
-                    art.isDonated = false
-                    art.donationDate = nil
-                    print("Debug: Donation date removed")
-                }
-            }
-        )
-    }
+    @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -49,8 +33,13 @@ struct ArtDetailView: View {
             //     .cornerRadius(8)
             //     .padding(.top)
             
-            Toggle("Donated", isOn: donationBinding)
-                .padding(.top)
+            Toggle("Donated", isOn: Binding(
+                get: { art.isDonated },
+                set: { newValue in
+                    dataManager.updateArtDonationStatus(art, isDonated: newValue)
+                }
+            ))
+            .padding(.top)
             
             DetailMoreInfoView(item: art)
             
