@@ -47,6 +47,22 @@ class DataManager: ObservableObject {
         fetchCurrentTown()
     }
 
+    /// Saves the current model context if there are changes.
+    private func saveContext() {
+        // Check if there are changes before attempting to save
+        if modelContext.hasChanges {
+            do {
+                try modelContext.save()
+                print("DataManager: Context saved successfully.")
+            } catch {
+                // Log the error or update an error state for the UI
+                print("DataManager: Failed to save context - \(error)")
+            }
+        } else {
+            print("DataManager: No changes detected in context, skipping save.")
+        }
+    }
+
     /// Fetches the current town using the TownRepository.
     /// If no town exists, it creates a default one.
     func fetchCurrentTown() {
@@ -220,6 +236,8 @@ class DataManager: ObservableObject {
                 try donationService.unmarkItemAsDonated(fossil)
                 analyticsService.invalidateCache()
             }
+            // Explicitly save the context after updating
+            saveContext()
         } catch {
             print("Error updating fossil donation status: \(error)")
         }
@@ -281,6 +299,8 @@ class DataManager: ObservableObject {
                 try donationService.unmarkItemAsDonated(bug)
                 analyticsService.invalidateCache()
             }
+            // Explicitly save the context after updating
+            saveContext()
         } catch {
             print("Error updating bug donation status: \(error)")
         }
@@ -341,6 +361,8 @@ class DataManager: ObservableObject {
                 try donationService.unmarkItemAsDonated(fish)
                 analyticsService.invalidateCache()
             }
+            // Explicitly save the context after updating
+            saveContext()
         } catch {
             print("Error updating fish donation status: \(error)")
         }
@@ -401,6 +423,8 @@ class DataManager: ObservableObject {
                 try donationService.unmarkItemAsDonated(art)
                 analyticsService.invalidateCache()
             }
+            // Explicitly save the context after updating
+            saveContext()
         } catch {
             print("Error updating art donation status: \(error)")
         }
