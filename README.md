@@ -1,14 +1,63 @@
-# AnimalCrossingGCN-Tracker
-* Version: v0.7.0-alpha-preview-5
-* Last Updated: April 23rd, 2025
-* Author: Brock Jenkinson (@jacuzzicoding)
+### Recent Technical Improvements (May 22, 2025)
+* **Dependency Injection Foundation**:
+  * Created service protocols (DonationServiceProtocol, AnalyticsServiceProtocol, ExportServiceProtocol)
+  * Implemented thread-safe DependencyContainer with SwiftUI integration
+  * Prepared migration path for existing services
+* **Enhanced Development System**:
+  * Implemented Claude.md documentation pattern throughout codebase
+  * Created `.claude/` directory for active development state
+  * Established improved AI collaboration workflow
+## 🤖 AI-Assisted Development
 
-> **Important Update**: v0.7.0-alpha-preview-5 implements a comprehensive error handling strategy with standardized error types and presentation components. This release also introduces several reusable UI components that improve code organization, maintainability, and user experience.
+This project is optimized for AI-assisted development with multiple AI systems working collaboratively:
+
+### Claude.md Documentation System
+Every major directory contains a `Claude.md` file that provides:
+- Module overview and architecture
+- Current implementation status
+- AI-specific guidance
+- Common tasks and patterns
+
+### Working Memory System
+The `.claude/` directory maintains active development state:
+- `WORKING_MEMORY.md` - Current session context
+- `TASK_BOARD.md` - Kanban-style task tracking
+- `DECISIONS.md` - Quick decision log
+- `SYSTEM_IMPROVEMENTS.md` - Development system enhancements
+
+### Multi-AI Collaboration
+- **Claude 4**: Architecture, planning, documentation
+- **Gemini 2.5 Pro**: Large refactoring, code analysis
+- **GPT-4.1**: Implementation, testing, documentation
+- **GPT-o3-mini**: Quick fixes, simple tasks
+
+See `Copilot.md` for active cross-AI communication.
+
+# AnimalCrossingGCN-Tracker
+
+<div align="center">
+  <img src="/Assets.xcassets/AppIcon.appiconset/icon_128x128.png" alt="App Icon" width="128" height="128">
+  
+  **Version**: v0.7.0-alpha-preview-5  
+  **Last Updated**: May 22, 2025  
+  **Author**: Brock Jenkinson ([@jacuzzicoding](https://github.com/jacuzzicoding))
+</div>
+
+> **Latest Update**: Implementing comprehensive dependency injection system with protocol-based design. The project now includes Claude.md files throughout the codebase for enhanced AI-assisted development.
+
+## 🚀 Quick Start for Developers
+
+New to the project? Start here:
+1. Read the root `Claude.md` file for project overview
+2. Check `.claude/WORKING_MEMORY.md` for current session state
+3. See `.claude/TASK_BOARD.md` for available tasks
+4. Read module-specific `Claude.md` files as you work
 
 ## Project Overview
+
 The AnimalCrossingGCN-Tracker is a comprehensive companion app for tracking Animal Crossing GameCube museum donations. Built with Swift and SwiftUI, the app leverages SwiftData to provide seamless cross-platform support for iPhone, iPad, and macOS devices.
 
-Version v0.7.0-alpha-preview-5 fully implements the error handling architecture defined in ADR-002 with standardized error types, consistent error propagation patterns, and user-friendly error presentation components. This release also adds several reusable UI components including ProgressBar, ActivityItem, and CategoryIcon to improve code organization and maintainability.
+Version v0.7.0-alpha-preview-5 implements a comprehensive error handling architecture, introduces reusable UI components, and is currently undergoing a dependency injection implementation to improve testability and maintainability.
 
 ## Features
 
@@ -93,9 +142,18 @@ Version v0.7.0-alpha-preview-5 fully implements the error handling architecture 
 ## File Structure
 ```
 AnimalCrossingGCN-Tracker/
+├── .claude/                      # AI working memory and active state
+│   ├── WORKING_MEMORY.md         # Current session context
+│   ├── TASK_BOARD.md            # Active tasks and backlog
+│   ├── DECISIONS.md             # Decision log
+│   └── SYSTEM_IMPROVEMENTS.md   # Development system docs
+├── Claude.md                     # Root AI guide
+├── Copilot.md                   # Cross-AI communication
 ├── App/
+│   ├── Claude.md                # App layer guide
 │   └── AnimalCrossingGCN_TrackerApp.swift
 ├── Models/
+│   ├── Claude.md                # Models guide
 │   ├── Core/
 │   │   ├── Item.swift
 │   │   ├── Games.swift
@@ -110,10 +168,13 @@ AnimalCrossingGCN-Tracker/
 │   ├── Extensions/
 │   │   └── Various model extensions
 │   ├── Protocols/
-│   │   └── DonationTimestampable.swift
+│   │   ├── CollectibleItem.swift
+│   │   ├── DonationTimestampable.swift
+│   │   └── TownLinkable.swift
 │   └── View Models/
 │       └── Various view models
 ├── Views/
+│   ├── Claude.md                # Views guide
 │   ├── ContentView.swift
 │   ├── ContentView+Analytics.swift
 │   ├── MainListView.swift
@@ -144,6 +205,7 @@ AnimalCrossingGCN-Tracker/
 ├── Managers/
 │   └── DataManager.swift
 ├── Repositories/
+│   ├── Claude.md                # Repositories guide
 │   ├── BaseRepository.swift
 │   ├── RepositoryError.swift
 │   ├── RepositoryProtocols.swift
@@ -153,17 +215,38 @@ AnimalCrossingGCN-Tracker/
 │   ├── ArtRepository.swift
 │   └── TownRepository.swift
 ├── Services/
+│   ├── Claude.md                # Services guide
 │   ├── DonationService.swift
 │   ├── AnalyticsService.swift
 │   ├── ExportService.swift
+│   ├── GlobalSearchService.swift
 │   └── ServiceError.swift
+├── Protocols/                   # DI protocols
+│   ├── DonationServiceProtocol.swift
+│   ├── AnalyticsServiceProtocol.swift
+│   └── ExportServiceProtocol.swift
 └── Utilities/
+    ├── DependencyContainer.swift
     └── Various utility files
 ```
 
 ## Development Status
 
 ### Current Build Progress
+* **v0.7.0-alpha-preview-6 (In Progress - May 22, 2025)**
+  * 🚀 **Dependency Injection Implementation**
+    * ✅ Created service protocols for all major services
+    * ✅ Implemented thread-safe DependencyContainer
+    * 🔄 Migrating services to protocol-based design
+    * 🔄 Updating ViewModels to use injected dependencies
+  * 🚀 **Enhanced Development System**
+    * ✅ Implemented Claude.md documentation pattern
+    * ✅ Created .claude/ working memory system
+    * ✅ Established improved AI collaboration workflow
+  * ⬜ Complete service migration to DI pattern
+  * ⬜ Update app initialization with dependency configuration
+  * ⬜ Add unit tests with mock implementations
+
 * **v0.7.0-alpha-preview-5 (April 23, 2025)**
   * ✅ **Implemented Error Handling Architecture**
     * ✅ Added domain-specific error types
