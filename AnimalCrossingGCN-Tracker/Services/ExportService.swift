@@ -42,50 +42,8 @@ struct AnalyticsExportData {
     // Add any additional analytics data we want to export
 }
 
-/// Protocol defining export operations
-protocol ExportService {
-    /// Exports analytics data to CSV format
-    /// - Parameters:
-    ///   - data: The analytics data to export
-    ///   - fileName: Optional file name (without extension)
-    /// - Throws: ServiceError.exportFailed if export fails
-    /// - Returns: URL to the exported file
-    func exportToCSV(data: AnalyticsExportData, fileName: String?) throws -> URL
-    
-    /// Exports a SwiftUI view to PNG format
-    /// - Parameters:
-    ///   - view: The SwiftUI view to export
-    ///   - fileName: Optional file name (without extension)
-    /// - Throws: ServiceError.exportFailed if export fails
-    /// - Returns: URL to the exported file
-    func exportToPNG<T: View>(view: T, fileName: String?) throws -> URL
-    
-    /// Exports a SwiftUI view to PDF format
-    /// - Parameters:
-    ///   - view: The SwiftUI view to export
-    ///   - fileName: Optional file name (without extension)
-    /// - Throws: ServiceError.exportFailed if export fails
-    /// - Returns: URL to the exported file
-    func exportToPDF<T: View>(view: T, fileName: String?) throws -> URL
-    
-    /// Copies data to clipboard
-    /// - Parameter data: The data to copy
-    /// - Throws: ServiceError.exportFailed if copy fails
-    func copyToClipboard(data: Any) throws
-    
-    /// Shares exported file using system share sheet
-    /// - Parameters:
-    ///   - url: URL of the file to share
-    #if os(iOS)
-    ///   - presentingViewController: The view controller presenting the share sheet
-    func shareFile(url: URL, presentingViewController: UIViewController?)
-    #elseif os(macOS)
-    func shareFile(url: URL)
-    #endif
-}
-
-/// Implementation of ExportService
-class ExportServiceImpl: ExportService {
+/// Implementation of ExportServiceProtocol
+class ExportServiceImpl: ExportServiceProtocol {
     
     private let fileManager = FileManager.default
     

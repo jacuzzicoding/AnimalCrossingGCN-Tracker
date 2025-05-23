@@ -23,13 +23,8 @@ struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
     @State private var isEditingTown: Bool = false
     
-    init() {
-        do {
-            let container = try ModelContainer(for: Town.self, Fossil.self, Bug.self, Fish.self, Art.self)
-            _viewModel = StateObject(wrappedValue: HomeViewModel(dataManager: DataManager(modelContext: container.mainContext)))
-        } catch {
-            fatalError("Failed to initialize ModelContainer: \(error.localizedDescription)")
-        }
+    init(viewModel: HomeViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
@@ -407,7 +402,12 @@ struct HomeView_Previews: PreviewProvider {
         let dataManager = DataManager(modelContext: context)
         let categoryManager = CategoryManager()
         
-        return HomeView()
+        // Manually create dependencies for preview
+        let donationService = DonationServiceImpl(modelContext: context)
+        let analyticsService = AnalyticsServiceImpl(modelContext: context, donationService: donationService)
+        let homeViewModel = HomeViewModel(dataManager: dataManager, analyticsService: analyticsService, donationService: donationService)
+        
+        return HomeView(viewModel: homeViewModel)
             .environmentObject(dataManager)
             .environmentObject(categoryManager)
     }

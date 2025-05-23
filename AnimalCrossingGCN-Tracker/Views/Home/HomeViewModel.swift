@@ -15,10 +15,14 @@ class HomeViewModel: ObservableObject {
     @Published var errorState: ErrorState = .none
     
     private var dataManager: DataManager
+    private let analyticsService: AnalyticsServiceProtocol
+    private let donationService: DonationServiceProtocol
     private var cancellables = Set<AnyCancellable>()
     
-    init(dataManager: DataManager) {
-        self.dataManager = dataManager
+    init(dataManager: DataManager, analyticsService: AnalyticsServiceProtocol, donationService: DonationServiceProtocol) {
+        self.dataManager = dataManager // Keep DataManager for now, or refactor to remove direct dependency
+        self.analyticsService = analyticsService
+        self.donationService = donationService
         loadAllData()
         // Listen for changes to currentTown and reload data
         dataManager.$currentTown.sink { [weak self] _ in

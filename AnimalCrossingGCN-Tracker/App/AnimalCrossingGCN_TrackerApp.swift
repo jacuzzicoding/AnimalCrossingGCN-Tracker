@@ -36,18 +36,24 @@ struct AnimalCrossingGCN_TrackerApp: App {
         }
     }()
     
-    // Initialize DataManager with the shared ModelContainer's context
+    private let dependencyContainer: DependencyContainer
     @StateObject private var dataManager: DataManager
 
     init() {
         let context = sharedModelContainer.mainContext
-        _dataManager = StateObject(wrappedValue: DataManager(modelContext: context))
+        self.dependencyContainer = AppDependencies.configure(with: context)
+        if let resolvedDataManager = try? dependencyContainer.resolve(DataManager.self) {
+            _dataManager = StateObject(wrappedValue: resolvedDataManager)
+        } else {
+            _dataManager = StateObject(wrappedValue: DataManager(modelContext: context))
+        }
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(dataManager) // Inject DataManager into the environment
+                .environmentObject(dataManager)
+                .environmentObject(dependencyContainer) // Inject DependencyContainer here as well
         }
         .modelContainer(sharedModelContainer)
     }

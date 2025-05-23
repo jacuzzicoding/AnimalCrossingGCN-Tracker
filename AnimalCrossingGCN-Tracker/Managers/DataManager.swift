@@ -17,17 +17,23 @@ class DataManager: ObservableObject {
     private var artRepository: ArtRepository
     
     // Services
-    private var donationService: DonationService
-    var analyticsService: AnalyticsService // Now public for direct access
-    private var globalSearchService: GlobalSearchService
-    let exportService: ExportService // Public export service
+    private let donationService: DonationServiceProtocol
+    var analyticsService: AnalyticsServiceProtocol // Now public for direct access
+    private let globalSearchService: GlobalSearchServiceProtocol
+    let exportService: ExportServiceProtocol // Public export service
 
     // Published properties to notify views of changes
     @Published var currentTown: Town?
     @Published var currentTownDTO: TownDTO?
 
     // Initialize DataManager with repositories and services
-    init(modelContext: ModelContext) {
+    init(
+        modelContext: ModelContext,
+        donationService: DonationServiceProtocol? = nil,
+        analyticsService: AnalyticsServiceProtocol? = nil,
+        exportService: ExportServiceProtocol? = nil,
+        globalSearchService: GlobalSearchServiceProtocol? = nil
+    ) {
         self.modelContext = modelContext
         
         // Initialize repositories
@@ -38,10 +44,10 @@ class DataManager: ObservableObject {
         self.artRepository = ArtRepository(modelContext: modelContext)
         
         // Initialize services
-        self.donationService = DonationService(modelContext: modelContext)
-        self.analyticsService = AnalyticsService(modelContext: modelContext, donationService: donationService)
-        self.globalSearchService = GlobalSearchService(modelContext: modelContext)
-        self.exportService = ExportServiceImpl()
+        self.donationService = donationService ?? DonationServiceImpl(modelContext: modelContext)
+        self.analyticsService = analyticsService ?? AnalyticsServiceImpl(modelContext: modelContext, donationService: self.donationService)
+        self.exportService = exportService ?? ExportServiceImpl()
+        self.globalSearchService = globalSearchService ?? GlobalSearchServiceImpl(modelContext: modelContext)
         
         // Fetch current town
         fetchCurrentTown()

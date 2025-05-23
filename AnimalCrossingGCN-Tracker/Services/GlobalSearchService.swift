@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 /// Service for searching across all collectible categories
-class GlobalSearchService {
+class GlobalSearchServiceImpl: GlobalSearchServiceProtocol {
     private let modelContext: ModelContext
     private let fossilRepository: FossilRepository
     private let bugRepository: BugRepository

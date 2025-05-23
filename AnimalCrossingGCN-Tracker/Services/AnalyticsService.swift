@@ -9,9 +9,9 @@ import Foundation
 import SwiftData
 
 /// Service for processing and transforming data for analytics features
-class AnalyticsService {
+class AnalyticsServiceImpl: AnalyticsServiceProtocol {
     private let modelContext: ModelContext
-    private let donationService: DonationService
+    private let donationService: DonationServiceProtocol
     private let fossilRepository: FossilRepository
     private let bugRepository: BugRepository
     private let fishRepository: FishRepository
@@ -28,7 +28,7 @@ class AnalyticsService {
     /// - Parameters:
     ///   - modelContext: The SwiftData context to use
     ///   - donationService: The donation service for access to donation data
-    init(modelContext: ModelContext, donationService: DonationService) {
+    init(modelContext: ModelContext, donationService: DonationServiceProtocol) {
         self.modelContext = modelContext
         self.donationService = donationService
         self.fossilRepository = FossilRepository(modelContext: modelContext)

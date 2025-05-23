@@ -324,7 +324,13 @@ struct ContentView: View { // Updated ContentView
                     .navigationDestination(for: HomeTab.self) { tab in
                         switch tab {
                         case .home:
-                            HomeView()
+                            // Resolve HomeViewModel from the dependency container
+                            if let homeViewModel = try? dependencyContainer.resolve(HomeViewModel.self) {
+                                HomeView(viewModel: homeViewModel)
+                            } else {
+                                // Fallback or error handling if resolution fails
+                                Text("Error loading HomeView")
+                            }
                         case .museum:
                             mainContent
                         case .analytics:
@@ -350,6 +356,7 @@ struct ContentView: View { // Updated ContentView
             }
         }
         .environmentObject(categoryManager)
+        .environmentObject(dependencyContainer) // Inject DependencyContainer
         .onAppear {
             loadData()
         }

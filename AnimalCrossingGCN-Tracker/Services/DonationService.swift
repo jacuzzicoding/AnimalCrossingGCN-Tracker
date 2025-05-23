@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 /// Service for managing donations across different collectible types
-class DonationService {
+class DonationServiceImpl: DonationServiceProtocol {
 	private let modelContext: ModelContext
 	private let fossilRepository: FossilRepository
 	private let bugRepository: BugRepository
