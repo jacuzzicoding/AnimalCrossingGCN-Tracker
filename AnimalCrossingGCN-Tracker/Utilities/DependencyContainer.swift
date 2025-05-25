@@ -7,9 +7,10 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 /// A simple dependency injection container for managing service instances
-class DependencyContainer {
+class DependencyContainer: ObservableObject {
     // MARK: - Properties
     
     /// Dictionary to store singleton instances
