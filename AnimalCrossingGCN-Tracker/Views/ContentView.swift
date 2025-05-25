@@ -6,39 +6,54 @@ import Foundation
 import SwiftUI
 import SwiftData
 
-// Simple ContentView that delegates to working views
+// Minimal ContentView for v0.7.0-alpha release
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @EnvironmentObject var dependencyContainer: DependencyContainer
     
     var body: some View {
-        Group {
-            if horizontalSizeClass == .compact {
-                // iPhone section - delegate to MainTabView
-                if let homeViewModel = try? dependencyContainer.resolve(HomeViewModel.self) {
-                    MainTabView(selectedTab: .constant(.home), isGlobalSearch: .constant(false))
-                } else {
-                    Text("Loading...")
-                }
-            } else {
-                // iPad/Mac section - use NavigationSplitView
-                NavigationSplitView {
-                    List {
-                        NavigationLink("Home", value: "home")
-                        NavigationLink("Museum", value: "museum") 
-                        NavigationLink("Analytics", value: "analytics")
+        NavigationStack {
+            VStack {
+                Text("Animal Crossing GCN Tracker")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .padding()
+                
+                Text("Museum Collection Tracker")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom)
+                
+                // Basic navigation buttons
+                VStack(spacing: 16) {
+                    Button("View Collections") {
+                        // Navigate to collections
                     }
-                } detail: {
-                    Text("Select an option from the sidebar")
-                        .foregroundColor(.secondary)
+                    .buttonStyle(.borderedProminent)
+                    
+                    Button("Analytics") {
+                        // Navigate to analytics
+                    }
+                    .buttonStyle(.bordered)
+                    
+                    Button("Settings") {
+                        // Navigate to settings
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .navigationTitle("Museum Tracker")
+                .padding()
+                
+                Spacer()
             }
+            .navigationTitle("Museum Tracker")
         }
     }
 }
 
-#Preview {
-    ContentView()
+#if DEBUG
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }
+#endif
