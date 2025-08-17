@@ -845,3 +845,79 @@ class DataManager: ObservableObject {
         updateTownDTO(town)
     }
 }
+
+#if DEBUG
+@MainActor
+extension DataManager {
+    func generateTestDonationData() {
+        guard let town = currentTown else { return }
+        
+        let calendar = Calendar.current
+        let now = Date()
+        let oneYearAgo = calendar.date(byAdding: .year, value: -1, to: now)!
+        
+        func randomDate(between startDate: Date, and endDate: Date) -> Date {
+            let timeInterval = endDate.timeIntervalSince(startDate)
+            let randomInterval = TimeInterval(arc4random_uniform(UInt32(timeInterval)))
+            return startDate.addingTimeInterval(randomInterval)
+        }
+        
+        func seasonalDate() -> Date {
+            let currentMonth = calendar.component(.month, from: now)
+            let currentYear = calendar.component(.year, from: now)
+            
+            var targetMonth: Int
+            let seasonBias = Int.random(in: 1...10)
+            
+            if seasonBias <= 3 {
+                targetMonth = Int.random(in: 3...5)
+            } else if seasonBias <= 5 {
+                targetMonth = Int.random(in: 6...8)
+            } else if seasonBias <= 8 {
+                targetMonth = Int.random(in: 9...11)
+            } else {
+                targetMonth = [12, 1, 2].randomElement()!
+            }
+            
+            let targetYear = (targetMonth > currentMonth) ? currentYear - 1 : currentYear
+            
+            var dateComponents = DateComponents()
+            dateComponents.year = targetYear
+            dateComponents.month = targetMonth
+            dateComponents.day = Int.random(in: 1...28)
+            
+            return calendar.date(from: dateComponents) ?? now
+        }
+        
+        func randomlyDonate<T: CollectibleItem & PersistentModel>(items: [T], probability: Double, useSeasonalDates: Bool = false) {
+            for item in items where !item.isDonated {
+                if Double.random(in: 0...1) < probability {
+                    let randomDonationDate = useSeasonalDates ? seasonalDate() : randomDate(between: oneYearAgo, and: now)
+                    
+                    do { try donationService.markItemAsDonated(item, withDate: randomDonationDate) }
+                    catch { print("Error randomly donating item: \(error)") }
+                }
+            }
+        }
+        
+        let fossils = getFossilsForCurrentTown()
+        let bugs = getBugsForCurrentTown()
+        let fish = getFishForCurrentTown()
+        let art = getArtForCurrentTown()
+        
+        randomlyDonate(items: fossils, probability: 0.7)
+        randomlyDonate(items: bugs, probability: 0.5, useSeasonalDates: true)
+        randomlyDonate(items: fish, probability: 0.6, useSeasonalDates: true)
+        randomlyDonate(items: art, probability: 0.3)
+        
+        updateTownDTO(town)
+        analyticsService.invalidateCache()
+        
+        print("Generated test donation data:")
+        print("- Fossils: \(fossils.filter { $0.isDonated }.count)/\(fossils.count)")
+        print("- Bugs: \(bugs.filter { $0.isDonated }.count)/\(bugs.count)")
+        print("- Fish: \(fish.filter { $0.isDonated }.count)/\(fish.count)")
+        print("- Art: \(art.filter { $0.isDonated }.count)/\(art.count)")
+    }
+}
+#endif

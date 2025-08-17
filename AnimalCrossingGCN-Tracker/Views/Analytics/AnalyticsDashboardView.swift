@@ -201,7 +201,7 @@ struct AnalyticsDashboardView: View {
             ToolbarItem {
                 Button("Generate Test Data") {
                     dataManager.generateTestDonationData()
-                    loadData() // Reload analytics data after generating test data
+                    loadData()
                 }
                 .buttonStyle(.bordered)
                 .tint(.blue)
