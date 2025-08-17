@@ -151,3 +151,4 @@ This project uses an AI-assisted development system:
 
 The codebase is optimized for AI-assisted development with comprehensive documentation and clear architectural patterns.
 - This is a github repository, please follow git best practices via the terminal.
+- Project notes are stored in an Obsidian vault located: /Users/brockjenkinson/Local/Obsidian/SwiftCoding/AnimalCrossingGCN-Tracker
