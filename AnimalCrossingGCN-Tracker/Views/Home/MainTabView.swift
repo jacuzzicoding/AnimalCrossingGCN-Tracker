@@ -106,54 +106,7 @@ struct CategoryDetailView: View {
     }
 }
 
-/// Placeholder for the donate view
-struct DonateView: View {
-    var body: some View {
-        NavigationStack {
-            VStack {
-                Text("Donate View")
-                    .font(.largeTitle)
-                    .padding()
-                
-                Text("This is where users will select items to donate to the museum.")
-                    .multilineTextAlignment(.center)
-                    .padding()
-                
-                // Mockup of a donation selection
-                List {
-                    ForEach(1...5, id: \.self) { item in
-                        HStack {
-                            Circle()
-                                .fill(Color.acLeafGreen.opacity(0.2))
-                                .frame(width: 40, height: 40)
-                                .overlay(
-                                    Image(systemName: "leaf.arrow.circlepath")
-                                        .foregroundColor(.acLeafGreen)
-                                )
-                            
-                            Text("Sample Item \(item)")
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                // Donation action
-                            }) {
-                                Text("Donate")
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(Color.acLeafGreen)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(8)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-            }
-            .navigationTitle("Donate to Museum")
-        }
-    }
-}
+// Real DonateView is now implemented in Views/Donate/DonateView.swift
 
 struct MainTabView_Previews: PreviewProvider {
     static var previews: some View {
